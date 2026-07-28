@@ -1,0 +1,10 @@
+[
+  { "id": "1", "name": "Sarees", "slug": "sarees" },
+  { "id": "2", "name": "Silk Sarees", "slug": "silk-sarees" },
+  { "id": "3", "name": "Cotton Sarees", "slug": "cotton-sarees" },
+  { "id": "4", "name": "Designer Sarees", "slug": "designer-sarees" },
+  { "id": "5", "name": "Lehengas", "slug": "lehengas" },
+  { "id": "6", "name": "Kurtis", "slug": "kurtis" },
+  { "id": "7", "name": "Dress Materials", "slug": "dress-materials" },
+  { "id": "8", "name": "Ethnic Wear", "slug": "ethnic-wear" }
+]

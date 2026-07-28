@@ -1,0 +1,30 @@
+[
+  {
+    "id": "1",
+    "customer_name": "Priya Sharma",
+    "review": "Absolutely beautiful sarees! The Kanjivaram I ordered was even more gorgeous in person. The fabric quality is exceptional and delivery was prompt. Sri Subhakari Fashions has become my go-to for all ethnic wear!",
+    "rating": 5,
+    "created_at": "2026-07-27T00:00:00.000Z"
+  },
+  {
+    "id": "2",
+    "customer_name": "Ananya Krishnan",
+    "review": "I was skeptical about ordering online, but the saree I received exceeded all expectations. The colors were vibrant, packaging was premium, and the team was so helpful on WhatsApp. Highly recommend!",
+    "rating": 5,
+    "created_at": "2026-07-27T00:00:00.000Z"
+  },
+  {
+    "id": "3",
+    "customer_name": "Meera Reddy",
+    "review": "Bought the bridal lehenga for my wedding and received so many compliments! The embroidery work is flawless and the fit was perfect. Thank you Sri Subhakari Fashions for making my big day even more special.",
+    "rating": 5,
+    "created_at": "2026-07-27T00:00:00.000Z"
+  },
+  {
+    "id": "4",
+    "customer_name": "Kavitha Nair",
+    "review": "The Pochampally Ikat saree I ordered is stunning. You can tell it's authentically handcrafted. The team was very responsive and even helped me pick the perfect color. Will definitely order again!",
+    "rating": 4,
+    "created_at": "2026-07-27T00:00:00.000Z"
+  }
+]

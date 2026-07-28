@@ -1,0 +1,223 @@
+[
+  {
+    "id": "1",
+    "name": "Royal Kanjivaram Silk Saree",
+    "slug": "royal-kanjivaram-silk-saree",
+    "description": "A magnificent Kanjivaram silk saree woven with pure mulberry silk and gold zari. This exquisite piece features a rich rose-pink body with an elaborate golden border depicting traditional temple motifs. Perfect for weddings and festive occasions.",
+    "category_id": "2",
+    "fabric": "Pure Silk",
+    "color": [
+      "Teal",
+      "Gold"
+    ],
+    "sizes": [
+      "Free Size"
+    ],
+    "price": 12500,
+    "offer_price": 10999,
+    "images": [
+      "/placeholder-saree-1.jpg"
+    ],
+    "sku": "SSF-KSS-001",
+    "wash_care": "Dry clean only. Store with camphor balls in a cotton cloth.",
+    "rating": 4.7,
+    "review_count": 105,
+    "featured": true,
+    "best_seller": true,
+    "new_arrival": false,
+    "stock": 25,
+    "tags": [
+      "Silk",
+      "Wedding",
+      "Traditional"
+    ],
+    "in_stock": true,
+    "created_at": "2026-07-28T09:44:23.461Z",
+    "updated_at": "2026-07-28T09:44:23.463Z"
+  },
+  {
+    "id": "2",
+    "name": "Mysore Crepe Chiffon Saree",
+    "slug": "mysore-crepe-chiffon-saree",
+    "description": "Lightweight and breathable Mysore crepe chiffon saree with delicate hand-block printed florals. Ideal for daytime events and parties.",
+    "category_id": "4",
+    "fabric": "Chiffon",
+    "color": [
+      "Teal",
+      "Gold"
+    ],
+    "sizes": [
+      "Free Size"
+    ],
+    "price": 4500,
+    "offer_price": 3799,
+    "images": [
+      "/placeholder-saree-2.jpg"
+    ],
+    "sku": "SSF-CCS-002",
+    "wash_care": "Hand wash gently in cold water.",
+    "rating": 4.2,
+    "review_count": 208,
+    "featured": true,
+    "best_seller": false,
+    "new_arrival": true,
+    "stock": 12,
+    "tags": [
+      "Traditional",
+      "New"
+    ],
+    "in_stock": true,
+    "created_at": "2026-07-28T09:44:23.463Z",
+    "updated_at": "2026-07-28T09:44:23.463Z"
+  },
+  {
+    "id": "3",
+    "name": "Bridal Red Lehenga Choli",
+    "slug": "bridal-red-lehenga-choli",
+    "description": "Stunning bridal red lehenga choli with heavy gold embroidery and mirror work. The set includes a fully embellished lehenga, blouse, and dupatta — your complete bridal look.",
+    "category_id": "5",
+    "fabric": "Net & Georgette",
+    "color": [
+      "Red",
+      "Gold"
+    ],
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "price": 28000,
+    "offer_price": 24500,
+    "images": [
+      "/placeholder-lehenga.jpg"
+    ],
+    "sku": "SSF-BRL-003",
+    "wash_care": "Dry clean only.",
+    "rating": 4.2,
+    "review_count": 18,
+    "featured": true,
+    "best_seller": true,
+    "new_arrival": false,
+    "stock": 5,
+    "tags": [
+      "Lehenga",
+      "Bridal",
+      "Embroidery"
+    ],
+    "in_stock": true,
+    "created_at": "2026-07-28T09:44:23.463Z",
+    "updated_at": "2026-07-28T09:44:23.463Z"
+  },
+  {
+    "id": "4",
+    "name": "Handloom Pochampally Ikat Saree",
+    "slug": "handloom-pochampally-ikat-saree",
+    "description": "Authentic handloom Pochampally ikat saree showcasing the traditional double ikat weaving technique from Telangana. Each saree is unique, made by skilled artisans.",
+    "category_id": "3",
+    "fabric": "Handloom Cotton",
+    "color": [
+      "Teal",
+      "Gold"
+    ],
+    "sizes": [
+      "Free Size"
+    ],
+    "price": 6800,
+    "offer_price": 5999,
+    "images": [
+      "/placeholder-saree-2.jpg"
+    ],
+    "sku": "SSF-HPI-004",
+    "wash_care": "First wash separately. Machine washable on gentle cycle.",
+    "rating": 4.4,
+    "review_count": 62,
+    "featured": false,
+    "best_seller": true,
+    "new_arrival": false,
+    "stock": 0,
+    "tags": [
+      "Traditional",
+      "New"
+    ],
+    "in_stock": false,
+    "created_at": "2026-07-28T09:44:23.463Z",
+    "updated_at": "2026-07-28T09:44:23.463Z"
+  },
+  {
+    "id": "5",
+    "name": "Designer Georgette Party Saree",
+    "slug": "designer-georgette-party-saree",
+    "description": "Contemporary designer georgette saree with sequin and thread embroidery. Perfect for cocktail parties, receptions, and festive gatherings.",
+    "category_id": "4",
+    "fabric": "Georgette",
+    "color": [
+      "Teal",
+      "Gold"
+    ],
+    "sizes": [
+      "Free Size"
+    ],
+    "price": 8900,
+    "offer_price": 7499,
+    "images": [
+      "/placeholder-saree-1.jpg"
+    ],
+    "sku": "SSF-DGS-005",
+    "wash_care": "Dry clean recommended.",
+    "rating": 4.7,
+    "review_count": 88,
+    "featured": true,
+    "best_seller": false,
+    "new_arrival": true,
+    "stock": 8,
+    "tags": [
+      "Traditional",
+      "New"
+    ],
+    "in_stock": true,
+    "created_at": "2026-07-28T09:44:23.463Z",
+    "updated_at": "2026-07-28T09:44:23.463Z"
+  },
+  {
+    "id": "6",
+    "name": "Anarkali Kurti with Dupatta",
+    "slug": "anarkali-kurti-with-dupatta",
+    "description": "Floor-length Anarkali kurti in premium rayon fabric with intricate chikankari embroidery. Paired with a matching embroidered dupatta.",
+    "category_id": "6",
+    "fabric": "Rayon",
+    "color": [
+      "Teal",
+      "Gold"
+    ],
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "price": 3500,
+    "offer_price": 2899,
+    "images": [
+      "/placeholder-saree-2.jpg"
+    ],
+    "sku": "SSF-AKD-006",
+    "wash_care": "Hand wash or gentle machine wash.",
+    "rating": 4.6,
+    "review_count": 206,
+    "featured": false,
+    "best_seller": true,
+    "new_arrival": true,
+    "stock": 18,
+    "tags": [
+      "Anarkali",
+      "Kurti",
+      "Chikankari"
+    ],
+    "in_stock": true,
+    "created_at": "2026-07-28T09:44:23.463Z",
+    "updated_at": "2026-07-28T09:44:23.463Z"
+  }
+]
