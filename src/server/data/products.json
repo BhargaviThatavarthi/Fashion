@@ -16,7 +16,7 @@
     "price": 12500,
     "offer_price": 10999,
     "images": [
-      "/placeholder-saree-1.jpg"
+      "/images/silk-saree.png"
     ],
     "sku": "SSF-KSS-001",
     "wash_care": "Dry clean only. Store with camphor balls in a cotton cloth.",
@@ -52,7 +52,7 @@
     "price": 4500,
     "offer_price": 3799,
     "images": [
-      "/placeholder-saree-2.jpg"
+      "/images/crape-saree.png"
     ],
     "sku": "SSF-CCS-002",
     "wash_care": "Hand wash gently in cold water.",
@@ -91,7 +91,7 @@
     "price": 28000,
     "offer_price": 24500,
     "images": [
-      "/placeholder-lehenga.jpg"
+      "/images/designer-saree.png"
     ],
     "sku": "SSF-BRL-003",
     "wash_care": "Dry clean only.",
@@ -115,7 +115,7 @@
     "name": "Handloom Pochampally Ikat Saree",
     "slug": "handloom-pochampally-ikat-saree",
     "description": "Authentic handloom Pochampally ikat saree showcasing the traditional double ikat weaving technique from Telangana. Each saree is unique, made by skilled artisans.",
-    "category_id": "3",
+    "category_id": "1",
     "fabric": "Handloom Cotton",
     "color": [
       "Teal",
@@ -127,7 +127,7 @@
     "price": 6800,
     "offer_price": 5999,
     "images": [
-      "/placeholder-saree-2.jpg"
+      "/images/cotton-saree.png"
     ],
     "sku": "SSF-HPI-004",
     "wash_care": "First wash separately. Machine washable on gentle cycle.",
@@ -150,7 +150,7 @@
     "name": "Designer Georgette Party Saree",
     "slug": "designer-georgette-party-saree",
     "description": "Contemporary designer georgette saree with sequin and thread embroidery. Perfect for cocktail parties, receptions, and festive gatherings.",
-    "category_id": "4",
+    "category_id": "3",
     "fabric": "Georgette",
     "color": [
       "Teal",
@@ -162,7 +162,7 @@
     "price": 8900,
     "offer_price": 7499,
     "images": [
-      "/placeholder-saree-1.jpg"
+      "/images/designer-saree.png"
     ],
     "sku": "SSF-DGS-005",
     "wash_care": "Dry clean recommended.",
@@ -185,7 +185,7 @@
     "name": "Anarkali Kurti with Dupatta",
     "slug": "anarkali-kurti-with-dupatta",
     "description": "Floor-length Anarkali kurti in premium rayon fabric with intricate chikankari embroidery. Paired with a matching embroidered dupatta.",
-    "category_id": "6",
+    "category_id": "5",
     "fabric": "Rayon",
     "color": [
       "Teal",
@@ -201,7 +201,7 @@
     "price": 3500,
     "offer_price": 2899,
     "images": [
-      "/placeholder-saree-2.jpg"
+      "/images/ethnic-top.png"
     ],
     "sku": "SSF-AKD-006",
     "wash_care": "Hand wash or gentle machine wash.",

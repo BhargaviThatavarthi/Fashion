@@ -241,22 +241,44 @@ function AdminProductEditForm() {
         const { url, size } = await validateAndOptimizeImage(file)
 
         if (isSupabaseConfigured()) {
-          // Convert Base64 back to Blob and upload
-          const response = await fetch(url)
-          const blob = await response.blob()
-          const fileExt = file.name.split('.').pop()
-          const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`
-          const filePath = fileName
+          try {
+            const sanitizeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+            const filePath = `${Date.now()}_${sanitizeName}`
 
-          const { error } = await supabase.storage
-            .from('products')
-            .upload(filePath, blob)
+            // Try product-images bucket, then products bucket
+            let { error } = await supabase.storage
+              .from('product-images')
+              .upload(filePath, file, { upsert: true })
 
-          if (error) throw error
+            if (error) {
+              const resAlt = await supabase.storage
+                .from('products')
+                .upload(filePath, file, { upsert: true })
+              error = resAlt.error
+            }
 
-          const savedPath = `/products/${filePath}`
-          uploadedPaths.push(savedPath)
-          addSharedMedia(file.name, savedPath, size)
+            if (error) throw error
+
+            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+            const publicUrl = `${supabaseUrl}/storage/v1/object/public/product-images/${filePath}`
+
+            // Save metadata to database table
+            await supabase.from('media_assets').insert({
+              file_name: file.name,
+              file_path: filePath,
+              public_url: publicUrl,
+              file_type: file.type,
+              file_size: file.size,
+              created_at: new Date().toISOString(),
+            })
+
+            uploadedPaths.push(publicUrl)
+            addSharedMedia(file.name, publicUrl, size)
+          } catch (supabaseErr: any) {
+            console.warn('Supabase upload notice, using local image storage fallback:', supabaseErr.message)
+            uploadedPaths.push(url)
+            addSharedMedia(file.name, url, size)
+          }
         } else {
           // Local base64 mode
           uploadedPaths.push(url)

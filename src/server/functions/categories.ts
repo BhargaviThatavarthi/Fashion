@@ -4,6 +4,7 @@ import type { Category } from '../../types'
 import fs from 'fs/promises'
 import path from 'path'
 import crypto from 'crypto'
+
 const getFilePath = (fileName: string) => {
   return path.join(process.cwd(), 'src', 'server', 'data', fileName)
 }
@@ -27,17 +28,22 @@ async function writeJson<T>(fileName: string, data: T): Promise<void> {
 export const getCategoriesServerFn = createServerFn({
   method: 'GET',
 }).handler(async () => {
-  if (!isSupabaseConfigured()) {
-    return await readJson<Category[]>('categories.json', [])
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name')
+
+      if (!error && data && data.length > 0) {
+        return data as Category[]
+      }
+    } catch (err: any) {
+      console.warn('Supabase categories query notice:', err.message)
+    }
   }
 
-  const { data, error } = await supabase
-    .from('categories')
-    .select('*')
-    .order('name')
-
-  if (error) return []
-  return (data as Category[]) || []
+  return await readJson<Category[]>('categories.json', [])
 })
 
 // 2. Get Category By Slug
@@ -46,19 +52,22 @@ export const getCategoryBySlugServerFn = createServerFn({
 })
   .validator((slug: string) => slug)
   .handler(async ({ data: slug }) => {
-    if (!isSupabaseConfigured()) {
-      const categories = await readJson<Category[]>('categories.json', [])
-      return categories.find((c) => c.slug === slug) || null
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .eq('slug', slug)
+          .maybeSingle()
+
+        if (!error && data) return data as Category
+      } catch (err: any) {
+        console.warn('Supabase category slug notice:', err.message)
+      }
     }
 
-    const { data, error } = await supabase
-      .from('categories')
-      .select('*')
-      .eq('slug', slug)
-      .single()
-
-    if (error) return null
-    return data as Category
+    const categories = await readJson<Category[]>('categories.json', [])
+    return categories.find((c) => c.slug === slug) || null
   })
 
 // 3. Create Category

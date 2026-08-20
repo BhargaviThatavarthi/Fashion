@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Search, Instagram, Youtube, Linkedin } from 'lucide-react'
+import { Menu, X, Search, Instagram, Youtube } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa'
 import { NAV_LINKS, SOCIAL, CONTACT } from '../../constants'
 
@@ -57,8 +57,8 @@ export default function Header() {
                 <Link
                   key={link.href}
                   to={link.href}
-                  className="font-nav text-sm font-500 text-gray-300 hover:text-white relative group transition-colors duration-200"
-                  activeProps={{ className: 'text-white' }}
+                  className="font-nav text-sm sm:text-base font-bold font-700 text-gray-100 hover:text-white relative group transition-colors duration-200 tracking-wide"
+                  activeProps={{ className: 'text-white font-bold' }}
                 >
                   <span className="relative">
                     {link.label}
@@ -111,15 +111,6 @@ export default function Header() {
                 style={{ color: 'inherit' }}
               >
                 <Instagram size={18} className="hover:text-pink-400 transition-colors" />
-              </a>
-              <a
-                href={SOCIAL.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-blue-400 p-2 rounded-full hover:bg-white/10 transition-colors"
-                aria-label="LinkedIn"
-              >
-                <Linkedin size={18} />
               </a>
 
               {/* WhatsApp Enquiry CTA */}
@@ -241,8 +232,8 @@ export default function Header() {
                     <Link
                       to={link.href}
                       onClick={() => setIsMobileOpen(false)}
-                      className="block font-nav font-600 text-base text-gray-200 hover:text-white py-3 px-3 rounded-xl hover:bg-white/8 transition-all"
-                      activeProps={{ style: { color: 'var(--color-pink)', background: 'rgba(216,92,138,0.1)' } }}
+                      className="block font-nav font-bold font-700 text-base text-white hover:text-pink-300 py-3 px-3 rounded-xl hover:bg-white/8 transition-all"
+                      activeProps={{ style: { color: 'var(--color-pink)', background: 'rgba(216,92,138,0.15)', fontWeight: 'bold' } }}
                     >
                       {link.label}
                     </Link>
@@ -262,9 +253,6 @@ export default function Header() {
                   </a>
                   <a href={SOCIAL.youtube} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-red-500" aria-label="YouTube">
                     <Youtube size={20} />
-                  </a>
-                  <a href={SOCIAL.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-blue-400" aria-label="LinkedIn">
-                    <Linkedin size={20} />
                   </a>
                 </div>
 

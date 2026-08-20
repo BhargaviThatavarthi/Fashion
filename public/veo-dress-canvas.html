@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #05020a; overflow: hidden; display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; }
+  canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  
+  function resize() {
+    canvas.width = window.innerWidth || 480;
+    canvas.height = window.innerHeight || 580;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  
+  let frame = 0;
+  function draw() {
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    
+    // Background gradient
+    const bg = ctx.createLinearGradient(0, 0, 0, h);
+    bg.addColorStop(0, '#05020a');
+    bg.addColorStop(0.5, '#12052c');
+    bg.addColorStop(1, '#05020a');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
+    
+    // Smooth 0 -> 1 morphing progress
+    const progress = (Math.sin(frame * 0.025) + 1) / 2;
+    
+    // Dress Geometry center and scale
+    const centerX = w / 2;
+    const topY = h * 0.18;
+    const dressHeight = h * 0.65;
+    
+    ctx.save();
+    
+    // Invisible Mannequin Neck/Shoulder Anchor
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.beginPath();
+    ctx.arc(centerX, topY - 18, 12, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Dress Silhouette Path (Ombré / Galaxy)
+    const sway = Math.sin(frame * 0.04) * (w * 0.03);
+    const skirtWidth = w * 0.32;
+    
+    ctx.beginPath();
+    ctx.moveTo(centerX - w * 0.1, topY);
+    ctx.quadraticCurveTo(centerX, topY + 15, centerX + w * 0.1, topY);
+    ctx.quadraticCurveTo(centerX + w * 0.08, topY + dressHeight * 0.3, centerX + skirtWidth + sway, topY + dressHeight);
+    ctx.quadraticCurveTo(centerX, topY + dressHeight + Math.cos(frame * 0.04) * 12, centerX - skirtWidth + sway, topY + dressHeight);
+    ctx.quadraticCurveTo(centerX - w * 0.08, topY + dressHeight * 0.3, centerX - w * 0.1, topY);
+    ctx.closePath();
+    
+    // Clip contents to dress silhouette
+    ctx.clip();
+    
+    // Base Layer: Sunset Ombré (Coral -> Soft Pink -> Seafoam Blue)
+    const sunsetGrad = ctx.createLinearGradient(0, topY, 0, topY + dressHeight);
+    sunsetGrad.addColorStop(0, '#ff6b4a');
+    sunsetGrad.addColorStop(0.35, '#e84393');
+    sunsetGrad.addColorStop(0.7, '#fd79a8');
+    sunsetGrad.addColorStop(1, '#55efc4');
+    ctx.fillStyle = sunsetGrad;
+    ctx.fillRect(0, 0, w, h);
+    
+    // Morph Layer: Deep-Space Cosmic Galaxy (Twinkling Stars & Pink/Purple Nebula)
+    ctx.globalAlpha = progress;
+    const galaxyGrad = ctx.createRadialGradient(centerX, topY + dressHeight * 0.4, 10, centerX, topY + dressHeight * 0.5, w * 0.6);
+    galaxyGrad.addColorStop(0, '#ffffff');
+    galaxyGrad.addColorStop(0.2, '#f472b6');
+    galaxyGrad.addColorStop(0.5, '#8b5cf6');
+    galaxyGrad.addColorStop(0.8, '#1e1b4b');
+    galaxyGrad.addColorStop(1, '#090514');
+    ctx.fillStyle = galaxyGrad;
+    ctx.fillRect(0, 0, w, h);
+    
+    // Twinkling Galaxy Stars inside dress
+    for(let i = 0; i < 90; i++) {
+      const sx = (i * 41 + frame * 0.4) % w;
+      const sy = (i * 59) % h;
+      const starSize = (Math.sin(i + frame * 0.1) + 1.6);
+      const starAlpha = (Math.sin(i * 2 + frame * 0.07) + 1) / 2;
+      ctx.fillStyle = `rgba(255, 255, 255, ${starAlpha})`;
+      ctx.beginPath();
+      ctx.arc(sx, sy, starSize, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    ctx.restore();
+    
+    // Dress Edge Glowing Contour
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(centerX - w * 0.1, topY);
+    ctx.quadraticCurveTo(centerX, topY + 15, centerX + w * 0.1, topY);
+    ctx.quadraticCurveTo(centerX + w * 0.08, topY + dressHeight * 0.3, centerX + skirtWidth + sway, topY + dressHeight);
+    ctx.quadraticCurveTo(centerX, topY + dressHeight + Math.cos(frame * 0.04) * 12, centerX - skirtWidth + sway, topY + dressHeight);
+    ctx.quadraticCurveTo(centerX - w * 0.08, topY + dressHeight * 0.3, centerX - w * 0.1, topY);
+    ctx.closePath();
+    ctx.strokeStyle = `rgba(244, 114, 182, ${0.4 + progress * 0.5})`;
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = '#ec4899';
+    ctx.shadowBlur = 18;
+    ctx.stroke();
+    ctx.restore();
+    
+    // Watermark "Veo AI 3D"
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText('Google Veo 3D AI', w - 120, h - 16);
+    
+    frame++;
+    requestAnimationFrame(draw);
+  }
+  draw();
+</script>
+</body>
+</html>

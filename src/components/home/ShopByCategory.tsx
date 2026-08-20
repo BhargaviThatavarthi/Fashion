@@ -2,16 +2,7 @@ import { motion } from 'framer-motion'
 import { Link } from '@tanstack/react-router'
 import { DEMO_CATEGORIES } from '../../constants'
 
-const CATEGORY_COLORS = [
-  'from-rose-100 to-pink-200',
-  'from-amber-100 to-yellow-200',
-  'from-sky-100 to-blue-200',
-  'from-emerald-100 to-green-200',
-  'from-violet-100 to-purple-200',
-  'from-orange-100 to-amber-200',
-  'from-teal-100 to-cyan-200',
-  'from-pink-100 to-rose-200',
-]
+
 
 const CATEGORY_EMOJIS: Record<string, string> = {
   'sarees': '🥻',
@@ -22,6 +13,17 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   'kurtis': '👘',
   'dress-materials': '🧵',
   'ethnic-wear': '🌸',
+}
+
+const CATEGORY_IMAGES: Record<string, string> = {
+  'sarees': '/images/silk-saree.png',
+  'silk-sarees': '/images/silk-saree.png',
+  'cotton-sarees': '/images/cotton-saree.png',
+  'designer-sarees': '/images/designer-saree.png',
+  'lehengas': '/images/designer-saree.png',
+  'kurtis': '/images/ethnic-top.png',
+  'dress-materials': '/images/crape-saree.png',
+  'ethnic-wear': '/images/crape-saree.png',
 }
 
 export default function ShopByCategory() {
@@ -47,45 +49,55 @@ export default function ShopByCategory() {
         </motion.div>
 
         {/* Category Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {categories.map((cat, i) => (
-            <motion.div
-              key={cat.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.07 }}
-            >
-              <Link
-                to="/shop"
-                search={{ category: cat.slug }}
-                className="group block"
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5">
+          {categories.map((cat, i) => {
+            const bgImage = CATEGORY_IMAGES[cat.slug] || '/images/silk-saree.png'
+            return (
+              <motion.div
+                key={cat.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.07 }}
               >
-                <div
-                  className={`relative bg-gradient-to-br ${CATEGORY_COLORS[i % CATEGORY_COLORS.length]} rounded-2xl p-6 text-center transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl cursor-pointer overflow-hidden`}
+                <Link
+                  to="/shop"
+                  search={{ category: cat.slug }}
+                  className="group block"
                 >
-                  {/* Background shimmer on hover */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300"
-                    style={{ background: 'linear-gradient(135deg, var(--color-pink), var(--color-gold))' }}
-                  />
+                  <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-md group-hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-1 cursor-pointer border border-pink-100">
+                    {/* Category Photo */}
+                    <img
+                      src={bgImage}
+                      alt={cat.name}
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
+                    
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent group-hover:from-black/90 transition-all duration-300" />
 
-                  <div className="relative z-10">
-                    <div className="text-4xl mb-3">
-                      {CATEGORY_EMOJIS[cat.slug] || '🌸'}
-                    </div>
-                    <h3 className="font-heading font-600 text-gray-800 text-base leading-tight group-hover:text-pink-700 transition-colors">
-                      {cat.name}
-                    </h3>
-                    <div className="mt-2 text-xs font-nav font-600 uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all duration-200"
-                      style={{ color: 'var(--color-pink)' }}
-                    >
-                      Explore →
+                    {/* Content */}
+                    <div className="absolute inset-0 p-5 flex flex-col justify-between z-10">
+                      <div className="flex justify-end">
+                        <span className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-lg text-white shadow-sm">
+                          {CATEGORY_EMOJIS[cat.slug] || '🌸'}
+                        </span>
+                      </div>
+
+                      <div>
+                        <h3 className="font-heading font-bold text-white text-lg sm:text-xl leading-snug drop-shadow-sm group-hover:text-amber-300 transition-colors">
+                          {cat.name}
+                        </h3>
+                        <div className="mt-1 text-xs font-semibold text-pink-200 flex items-center gap-1 opacity-90 group-hover:opacity-100">
+                          Explore Collection &rarr;
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
+                </Link>
+              </motion.div>
+            )
+          })}
         </div>
       </div>
     </section>

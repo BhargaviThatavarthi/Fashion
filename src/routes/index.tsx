@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import HeroBanner from '../components/home/HeroBanner'
+import CategoryQuickNav from '../components/home/CategoryQuickNav'
 import ProductSection from '../components/home/ProductSection'
-import ShopByCategory from '../components/home/ShopByCategory'
 import WhyChooseUs from '../components/home/WhyChooseUs'
 import Testimonials from '../components/home/Testimonials'
 import YouTubeSection from '../components/home/YouTubeSection'
@@ -78,6 +78,9 @@ function HomePage() {
       {/* Hero Banner */}
       <HeroBanner />
 
+      {/* Category Quick Nav Story Carousel */}
+      <CategoryQuickNav />
+
       {/* Featured Sarees */}
       <ProductSection
         sectionId="featured"
@@ -89,9 +92,6 @@ function HomePage() {
         viewAllLink="/shop"
         viewAllLabel="View All Sarees"
       />
-
-      {/* Shop by Category */}
-      <ShopByCategory />
 
       {/* New Arrivals */}
       <ProductSection

@@ -2,6 +2,7 @@ import {
   HeadContent,
   Scripts,
   createRootRouteWithContext,
+  useLocation,
 } from '@tanstack/react-router'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
@@ -41,6 +42,25 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   shellComponent: RootDocument,
 })
 
+function RootContent({ children }: { children: React.ReactNode }) {
+  const location = useLocation()
+  const isAdmin = location.pathname.startsWith('/admin')
+
+  if (isAdmin) {
+    return <main>{children}</main>
+  }
+
+  return (
+    <>
+      <Header />
+      <main>{children}</main>
+      <Footer />
+      <WhatsAppFab />
+      <BackToTop />
+    </>
+  )
+}
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -48,12 +68,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="antialiased" style={{ fontFamily: "'Poppins', system-ui, sans-serif" }}>
-        <Header />
-        <main>{children}</main>
-        <Footer />
-        <WhatsAppFab />
-        <BackToTop />
-
+        <RootContent>{children}</RootContent>
         <Scripts />
       </body>
     </html>

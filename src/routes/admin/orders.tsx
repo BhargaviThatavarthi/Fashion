@@ -83,7 +83,7 @@ function AdminOrders() {
               <span className="font-nav text-xs font-600 text-gray-400 uppercase tracking-wide">{card.title}</span>
               <card.icon size={18} style={{ color: card.color }} />
             </div>
-            <div className="font-heading text-2xl font-700 text-gray-800">{card.value}</div>
+            <div className="font-sans text-2xl font-800 text-gray-800">{card.value}</div>
           </motion.div>
         ))}
       </div>

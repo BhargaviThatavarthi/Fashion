@@ -39,16 +39,20 @@ export const Route = createFileRoute('/shop')({
       page: 1,
       limit: 12,
     }
-    await Promise.all([
-      queryClient.ensureQueryData({
-        queryKey: ['products', filters],
-        queryFn: () => getProducts(filters),
-      }),
-      queryClient.ensureQueryData({
-        queryKey: ['categories'],
-        queryFn: getCategories,
-      }),
-    ])
+    try {
+      await Promise.all([
+        queryClient.ensureQueryData({
+          queryKey: ['products', filters],
+          queryFn: () => getProducts(filters),
+        }),
+        queryClient.ensureQueryData({
+          queryKey: ['categories'],
+          queryFn: getCategories,
+        }),
+      ])
+    } catch (err: any) {
+      console.warn('Shop route loader notice:', err?.message || err)
+    }
   },
   head: () => ({
     meta: [

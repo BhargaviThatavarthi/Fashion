@@ -4,6 +4,7 @@ import type { Product, ProductFilters, PaginatedResponse } from '../../types'
 import fs from 'fs/promises'
 import path from 'path'
 import crypto from 'crypto'
+
 const getFilePath = (fileName: string) => {
   return path.join(process.cwd(), 'src', 'server', 'data', fileName)
 }
@@ -23,130 +24,156 @@ async function writeJson<T>(fileName: string, data: T): Promise<void> {
   await fs.writeFile(file, JSON.stringify(data, null, 2), 'utf-8')
 }
 
+// Local JSON Products Fallback Processor
+async function getLocalProductsResponse(filters: ProductFilters): Promise<PaginatedResponse<Product>> {
+  let products = await readJson<Product[]>('products.json', [])
+  const categories = await readJson<any[]>('categories.json', [])
+
+  products = products.map((p) => ({
+    ...p,
+    category: categories.find((c) => c.id === p.category_id) || null,
+  }))
+
+  if (filters.search) {
+    const q = filters.search.toLowerCase()
+    products = products.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.description?.toLowerCase().includes(q) ||
+        (p.category?.name && p.category.name.toLowerCase().includes(q)),
+    )
+  }
+
+  if (filters.category) {
+    products = products.filter(
+      (p) =>
+        p.category_id === filters.category ||
+        p.category?.slug === filters.category,
+    )
+  }
+
+  if (filters.fabric) {
+    products = products.filter((p) => p.fabric === filters.fabric)
+  }
+  if (filters.newArrival) products = products.filter((p) => p.new_arrival)
+  if (filters.bestSeller) products = products.filter((p) => p.best_seller)
+  if (filters.featured) products = products.filter((p) => p.featured)
+  if (filters.minPrice !== undefined) {
+    products = products.filter((p) => (p.offer_price || p.price) >= filters.minPrice!)
+  }
+  if (filters.maxPrice !== undefined) {
+    products = products.filter((p) => (p.offer_price || p.price) <= filters.maxPrice!)
+  }
+  if (filters.color) {
+    products = products.filter((p) => p.color?.includes(filters.color!))
+  }
+  if (filters.size) {
+    products = products.filter((p) => p.sizes?.includes(filters.size!))
+  }
+
+  switch (filters.sortBy) {
+    case 'price_asc':
+      products.sort((a, b) => (a.offer_price || a.price) - (b.offer_price || b.price))
+      break
+    case 'price_desc':
+      products.sort((a, b) => (b.offer_price || b.price) - (a.offer_price || a.price))
+      break
+    case 'popular':
+      products.sort((a, b) => (b.review_count || 0) - (a.review_count || 0))
+      break
+    default:
+      products.sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime())
+  }
+
+  const page = filters.page || 1
+  const limit = filters.limit || 12
+  const start = (page - 1) * limit
+  return {
+    data: products.slice(start, start + limit),
+    total: products.length,
+    page,
+    limit,
+    hasMore: start + limit < products.length,
+  } as PaginatedResponse<Product>
+}
+
 // 1. Get Products
 export const getProductsServerFn = createServerFn({
   method: 'GET',
 })
   .validator((filters: ProductFilters) => filters)
   .handler(async ({ data: filters }) => {
-    if (!isSupabaseConfigured()) {
-      // Demo mode: Read from JSON file
-      let products = await readJson<Product[]>('products.json', [])
-      const categories = await readJson<any[]>('categories.json', [])
+    if (isSupabaseConfigured()) {
+      try {
+        const page = filters.page || 1
+        const limit = filters.limit || 12
+        const from = (page - 1) * limit
+        const to = from + limit - 1
 
-      // Map category object to products
-      products = products.map((p) => ({
-        ...p,
-        category: categories.find((c) => c.id === p.category_id) || null,
-      }))
+        let query = supabase
+          .from('products')
+          .select('*, category:categories(*)', { count: 'exact' })
 
-      if (filters.search) {
-        const q = filters.search.toLowerCase()
-        products = products.filter(
-          (p) =>
-            p.name.toLowerCase().includes(q) ||
-            p.description?.toLowerCase().includes(q) ||
-            (p.category?.name && p.category.name.toLowerCase().includes(q)),
-        )
-      }
-      if (filters.category) {
-        products = products.filter(
-          (p) =>
-            p.category_id === filters.category ||
-            p.category?.slug === filters.category,
-        )
-      }
-      if (filters.fabric) {
-        products = products.filter((p) => p.fabric === filters.fabric)
-      }
-      if (filters.newArrival) products = products.filter((p) => p.new_arrival)
-      if (filters.bestSeller) products = products.filter((p) => p.best_seller)
-      if (filters.featured) products = products.filter((p) => p.featured)
-      if (filters.minPrice !== undefined) {
-        products = products.filter((p) => (p.offer_price || p.price) >= filters.minPrice!)
-      }
-      if (filters.maxPrice !== undefined) {
-        products = products.filter((p) => (p.offer_price || p.price) <= filters.maxPrice!)
-      }
-      if (filters.color) {
-        products = products.filter((p) => p.color?.includes(filters.color!))
-      }
-      if (filters.size) {
-        products = products.filter((p) => p.sizes?.includes(filters.size!))
-      }
+        if (filters.search) query = query.ilike('name', `%${filters.search}%`)
 
-      // Sorting
-      switch (filters.sortBy) {
-        case 'price_asc':
-          products.sort((a, b) => (a.offer_price || a.price) - (b.offer_price || b.price))
-          break
-        case 'price_desc':
-          products.sort((a, b) => (b.offer_price || b.price) - (a.offer_price || a.price))
-          break
-        case 'popular':
-          products.sort((a, b) => (b.review_count || 0) - (a.review_count || 0))
-          break
-        default:
-          products.sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime())
-      }
+        if (filters.category) {
+          const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(filters.category)
+          if (isUUID) {
+            query = query.eq('category_id', filters.category)
+          } else {
+            const { data: catData } = await supabase
+              .from('categories')
+              .select('id')
+              .eq('slug', filters.category)
+              .maybeSingle()
 
-      const page = filters.page || 1
-      const limit = filters.limit || 12
-      const start = (page - 1) * limit
-      return {
-        data: products.slice(start, start + limit),
-        total: products.length,
-        page,
-        limit,
-        hasMore: start + limit < products.length,
-      } as PaginatedResponse<Product>
+            if (catData?.id) {
+              query = query.eq('category_id', catData.id)
+            }
+          }
+        }
+
+        if (filters.fabric) query = query.eq('fabric', filters.fabric)
+        if (filters.minPrice !== undefined) query = query.gte('price', filters.minPrice)
+        if (filters.maxPrice !== undefined) query = query.lte('price', filters.maxPrice)
+        if (filters.newArrival) query = query.eq('new_arrival', true)
+        if (filters.bestSeller) query = query.eq('best_seller', true)
+        if (filters.featured) query = query.eq('featured', true)
+
+        switch (filters.sortBy) {
+          case 'price_asc':
+            query = query.order('price', { ascending: true })
+            break
+          case 'price_desc':
+            query = query.order('price', { ascending: false })
+            break
+          case 'popular':
+            query = query.order('review_count', { ascending: false })
+            break
+          default:
+            query = query.order('created_at', { ascending: false })
+        }
+
+        query = query.range(from, to)
+        const { data, error, count } = await query
+
+        if (error) throw error
+
+        if (data && data.length > 0) {
+          return {
+            data: (data as Product[]) || [],
+            total: count || 0,
+            page,
+            limit,
+            hasMore: (count || 0) > to + 1,
+          } as PaginatedResponse<Product>
+        }
+      } catch (err: any) {
+        console.warn('Supabase query notice, using local JSON fallback:', err.message)
+      }
     }
 
-    // Supabase Mode
-    const page = filters.page || 1
-    const limit = filters.limit || 12
-    const from = (page - 1) * limit
-    const to = from + limit - 1
-
-    let query = supabase
-      .from('products')
-      .select('*, category:categories(*)', { count: 'exact' })
-
-    if (filters.search) query = query.ilike('name', `%${filters.search}%`)
-    if (filters.category) query = query.eq('category_id', filters.category)
-    if (filters.fabric) query = query.eq('fabric', filters.fabric)
-    if (filters.minPrice !== undefined) query = query.gte('price', filters.minPrice)
-    if (filters.maxPrice !== undefined) query = query.lte('price', filters.maxPrice)
-    if (filters.newArrival) query = query.eq('new_arrival', true)
-    if (filters.bestSeller) query = query.eq('best_seller', true)
-    if (filters.featured) query = query.eq('featured', true)
-
-    // Sorting
-    switch (filters.sortBy) {
-      case 'price_asc':
-        query = query.order('price', { ascending: true })
-        break
-      case 'price_desc':
-        query = query.order('price', { ascending: false })
-        break
-      case 'popular':
-        query = query.order('review_count', { ascending: false })
-        break
-      default:
-        query = query.order('created_at', { ascending: false })
-    }
-
-    query = query.range(from, to)
-    const { data, error, count } = await query
-
-    if (error) throw new Error(error.message)
-    return {
-      data: (data as Product[]) || [],
-      total: count || 0,
-      page,
-      limit,
-      hasMore: (count || 0) > to + 1,
-    } as PaginatedResponse<Product>
+    return await getLocalProductsResponse(filters)
   })
 
 // 2. Get Product By Slug
@@ -155,25 +182,28 @@ export const getProductBySlugServerFn = createServerFn({
 })
   .validator((slug: string) => slug)
   .handler(async ({ data: slug }) => {
-    if (!isSupabaseConfigured()) {
-      const products = await readJson<Product[]>('products.json', [])
-      const categories = await readJson<any[]>('categories.json', [])
-      const product = products.find((p) => p.slug === slug)
-      if (!product) return null
-      return {
-        ...product,
-        category: categories.find((c) => c.id === product.category_id) || null,
-      } as Product
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*, category:categories(*)')
+          .eq('slug', slug)
+          .maybeSingle()
+
+        if (!error && data) return data as Product
+      } catch (err: any) {
+        console.warn('Supabase product slug query notice:', err.message)
+      }
     }
 
-    const { data, error } = await supabase
-      .from('products')
-      .select('*, category:categories(*)')
-      .eq('slug', slug)
-      .single()
-
-    if (error) return null
-    return data as Product
+    const products = await readJson<Product[]>('products.json', [])
+    const categories = await readJson<any[]>('categories.json', [])
+    const product = products.find((p) => p.slug === slug)
+    if (!product) return null
+    return {
+      ...product,
+      category: categories.find((c) => c.id === product.category_id) || null,
+    } as Product
   })
 
 // 3. Get Featured Products
@@ -181,27 +211,30 @@ export const getFeaturedProductsServerFn = createServerFn({
   method: 'GET',
 })
   .handler(async () => {
-    if (!isSupabaseConfigured()) {
-      const products = await readJson<Product[]>('products.json', [])
-      const categories = await readJson<any[]>('categories.json', [])
-      return products
-        .filter((p) => p.featured)
-        .slice(0, 8)
-        .map((p) => ({
-          ...p,
-          category: categories.find((c) => c.id === p.category_id) || null,
-        })) as Product[]
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*, category:categories(*)')
+          .eq('featured', true)
+          .order('created_at', { ascending: false })
+          .limit(8)
+
+        if (!error && data && data.length > 0) return data as Product[]
+      } catch (err: any) {
+        console.warn('Supabase featured products notice:', err.message)
+      }
     }
 
-    const { data, error } = await supabase
-      .from('products')
-      .select('*, category:categories(*)')
-      .eq('featured', true)
-      .order('created_at', { ascending: false })
-      .limit(8)
-
-    if (error) return []
-    return (data as Product[]) || []
+    const products = await readJson<Product[]>('products.json', [])
+    const categories = await readJson<any[]>('categories.json', [])
+    return products
+      .filter((p) => p.featured)
+      .slice(0, 8)
+      .map((p) => ({
+        ...p,
+        category: categories.find((c) => c.id === p.category_id) || null,
+      })) as Product[]
   })
 
 // 4. Get Best Sellers
@@ -209,27 +242,30 @@ export const getBestSellersServerFn = createServerFn({
   method: 'GET',
 })
   .handler(async () => {
-    if (!isSupabaseConfigured()) {
-      const products = await readJson<Product[]>('products.json', [])
-      const categories = await readJson<any[]>('categories.json', [])
-      return products
-        .filter((p) => p.best_seller)
-        .slice(0, 8)
-        .map((p) => ({
-          ...p,
-          category: categories.find((c) => c.id === p.category_id) || null,
-        })) as Product[]
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*, category:categories(*)')
+          .eq('best_seller', true)
+          .order('review_count', { ascending: false })
+          .limit(8)
+
+        if (!error && data && data.length > 0) return data as Product[]
+      } catch (err: any) {
+        console.warn('Supabase best sellers notice:', err.message)
+      }
     }
 
-    const { data, error } = await supabase
-      .from('products')
-      .select('*, category:categories(*)')
-      .eq('best_seller', true)
-      .order('review_count', { ascending: false })
-      .limit(8)
-
-    if (error) return []
-    return (data as Product[]) || []
+    const products = await readJson<Product[]>('products.json', [])
+    const categories = await readJson<any[]>('categories.json', [])
+    return products
+      .filter((p) => p.best_seller)
+      .slice(0, 8)
+      .map((p) => ({
+        ...p,
+        category: categories.find((c) => c.id === p.category_id) || null,
+      })) as Product[]
   })
 
 // 5. Get New Arrivals
@@ -237,27 +273,30 @@ export const getNewArrivalsServerFn = createServerFn({
   method: 'GET',
 })
   .handler(async () => {
-    if (!isSupabaseConfigured()) {
-      const products = await readJson<Product[]>('products.json', [])
-      const categories = await readJson<any[]>('categories.json', [])
-      return products
-        .filter((p) => p.new_arrival)
-        .slice(0, 8)
-        .map((p) => ({
-          ...p,
-          category: categories.find((c) => c.id === p.category_id) || null,
-        })) as Product[]
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*, category:categories(*)')
+          .eq('new_arrival', true)
+          .order('created_at', { ascending: false })
+          .limit(8)
+
+        if (!error && data && data.length > 0) return data as Product[]
+      } catch (err: any) {
+        console.warn('Supabase new arrivals notice:', err.message)
+      }
     }
 
-    const { data, error } = await supabase
-      .from('products')
-      .select('*, category:categories(*)')
-      .eq('new_arrival', true)
-      .order('created_at', { ascending: false })
-      .limit(8)
-
-    if (error) return []
-    return (data as Product[]) || []
+    const products = await readJson<Product[]>('products.json', [])
+    const categories = await readJson<any[]>('categories.json', [])
+    return products
+      .filter((p) => p.new_arrival)
+      .slice(0, 8)
+      .map((p) => ({
+        ...p,
+        category: categories.find((c) => c.id === p.category_id) || null,
+      })) as Product[]
   })
 
 // 6. Get Related Products
@@ -266,24 +305,27 @@ export const getRelatedProductsServerFn = createServerFn({
 })
   .validator((data: { productId: string; categoryId?: string }) => data)
   .handler(async ({ data: { productId, categoryId } }) => {
-    if (!isSupabaseConfigured()) {
-      const products = await readJson<Product[]>('products.json', [])
-      return products
-        .filter((p) => p.id !== productId && (!categoryId || p.category_id === categoryId))
-        .slice(0, 4)
+    if (isSupabaseConfigured()) {
+      try {
+        let query = supabase
+          .from('products')
+          .select('*, category:categories(*)')
+          .neq('id', productId)
+          .limit(4)
+
+        if (categoryId) query = query.eq('category_id', categoryId)
+
+        const { data, error } = await query
+        if (!error && data && data.length > 0) return data as Product[]
+      } catch (err: any) {
+        console.warn('Supabase related products notice:', err.message)
+      }
     }
 
-    let query = supabase
-      .from('products')
-      .select('*, category:categories(*)')
-      .neq('id', productId)
-      .limit(4)
-
-    if (categoryId) query = query.eq('category_id', categoryId)
-
-    const { data, error } = await query
-    if (error) return []
-    return (data as Product[]) || []
+    const products = await readJson<Product[]>('products.json', [])
+    return products
+      .filter((p) => p.id !== productId && (!categoryId || p.category_id === categoryId))
+      .slice(0, 4)
   })
 
 // 7. Create Product

@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { supabase, isSupabaseConfigured } from '../../lib/supabase'
-import type { HomepageBanner, Product } from '../../types'
+import type { HomepageBanner } from '../../types'
 import fs from 'fs/promises'
 import path from 'path'
 import crypto from 'crypto'

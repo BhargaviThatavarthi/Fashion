@@ -1,6 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
 import { supabase, isSupabaseConfigured } from '../../lib/supabase'
-import type { SocialLinks } from '../../types'
 import fs from 'fs/promises'
 import path from 'path'
 

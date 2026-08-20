@@ -86,6 +86,28 @@ export interface ContactEnquiry {
   created_at?: string
 }
 
+export interface CustomerLead {
+  id: string
+  customer_name: string
+  phone?: string | null
+  email?: string | null
+  source?: string | null
+  message: string
+  status: 'New' | 'Contacted' | 'Converted' | 'Closed'
+  created_at?: string
+  updated_at?: string
+}
+
+export interface MediaAsset {
+  id?: string
+  file_name: string
+  file_path: string
+  public_url: string
+  file_type?: string | null
+  file_size?: number | null
+  created_at?: string
+}
+
 export interface AdminUser {
   id: string
   email: string
@@ -129,7 +151,7 @@ export const DEMO_PRODUCTS: Product[] = [
     sizes: ['Free Size'],
     price: 12500,
     offer_price: 10999,
-    images: ['/placeholder-saree-1.jpg'],
+    images: ['/images/silk-saree.png'],
     sku: 'SSF-KSS-001',
     wash_care: 'Dry clean only. Store with camphor balls in a cotton cloth.',
     rating: 4.8,
@@ -152,7 +174,7 @@ export const DEMO_PRODUCTS: Product[] = [
     sizes: ['Free Size'],
     price: 4500,
     offer_price: 3799,
-    images: ['/placeholder-saree-2.jpg'],
+    images: ['/images/crape-saree.png'],
     sku: 'SSF-CCS-002',
     wash_care: 'Hand wash gently in cold water.',
     rating: 4.6,
@@ -163,7 +185,7 @@ export const DEMO_PRODUCTS: Product[] = [
     stock: 12,
     tags: ['Chiffon', 'Block Print', 'Floral'],
     in_stock: true,
-    category: { id: '3', name: 'Cotton Sarees', slug: 'cotton-sarees' },
+    category: { id: '4', name: 'Crape Sarees', slug: 'crape-sarees' },
   },
   {
     id: '3',
@@ -175,7 +197,7 @@ export const DEMO_PRODUCTS: Product[] = [
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     price: 28000,
     offer_price: 24500,
-    images: ['/placeholder-lehenga.jpg'],
+    images: ['/images/designer-saree.png'],
     sku: 'SSF-BRL-003',
     wash_care: 'Dry clean only.',
     rating: 4.9,
@@ -198,7 +220,7 @@ export const DEMO_PRODUCTS: Product[] = [
     sizes: ['Free Size'],
     price: 6800,
     offer_price: 5999,
-    images: ['/placeholder-saree-1.jpg'],
+    images: ['/images/cotton-saree.png'],
     sku: 'SSF-HPI-004',
     wash_care: 'First wash separately. Machine washable on gentle cycle.',
     rating: 4.7,
@@ -221,7 +243,7 @@ export const DEMO_PRODUCTS: Product[] = [
     sizes: ['Free Size'],
     price: 8900,
     offer_price: 7499,
-    images: ['/placeholder-saree-2.jpg'],
+    images: ['/images/designer-saree.png'],
     sku: 'SSF-DGS-005',
     wash_care: 'Dry clean recommended.',
     rating: 4.5,
@@ -244,7 +266,7 @@ export const DEMO_PRODUCTS: Product[] = [
     sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
     price: 3500,
     offer_price: 2899,
-    images: ['/placeholder-saree-1.jpg'],
+    images: ['/images/ethnic-top.png'],
     sku: 'SSF-AKD-006',
     wash_care: 'Hand wash or gentle machine wash.',
     rating: 4.4,

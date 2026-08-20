@@ -28,13 +28,14 @@ export function truncate(text: string, length: number): string {
 }
 
 const PLACEHOLDERS: Record<string, string> = {
-  '/placeholder-saree-1.jpg': 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&q=80',
-  '/placeholder-saree-2.jpg': 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=600&q=80',
-  '/placeholder-lehenga.jpg': 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=600&q=80',
-  '/placeholder.jpg': 'https://images.unsplash.com/photo-1608748010899-18f300247112?w=600&q=80'
+  '/placeholder-saree-1.jpg': '/images/silk-saree.png',
+  '/placeholder-saree-2.jpg': '/images/crape-saree.png',
+  '/placeholder-lehenga.jpg': '/images/designer-saree.png',
+  '/placeholder-cotton.jpg': '/images/cotton-saree.png',
+  '/placeholder.jpg': '/images/silk-saree.png'
 }
 
-export function getImageUrl(path: string | null | undefined, fallback: string = 'https://images.unsplash.com/photo-1608748010899-18f300247112?w=600&q=80'): string {
+export function getImageUrl(path: string | null | undefined, fallback: string = '/images/silk-saree.png'): string {
   if (!path) return fallback
   if (path.startsWith('http')) return path
   
