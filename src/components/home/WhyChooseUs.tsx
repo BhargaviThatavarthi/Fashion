@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { WHY_CHOOSE_US } from '../../constants'
-import { Shield, Sparkles, MessageCircle, Truck, RotateCcw, Award } from 'lucide-react'
+import { Shield, Sparkles, MessageCircle, Truck, RotateCcw, Award, ShieldCheck } from 'lucide-react'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Shield,
@@ -9,6 +9,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   TruckIcon: Truck,
   RotateCcw,
   Award,
+  ShieldCheck,
 }
 
 export default function WhyChooseUs() {

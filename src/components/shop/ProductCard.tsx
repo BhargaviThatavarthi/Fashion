@@ -1,5 +1,3 @@
-
-
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
@@ -16,17 +14,31 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [imgIndex, setImgIndex] = useState(0)
 
-  const images = product.images || []
-  const mainImg = getImageUrl(images[0])
-  const hoverImg = getImageUrl(images[1] || images[0] || '')
+  const images = Array.isArray(product.images) && product.images.length > 0
+    ? product.images
+    : (product.image_url ? [product.image_url] : [])
+
+  const mainImg = getImageUrl(product.image_url || images[0])
+  const hoverImg = getImageUrl(images[1] || product.image_url || images[0] || '')
+
+  const isOutOfStock =
+    product.status === 'out_of_stock' ||
+    (product.stock_quantity !== undefined && product.stock_quantity !== null && product.stock_quantity <= 0) ||
+    (product.stock !== undefined && product.stock !== null && product.stock <= 0) ||
+    product.in_stock === false
 
   const discount = product.offer_price
     ? formatDiscount(product.price, product.offer_price)
     : 0
 
+  const categoryName =
+    typeof product.category === 'object' && product.category
+      ? product.category.name
+      : (product.category || '')
+
   return (
     <motion.div
-      className="premium-card group"
+      className={`premium-card group ${isOutOfStock ? 'opacity-90' : ''}`}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
@@ -34,14 +46,14 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     >
       {/* Image Container */}
       <div
-        className="product-img-zoom relative aspect-[3/4] overflow-hidden"
+        className="product-img-zoom relative aspect-[3/4] overflow-hidden bg-gray-50"
         onMouseEnter={() => setImgIndex(1)}
         onMouseLeave={() => setImgIndex(0)}
       >
         <img
           src={imgIndex === 0 ? mainImg : hoverImg}
           alt={product.name}
-          className="w-full h-full object-cover transition-all duration-500"
+          className={`w-full h-full object-cover transition-all duration-500 ${isOutOfStock ? 'grayscale-[25%]' : ''}`}
           loading="lazy"
           onError={(e) => {
             ;(e.target as HTMLImageElement).src =
@@ -50,34 +62,42 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         />
 
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-          {product.new_arrival && (
-            <span
-              className="text-white text-[10px] font-700 font-nav px-2.5 py-0.5 rounded-full"
-              style={{ background: 'var(--color-pink)' }}
-            >
-              NEW
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+          {isOutOfStock ? (
+            <span className="bg-red-600 text-white text-[10px] font-700 font-nav px-2.5 py-0.5 rounded-full shadow-md tracking-wider">
+              OUT OF STOCK
             </span>
-          )}
-          {product.best_seller && (
-            <span
-              className="text-white text-[10px] font-700 font-nav px-2.5 py-0.5 rounded-full"
-              style={{ background: 'var(--color-gold)' }}
-            >
-              BESTSELLER
-            </span>
-          )}
-          {discount > 0 && (
-            <span className="bg-green-500 text-white text-[10px] font-700 font-nav px-2.5 py-0.5 rounded-full">
-              {discount}% OFF
-            </span>
+          ) : (
+            <>
+              {product.new_arrival && (
+                <span
+                  className="text-white text-[10px] font-700 font-nav px-2.5 py-0.5 rounded-full"
+                  style={{ background: 'var(--color-pink)' }}
+                >
+                  NEW
+                </span>
+              )}
+              {product.best_seller && (
+                <span
+                  className="text-white text-[10px] font-700 font-nav px-2.5 py-0.5 rounded-full"
+                  style={{ background: 'var(--color-gold)' }}
+                >
+                  BESTSELLER
+                </span>
+              )}
+              {discount > 0 && (
+                <span className="bg-green-500 text-white text-[10px] font-700 font-nav px-2.5 py-0.5 rounded-full">
+                  {discount}% OFF
+                </span>
+              )}
+            </>
           )}
         </div>
 
         {/* Wishlist */}
         <button
           onClick={() => setIsWishlisted(!isWishlisted)}
-          className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110"
+          className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 z-10"
           aria-label="Add to wishlist"
         >
           <Heart
@@ -88,7 +108,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         </button>
 
         {/* Quick View overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 z-10">
           <Link
             to="/shop/$slug"
             params={{ slug: product.slug }}
@@ -103,11 +123,12 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       {/* Content */}
       <div className="p-4">
         {/* Category */}
-        {product.category && (
-          <p className="font-nav text-[10px] font-600 uppercase tracking-widest mb-1.5"
+        {categoryName && (
+          <p
+            className="font-nav text-[10px] font-600 uppercase tracking-widest mb-1.5"
             style={{ color: 'var(--color-gold)' }}
           >
-            {product.category.name}
+            {categoryName}
           </p>
         )}
 
@@ -147,11 +168,11 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
 
         {/* Price */}
         <div className="flex items-baseline gap-2 mb-3">
-          <span className="font-heading text-lg font-700" style={{ color: 'var(--color-pink)' }}>
+          <span className="font-price font-sans text-lg font-bold" style={{ color: 'var(--color-pink)' }}>
             {formatPrice(product.offer_price || product.price)}
           </span>
           {product.offer_price && (
-            <span className="text-sm text-gray-400 line-through">
+            <span className="font-price font-sans text-sm text-gray-400 line-through">
               {formatPrice(product.price)}
             </span>
           )}
@@ -180,15 +201,25 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
           >
             View Details
           </Link>
-          <Link
-            to="/contact"
-            search={{ product: product.name }}
-            className="flex items-center gap-1.5 text-white text-xs font-nav font-600 px-3 py-2 rounded-full transition-all duration-200 hover:opacity-90"
-            style={{ background: 'var(--color-pink)' }}
-            aria-label="Enquire Now"
-          >
-            Enquire Now
-          </Link>
+          {isOutOfStock ? (
+            <button
+              disabled
+              className="flex items-center justify-center text-gray-400 bg-gray-100 text-xs font-nav font-600 px-3 py-2 rounded-full cursor-not-allowed border border-gray-200"
+              title="This product is currently out of stock"
+            >
+              Out of Stock
+            </button>
+          ) : (
+            <Link
+              to="/contact"
+              search={{ product: product.name }}
+              className="flex items-center gap-1.5 text-white text-xs font-nav font-600 px-3 py-2 rounded-full transition-all duration-200 hover:opacity-90"
+              style={{ background: 'var(--color-pink)' }}
+              aria-label="Enquire Now"
+            >
+              Enquire Now
+            </Link>
+          )}
         </div>
       </div>
     </motion.div>

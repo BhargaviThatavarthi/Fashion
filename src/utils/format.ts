@@ -1,3 +1,5 @@
+import { supabaseUrl } from '../lib/supabase'
+
 // Format Utility Functions
 
 export function formatPrice(price: number): string {
@@ -36,19 +38,42 @@ const PLACEHOLDERS: Record<string, string> = {
 }
 
 export function getImageUrl(path: string | null | undefined, fallback: string = '/images/silk-saree.png'): string {
-  if (!path) return fallback
-  if (path.startsWith('http')) return path
-  
-  if (PLACEHOLDERS[path]) {
-    return PLACEHOLDERS[path]
+  if (!path || path.trim() === '') return fallback
+  const trimmed = path.trim()
+
+  if (
+    trimmed.startsWith('http://') ||
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('data:') ||
+    trimmed.startsWith('blob:')
+  ) {
+    return trimmed
   }
 
-  // Supabase storage URL pattern
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-  if (supabaseUrl && path.startsWith('/')) {
-    return `${supabaseUrl}/storage/v1/object/public${path}`
+  if (PLACEHOLDERS[trimmed]) {
+    return PLACEHOLDERS[trimmed]
   }
-  return path
+
+  if (trimmed.startsWith('/images/')) {
+    return trimmed
+  }
+
+  // Supabase storage URL resolution
+  if (supabaseUrl && !supabaseUrl.includes('placeholder')) {
+    if (trimmed.startsWith('/storage/v1/object/public/')) {
+      return `${supabaseUrl}${trimmed}`
+    }
+    if (trimmed.startsWith('/product-images/')) {
+      return `${supabaseUrl}/storage/v1/object/public${trimmed}`
+    }
+    if (trimmed.startsWith('product-images/')) {
+      return `${supabaseUrl}/storage/v1/object/public/${trimmed}`
+    }
+    // Relative category path e.g. "tops/123_pic.jpg"
+    return `${supabaseUrl}/storage/v1/object/public/product-images/${trimmed.replace(/^\//, '')}`
+  }
+
+  return trimmed
 }
 
 export function formatRating(rating: number): string {

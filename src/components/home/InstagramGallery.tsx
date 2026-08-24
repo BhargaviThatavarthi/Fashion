@@ -25,7 +25,7 @@ export default function InstagramGallery() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <span className="section-badge">📸 Instagram Gallery</span>
+          <span className="section-badge">Instagram Gallery</span>
           <h2 className="section-heading">Follow Us on Instagram</h2>
           <p className="section-subtitle mt-2 max-w-md mx-auto">
             Get inspired! Follow <strong>@srisubhakarifashions</strong> for daily looks,

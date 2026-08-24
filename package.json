@@ -6,12 +6,15 @@
     "#/*": "./src/*"
   },
   "scripts": {
-    "dev": "vite dev --port 8000",
+    "dev": "vite dev --port 8001",
     "generate-routes": "tsr generate",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@sanity/client": "^8.2.0",
+    "@sanity/image-url": "^1.1.0",
+    "sanity": "^3.75.0",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.8",
     "@tailwindcss/vite": "^4.1.18",

@@ -25,7 +25,7 @@ export default function YouTubeSection({ videos }: YouTubeSectionProps) {
             className="inline-block font-nav text-xs font-700 tracking-[0.2em] uppercase mb-3 px-4 py-1.5 rounded-full"
             style={{ color: '#FF0000', background: 'rgba(255,0,0,0.1)', border: '1px solid rgba(255,0,0,0.2)' }}
           >
-            📺 YouTube Channel
+            YouTube Channel
           </span>
           <h2
             className="font-heading text-white"

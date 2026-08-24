@@ -15,6 +15,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CarouselDemoRouteImport } from './routes/carousel-demo'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as StudioRouteImport } from './routes/studio'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminCategoriesRouteImport } from './routes/admin/categories'
 import { Route as AdminCustomersRouteImport } from './routes/admin/customers'
@@ -30,7 +31,9 @@ import { Route as AdminSocialRouteImport } from './routes/admin/social'
 import { Route as AdminTestimonialsRouteImport } from './routes/admin/testimonials'
 import { Route as AdminYoutubeRouteImport } from './routes/admin/youtube'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
+import { Route as ShopIndexRouteImport } from './routes/shop.index'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
+import { Route as StudioSplatRouteImport } from './routes/studio.$'
 import { Route as AdminProductsIndexRouteImport } from './routes/admin/products.index'
 import { Route as AdminProductsIdRouteImport } from './routes/admin/products.$id'
 import { Route as AdminProductsNewRouteImport } from './routes/admin/products.new'
@@ -64,6 +67,11 @@ const ContactRoute = ContactRouteImport.update({
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
   path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioRoute = StudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -141,10 +149,20 @@ const ApiUploadRoute = ApiUploadRouteImport.update({
   path: '/api/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShopIndexRoute = ShopIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ShopRoute,
+} as any)
 const ShopSlugRoute = ShopSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => ShopRoute,
+} as any)
+const StudioSplatRoute = StudioSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => StudioRoute,
 } as any)
 const AdminProductsIndexRoute = AdminProductsIndexRouteImport.update({
   id: '/',
@@ -174,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/carousel-demo': typeof CarouselDemoRoute
   '/contact': typeof ContactRoute
   '/shop': typeof ShopRouteWithChildren
+  '/studio': typeof StudioRouteWithChildren
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/enquiries': typeof AdminEnquiriesRoute
@@ -189,7 +208,9 @@ export interface FileRoutesByFullPath {
   '/admin/youtube': typeof AdminYoutubeRoute
   '/api/upload': typeof ApiUploadRoute
   '/shop/$slug': typeof ShopSlugRoute
+  '/studio/$': typeof StudioSplatRoute
   '/admin/': typeof AdminIndexRoute
+  '/shop/': typeof ShopIndexRoute
   '/admin/products/$id': typeof AdminProductsIdRoute
   '/admin/products/new': typeof AdminProductsNewRoute
   '/api/youtube/callback': typeof ApiYoutubeCallbackRoute
@@ -200,7 +221,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/carousel-demo': typeof CarouselDemoRoute
   '/contact': typeof ContactRoute
-  '/shop': typeof ShopRouteWithChildren
+  '/studio': typeof StudioRouteWithChildren
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/enquiries': typeof AdminEnquiriesRoute
@@ -215,7 +236,9 @@ export interface FileRoutesByTo {
   '/admin/youtube': typeof AdminYoutubeRoute
   '/api/upload': typeof ApiUploadRoute
   '/shop/$slug': typeof ShopSlugRoute
+  '/studio/$': typeof StudioSplatRoute
   '/admin': typeof AdminIndexRoute
+  '/shop': typeof ShopIndexRoute
   '/admin/products/$id': typeof AdminProductsIdRoute
   '/admin/products/new': typeof AdminProductsNewRoute
   '/api/youtube/callback': typeof ApiYoutubeCallbackRoute
@@ -229,6 +252,7 @@ export interface FileRoutesById {
   '/carousel-demo': typeof CarouselDemoRoute
   '/contact': typeof ContactRoute
   '/shop': typeof ShopRouteWithChildren
+  '/studio': typeof StudioRouteWithChildren
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/enquiries': typeof AdminEnquiriesRoute
@@ -244,7 +268,9 @@ export interface FileRoutesById {
   '/admin/youtube': typeof AdminYoutubeRoute
   '/api/upload': typeof ApiUploadRoute
   '/shop/$slug': typeof ShopSlugRoute
+  '/studio/$': typeof StudioSplatRoute
   '/admin/': typeof AdminIndexRoute
+  '/shop/': typeof ShopIndexRoute
   '/admin/products/$id': typeof AdminProductsIdRoute
   '/admin/products/new': typeof AdminProductsNewRoute
   '/api/youtube/callback': typeof ApiYoutubeCallbackRoute
@@ -259,6 +285,7 @@ export interface FileRouteTypes {
     | '/carousel-demo'
     | '/contact'
     | '/shop'
+    | '/studio'
     | '/admin/categories'
     | '/admin/customers'
     | '/admin/enquiries'
@@ -274,7 +301,9 @@ export interface FileRouteTypes {
     | '/admin/youtube'
     | '/api/upload'
     | '/shop/$slug'
+    | '/studio/$'
     | '/admin/'
+    | '/shop/'
     | '/admin/products/$id'
     | '/admin/products/new'
     | '/api/youtube/callback'
@@ -285,7 +314,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/carousel-demo'
     | '/contact'
-    | '/shop'
+    | '/studio'
     | '/admin/categories'
     | '/admin/customers'
     | '/admin/enquiries'
@@ -300,7 +329,9 @@ export interface FileRouteTypes {
     | '/admin/youtube'
     | '/api/upload'
     | '/shop/$slug'
+    | '/studio/$'
     | '/admin'
+    | '/shop'
     | '/admin/products/$id'
     | '/admin/products/new'
     | '/api/youtube/callback'
@@ -313,6 +344,7 @@ export interface FileRouteTypes {
     | '/carousel-demo'
     | '/contact'
     | '/shop'
+    | '/studio'
     | '/admin/categories'
     | '/admin/customers'
     | '/admin/enquiries'
@@ -328,7 +360,9 @@ export interface FileRouteTypes {
     | '/admin/youtube'
     | '/api/upload'
     | '/shop/$slug'
+    | '/studio/$'
     | '/admin/'
+    | '/shop/'
     | '/admin/products/$id'
     | '/admin/products/new'
     | '/api/youtube/callback'
@@ -342,6 +376,7 @@ export interface RootRouteChildren {
   CarouselDemoRoute: typeof CarouselDemoRoute
   ContactRoute: typeof ContactRoute
   ShopRoute: typeof ShopRouteWithChildren
+  StudioRoute: typeof StudioRouteWithChildren
   ApiUploadRoute: typeof ApiUploadRoute
   ApiYoutubeCallbackRoute: typeof ApiYoutubeCallbackRoute
 }
@@ -388,6 +423,13 @@ declare module '@tanstack/react-router' {
       path: '/shop'
       fullPath: '/shop'
       preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studio': {
+      id: '/studio'
+      path: '/studio'
+      fullPath: '/studio'
+      preLoaderRoute: typeof StudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -495,12 +537,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shop/': {
+      id: '/shop/'
+      path: '/'
+      fullPath: '/shop/'
+      preLoaderRoute: typeof ShopIndexRouteImport
+      parentRoute: typeof ShopRoute
+    }
     '/shop/$slug': {
       id: '/shop/$slug'
       path: '/$slug'
       fullPath: '/shop/$slug'
       preLoaderRoute: typeof ShopSlugRouteImport
       parentRoute: typeof ShopRoute
+    }
+    '/studio/$': {
+      id: '/studio/$'
+      path: '/$'
+      fullPath: '/studio/$'
+      preLoaderRoute: typeof StudioSplatRouteImport
+      parentRoute: typeof StudioRoute
     }
     '/admin/products/': {
       id: '/admin/products/'
@@ -587,13 +643,26 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface ShopRouteChildren {
   ShopSlugRoute: typeof ShopSlugRoute
+  ShopIndexRoute: typeof ShopIndexRoute
 }
 
 const ShopRouteChildren: ShopRouteChildren = {
   ShopSlugRoute: ShopSlugRoute,
+  ShopIndexRoute: ShopIndexRoute,
 }
 
 const ShopRouteWithChildren = ShopRoute._addFileChildren(ShopRouteChildren)
+
+interface StudioRouteChildren {
+  StudioSplatRoute: typeof StudioSplatRoute
+}
+
+const StudioRouteChildren: StudioRouteChildren = {
+  StudioSplatRoute: StudioSplatRoute,
+}
+
+const StudioRouteWithChildren =
+  StudioRoute._addFileChildren(StudioRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -602,6 +671,7 @@ const rootRouteChildren: RootRouteChildren = {
   CarouselDemoRoute: CarouselDemoRoute,
   ContactRoute: ContactRoute,
   ShopRoute: ShopRouteWithChildren,
+  StudioRoute: StudioRouteWithChildren,
   ApiUploadRoute: ApiUploadRoute,
   ApiYoutubeCallbackRoute: ApiYoutubeCallbackRoute,
 }

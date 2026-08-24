@@ -26,7 +26,7 @@ export default function ContactCTA() {
             style={{ background: 'radial-gradient(circle, var(--color-gold), transparent)' }} />
 
           <div className="relative z-10">
-            <span className="section-badge">💬 Get in Touch</span>
+            <span className="section-badge">Get in Touch</span>
             <h2 className="section-heading mb-4">
               Ready to Find Your{' '}
               <span className="italic" style={{ color: 'var(--color-pink)' }}>Perfect Saree?</span>

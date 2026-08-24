@@ -74,13 +74,22 @@ function AdminCategories() {
           <div className="divide-y" style={{ borderColor: '#fde8f0' }}>
             {(categories || []).map((cat) => (
               <div key={cat.id} className="flex items-center justify-between p-5 hover:bg-gray-50/50">
-                <div>
-                  <p className="font-nav font-700 text-sm text-gray-800">{cat.name}</p>
-                  <p className="text-xs text-gray-400 font-mono">{cat.slug}</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-pink-100 shadow-xs">
+                    <img
+                      src={cat.image || `/images/categories/${cat.slug}.jpg`}
+                      alt={cat.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-nav font-700 text-sm text-gray-800">{cat.name}</p>
+                    <p className="text-xs text-gray-400 font-mono">{cat.slug}</p>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => handleDelete(cat.id, cat.name)}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-50 text-red-400 hover:text-red-600 transition-colors">
+                    className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-50 text-red-400 hover:text-red-600 transition-colors cursor-pointer">
                     <Trash2 size={14} />
                   </button>
                 </div>

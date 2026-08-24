@@ -45,8 +45,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 function RootContent({ children }: { children: React.ReactNode }) {
   const location = useLocation()
   const isAdmin = location.pathname.startsWith('/admin')
+  const isStudio = location.pathname.startsWith('/studio')
 
-  if (isAdmin) {
+  if (isAdmin || isStudio) {
     return <main>{children}</main>
   }
 

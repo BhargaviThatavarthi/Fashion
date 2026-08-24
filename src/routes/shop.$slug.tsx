@@ -40,14 +40,14 @@ function ProductDetailPage() {
   const { data: product, isLoading } = useQuery({
     queryKey: ['product', slug],
     queryFn: () => getProductBySlug(slug),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   })
 
   const { data: related } = useQuery({
     queryKey: ['related', product?.id, product?.category_id],
     queryFn: () => getRelatedProducts(product!.id, product!.category_id || undefined),
     enabled: !!product,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
   })
 
   if (isLoading) {
@@ -69,7 +69,7 @@ function ProductDetailPage() {
   if (!product) {
     return (
       <div className="text-center py-32">
-        <div className="text-6xl mb-4">😔</div>
+        <ShoppingBag size={48} className="mx-auto text-gray-300 mb-4" />
         <h2 className="font-heading text-2xl text-gray-600 mb-4">Product not found</h2>
         <Link to="/shop" className="btn-pink px-6 py-2.5 text-sm">
           Back to Shop
@@ -78,12 +78,25 @@ function ProductDetailPage() {
     )
   }
 
-  const images = product.images?.length
+  const images = Array.isArray(product.images) && product.images.length > 0
     ? product.images
-    : ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&q=80']
+    : (product.image_url ? [product.image_url] : ['/images/silk-saree.png'])
   const discount = product.offer_price ? formatDiscount(product.price, product.offer_price) : 0
 
+  const isOutOfStock =
+    product.status === 'out_of_stock' ||
+    (product.stock_quantity !== undefined && product.stock_quantity !== null && product.stock_quantity <= 0) ||
+    (product.stock !== undefined && product.stock !== null && product.stock <= 0) ||
+    product.in_stock === false
 
+  const categoryName =
+    typeof product.category === 'object' && product.category
+      ? product.category.name
+      : (product.category || '')
+  const categorySlug =
+    typeof product.category === 'object' && product.category
+      ? product.category.slug
+      : (product.category ? product.category.toLowerCase().replace(/[^a-z0-9]+/g, '-') : '')
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
 
@@ -105,7 +118,7 @@ function ProductDetailPage() {
           <div>
             {/* Main Image */}
             <motion.div
-              className="relative rounded-2xl overflow-hidden mb-4 cursor-zoom-in aspect-[3/4]"
+              className="relative rounded-2xl overflow-hidden mb-4 cursor-zoom-in aspect-[3/4] bg-gray-50"
               style={{
                 boxShadow: '0 8px 40px rgba(216,92,138,0.12)',
                 border: '2px solid rgba(249,220,231,0.5)',
@@ -115,7 +128,7 @@ function ProductDetailPage() {
               <img
                 src={getImageUrl(images[activeImg])}
                 alt={product.name}
-                className={`w-full h-full object-cover transition-transform duration-500 ${zoomed ? 'scale-125' : 'scale-100'}`}
+                className={`w-full h-full object-cover transition-transform duration-500 ${zoomed ? 'scale-125' : 'scale-100'} ${isOutOfStock ? 'grayscale-[20%]' : ''}`}
                 onError={(e) => {
                   ;(e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&q=80'
                 }}
@@ -123,11 +136,15 @@ function ProductDetailPage() {
               <button className="absolute top-3 right-3 bg-white/80 p-2 rounded-full" aria-label="Zoom">
                 <ZoomIn size={16} style={{ color: 'var(--color-pink)' }} />
               </button>
-              {discount > 0 && (
+              {isOutOfStock ? (
+                <div className="absolute top-3 left-3 bg-red-600 text-white text-xs font-700 font-nav px-3 py-1 rounded-full shadow-md tracking-wider">
+                  OUT OF STOCK
+                </div>
+              ) : discount > 0 ? (
                 <div className="absolute top-3 left-3 bg-green-500 text-white text-xs font-700 font-nav px-2.5 py-1 rounded-full">
                   -{discount}% OFF
                 </div>
-              )}
+              ) : null}
             </motion.div>
 
             {/* Thumbnail Strip */}
@@ -151,13 +168,29 @@ function ProductDetailPage() {
 
           {/* Product Info */}
           <div>
-            {/* Category & SKU */}
-            <div className="flex items-center justify-between mb-2">
-              {product.category && (
-                <span className="font-nav text-xs font-700 uppercase tracking-widest" style={{ color: 'var(--color-gold)' }}>
-                  {product.category.name}
-                </span>
-              )}
+            {/* Category, Collections & SKU */}
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                {categoryName && (
+                  <Link
+                    to="/shop"
+                    search={{ category: categorySlug || categoryName }}
+                    className="font-nav text-xs font-700 uppercase tracking-wider px-3 py-1 bg-pink-50 text-pink-700 border border-pink-200 rounded-full hover:bg-pink-100 transition-colors"
+                  >
+                    🏷️ {categoryName}
+                  </Link>
+                )}
+                {product.collections?.map((col) => (
+                  <Link
+                    key={col.id}
+                    to="/shop"
+                    search={{ collection: col.slug }}
+                    className="font-nav text-xs font-700 tracking-wide px-3 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-full hover:bg-amber-100 transition-colors"
+                  >
+                    {col.badge || '✨'} {col.title}
+                  </Link>
+                ))}
+              </div>
               {product.sku && (
                 <span className="text-xs text-gray-400 font-nav">SKU: {product.sku}</span>
               )}
@@ -168,33 +201,44 @@ function ProductDetailPage() {
               {product.name}
             </h1>
 
-            {/* Rating */}
-            {product.rating && (
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex gap-0.5">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      size={16}
-                      className={star <= Math.round(product.rating!) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200 fill-gray-200'}
-                    />
-                  ))}
+            {/* Rating & Stock Status */}
+            <div className="flex items-center gap-4 mb-4 flex-wrap">
+              {product.rating && (
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-0.5">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        size={16}
+                        className={star <= Math.round(product.rating!) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200 fill-gray-200'}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-500">({product.review_count || 0} reviews)</span>
                 </div>
-                <span className="text-sm text-gray-500">({product.review_count} reviews)</span>
-              </div>
-            )}
+              )}
+              {isOutOfStock ? (
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-nav font-700 bg-red-100 text-red-700">
+                  Out of Stock
+                </span>
+              ) : (
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-nav font-700 bg-green-100 text-green-700">
+                  In Stock ({product.stock_quantity ?? product.stock ?? 'Available'})
+                </span>
+              )}
+            </div>
 
             {/* Price */}
             <div className="flex items-baseline gap-3 mb-5 pb-5 border-b" style={{ borderColor: 'var(--color-pink-light)' }}>
-              <span className="font-heading text-3xl font-700" style={{ color: 'var(--color-pink)' }}>
+              <span className="font-price font-sans text-3xl font-bold" style={{ color: 'var(--color-pink)' }}>
                 {formatPrice(product.offer_price || product.price)}
               </span>
               {product.offer_price && (
-                <span className="text-lg text-gray-400 line-through">{formatPrice(product.price)}</span>
+                <span className="font-price font-sans text-lg text-gray-400 line-through">{formatPrice(product.price)}</span>
               )}
               {discount > 0 && (
-                <span className="text-sm font-600 font-nav text-green-600">
-                  Save {formatPrice(product.price - product.offer_price!)}
+                <span className="font-price font-sans text-sm font-semibold text-emerald-600">
+                  Save {formatPrice(product.price - product.offer_price!)} ({discount}% OFF)
                 </span>
               )}
             </div>
@@ -261,16 +305,25 @@ function ProductDetailPage() {
             )}
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 mb-6">
-              <Link
-                to="/contact"
-                search={{ product: product.name }}
-                className="btn-pink flex items-center justify-center gap-2.5 flex-1 text-base py-3.5"
-              >
-                Enquire Now
-              </Link>
+              {isOutOfStock ? (
+                <button
+                  disabled
+                  className="flex items-center justify-center gap-2.5 flex-1 text-base py-3.5 rounded-full bg-gray-200 text-gray-400 font-nav font-700 cursor-not-allowed border border-gray-300"
+                >
+                  Currently Out of Stock
+                </button>
+              ) : (
+                <Link
+                  to="/contact"
+                  search={{ product: product.name }}
+                  className="btn-pink flex items-center justify-center gap-2.5 flex-1 text-base py-3.5"
+                >
+                  Enquire Now
+                </Link>
+              )}
               <button
                 onClick={() => setWishlisted(!wishlisted)}
-                className="w-14 h-14 rounded-full border-2 flex items-center justify-center transition-all"
+                className="w-14 h-14 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer"
                 style={{
                   borderColor: wishlisted ? 'var(--color-pink)' : 'var(--color-pink-light)',
                   background: wishlisted ? 'var(--color-pink-light)' : 'white',
@@ -307,7 +360,7 @@ function ProductDetailPage() {
         {related && related.length > 0 && (
           <section>
             <div className="text-center mb-8">
-              <span className="section-badge">✨ You May Also Like</span>
+              <span className="section-badge">You May Also Like</span>
               <h2 className="section-heading">Related Products</h2>
               <div className="gold-divider" />
             </div>

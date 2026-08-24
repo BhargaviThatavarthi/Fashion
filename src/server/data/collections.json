@@ -1,0 +1,46 @@
+[
+  {
+    "id": "col-featured-sarees",
+    "title": "Featured Sarees",
+    "slug": "featured-sarees",
+    "badge": "⭐ Handpicked",
+    "subtitle": "Explore our most-loved collection of sarees and ethnic wear, each crafted for the modern woman who celebrates tradition.",
+    "image": "/images/silk-saree.png",
+    "order": 1,
+    "show_on_homepage": true,
+    "view_all_label": "View All Featured Sarees"
+  },
+  {
+    "id": "col-new-arrivals",
+    "title": "New Arrivals",
+    "slug": "new-arrivals",
+    "badge": "🆕 Just Arrived",
+    "subtitle": "Be the first to discover our freshest designs — straight from the looms of master weavers.",
+    "image": "/images/cotton-saree.png",
+    "order": 2,
+    "show_on_homepage": true,
+    "view_all_label": "See All New Arrivals"
+  },
+  {
+    "id": "col-best-sellers",
+    "title": "Best Sellers",
+    "slug": "best-sellers",
+    "badge": "🏆 Top Rated",
+    "subtitle": "Our most popular designs — chosen by thousands of happy customers across India.",
+    "image": "/images/designer-saree.png",
+    "order": 3,
+    "show_on_homepage": true,
+    "view_all_label": "View All Best Sellers"
+  },
+  {
+    "id": "col-festival-collections",
+    "title": "Festival Collections",
+    "slug": "festival-collections",
+    "badge": "🎊 Festival Ready",
+    "subtitle": "Celebrate every festival in style with our exclusive festive wear collection.",
+    "image": "/images/silk-saree.png",
+    "order": 4,
+    "show_on_homepage": true,
+    "view_all_label": "Shop Festival Wear"
+  }
+]

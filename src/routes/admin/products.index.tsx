@@ -1,13 +1,14 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Plus, Edit, Trash2, Eye, Copy, FileSpreadsheet,
   Upload, Search, SlidersHorizontal, CheckCircle, XCircle
 } from 'lucide-react'
 import { getProducts, deleteProduct, createProduct, updateProduct } from '../../services/products'
 import { getCategories } from '../../services/categories'
+import { STATIC_CATEGORIES } from '../../constants/categories'
 import { formatPrice, slugify, formatDiscount, getImageUrl } from '../../utils/format'
 
 export const Route = createFileRoute('/admin/products/')({
@@ -64,14 +65,22 @@ function AdminProducts() {
     return true
   })
 
+  const queryClient = useQueryClient()
+
   const handleDelete = async (id: string, name: string) => {
     if (window.confirm(`Delete "${name}"? This cannot be undone.`)) {
       try {
         await deleteProduct(id)
         setSelectedIds(prev => prev.filter(item => item !== id))
+        await queryClient.invalidateQueries({ queryKey: ['products'] })
+        await queryClient.invalidateQueries({ queryKey: ['admin-products'] })
+        await queryClient.invalidateQueries({ queryKey: ['featured-products'] })
+        await queryClient.invalidateQueries({ queryKey: ['best-sellers'] })
+        await queryClient.invalidateQueries({ queryKey: ['new-arrivals'] })
+        await queryClient.invalidateQueries({ queryKey: ['festival-products'] })
         refetch()
-      } catch (err) {
-        alert('Failed to delete product.')
+      } catch (err: any) {
+        alert('Failed to delete product: ' + (err.message || err))
       }
     }
   }
@@ -82,10 +91,16 @@ function AdminProducts() {
       try {
         await Promise.all(selectedIds.map((id) => deleteProduct(id)))
         setSelectedIds([])
+        await queryClient.invalidateQueries({ queryKey: ['products'] })
+        await queryClient.invalidateQueries({ queryKey: ['admin-products'] })
+        await queryClient.invalidateQueries({ queryKey: ['featured-products'] })
+        await queryClient.invalidateQueries({ queryKey: ['best-sellers'] })
+        await queryClient.invalidateQueries({ queryKey: ['new-arrivals'] })
+        await queryClient.invalidateQueries({ queryKey: ['festival-products'] })
         alert('Selected products deleted successfully!')
         refetch()
-      } catch (err) {
-        alert('Failed to delete some products.')
+      } catch (err: any) {
+        alert('Failed to delete some products: ' + (err.message || err))
       }
     }
   }
@@ -96,25 +111,50 @@ function AdminProducts() {
       await createProduct({
         ...rest,
         name: `${product.name} (Copy)`,
-        slug: `${product.slug}-copy`,
+        slug: `${product.slug}-copy-${Date.now().toString().slice(-4)}`,
         sku: product.sku ? `${product.sku}-copy` : `SSF-DUP-${Math.floor(100 + Math.random() * 900)}`,
         created_at: new Date().toISOString(),
       })
+      await queryClient.invalidateQueries({ queryKey: ['products'] })
+      await queryClient.invalidateQueries({ queryKey: ['admin-products'] })
       alert(`Duplicated "${product.name}" successfully!`)
       refetch()
-    } catch (err) {
-      alert('Failed to duplicate product.')
+    } catch (err: any) {
+      alert('Failed to duplicate product: ' + (err.message || err))
+    }
+  }
+
+  const handleStockChange = async (product: any, newStock: number) => {
+    try {
+      const validStock = Math.max(0, newStock)
+      await updateProduct(product.id, {
+        stock: validStock,
+        stock_quantity: validStock,
+        in_stock: validStock > 0,
+      })
+      await queryClient.invalidateQueries({ queryKey: ['products'] })
+      await queryClient.invalidateQueries({ queryKey: ['admin-products'] })
+      refetch()
+    } catch (err: any) {
+      alert('Failed to update stock quantity: ' + (err.message || err))
     }
   }
 
   const toggleAvailability = async (product: any) => {
     try {
+      const currentlyInStock = product.status !== 'out_of_stock' && (product.stock_quantity ?? product.stock ?? 0) > 0
+      const newStock = currentlyInStock ? 0 : (product.stock_quantity || product.stock || 10)
+
       await updateProduct(product.id, {
-        in_stock: product.in_stock === false ? true : false,
+        stock: newStock,
+        stock_quantity: newStock,
+        in_stock: !currentlyInStock,
       })
+      await queryClient.invalidateQueries({ queryKey: ['products'] })
+      await queryClient.invalidateQueries({ queryKey: ['admin-products'] })
       refetch()
-    } catch (err) {
-      alert('Failed to toggle availability.')
+    } catch (err: any) {
+      alert('Failed to toggle availability: ' + (err.message || err))
     }
   }
 
@@ -306,7 +346,7 @@ function AdminProducts() {
             style={{ borderColor: 'var(--color-pink-light)' }}
           >
             <option value="">All Categories</option>
-            {(categories || []).map((cat) => (
+            {(categories && categories.length > 0 ? categories : STATIC_CATEGORIES).map((cat) => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
           </select>
@@ -424,8 +464,8 @@ function AdminProducts() {
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-12 rounded-lg overflow-hidden bg-pink-50 shrink-0 border border-pink-100 flex items-center justify-center">
-                            {product.images?.[0] ? (
-                              <img src={getImageUrl(product.images[0])} alt="" className="w-full h-full object-cover" />
+                            {(product.image_url || product.images?.[0]) ? (
+                              <img src={getImageUrl(product.image_url || product.images?.[0])} alt="" className="w-full h-full object-cover" />
                             ) : (
                               <div className="text-lg">🥻</div>
                             )}
@@ -438,7 +478,9 @@ function AdminProducts() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-4 text-xs font-600 text-gray-600">{product.category?.name || '—'}</td>
+                      <td className="px-5 py-4 text-xs font-600 text-gray-600">
+                        {typeof product.category === 'object' && product.category ? product.category.name : (product.category || '—')}
+                      </td>
                       <td className="px-5 py-4 text-xs font-600 text-gray-500">{formatPrice(product.price)}</td>
                       <td className="px-5 py-4 font-nav font-700 text-sm" style={{ color: 'var(--color-pink)' }}>
                         {formatPrice(product.offer_price || product.price)}
@@ -446,15 +488,39 @@ function AdminProducts() {
                       <td className="px-5 py-4 text-xs font-700 text-green-600">
                         {discount > 0 ? `${discount}% OFF` : '—'}
                       </td>
-                      <td className="px-5 py-4 text-xs font-600 text-gray-600">{product.stock !== undefined ? product.stock : '—'}</td>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleStockChange(product, (product.stock_quantity ?? product.stock ?? 0) - 1)}
+                            className="w-5 h-5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center text-xs font-bold cursor-pointer"
+                            title="Decrease stock"
+                          >
+                            -
+                          </button>
+                          <span className="text-xs font-700 min-w-[20px] text-center text-gray-700">
+                            {product.stock_quantity ?? product.stock ?? 0}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleStockChange(product, (product.stock_quantity ?? product.stock ?? 0) + 1)}
+                            className="w-5 h-5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center text-xs font-bold cursor-pointer"
+                            title="Increase stock"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </td>
                       <td className="px-5 py-4">
                         <button
                           onClick={() => toggleAvailability(product)}
                           className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-700 uppercase cursor-pointer transition-colors ${
-                            product.in_stock !== false ? 'bg-green-50 text-green-600 hover:bg-green-100' : 'bg-red-50 text-red-600 hover:bg-red-100'
+                            product.status !== 'out_of_stock' && (product.stock_quantity ?? product.stock ?? 0) > 0
+                              ? 'bg-green-50 text-green-600 hover:bg-green-100'
+                              : 'bg-red-50 text-red-600 hover:bg-red-100'
                           }`}
                         >
-                          {product.in_stock !== false ? (
+                          {product.status !== 'out_of_stock' && (product.stock_quantity ?? product.stock ?? 0) > 0 ? (
                             <>
                               <CheckCircle size={10} />
                               In Stock

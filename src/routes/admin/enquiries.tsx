@@ -48,7 +48,7 @@ const INITIAL_MOCK_LEADS: CustomerLead[] = [
   },
 ]
 
-export function AdminCustomerLeads() {
+function AdminCustomerLeads() {
   const [leads, setLeads] = useState<CustomerLead[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -93,10 +93,11 @@ export function AdminCustomerLeads() {
           .select('*')
           .order('created_at', { ascending: sortOrder === 'oldest' })
 
-        if (error) throw error
-
-        if (data && data.length > 0) {
+        if (!error && data) {
           setLeads(data as CustomerLead[])
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('ssf_customer_leads', JSON.stringify(data))
+          }
           setLoading(false)
           return
         }
@@ -125,6 +126,24 @@ export function AdminCustomerLeads() {
 
   useEffect(() => {
     fetchLeads()
+
+    // Real-time subscription to incoming messages
+    if (isSupabaseConfigured()) {
+      const channel = supabase
+        .channel('admin_customer_leads_channel')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'customer_leads' },
+          () => {
+            fetchLeads()
+          }
+        )
+        .subscribe()
+
+      return () => {
+        supabase.removeChannel(channel)
+      }
+    }
   }, [sortOrder])
 
   const saveLocalLeads = (newLeads: CustomerLead[]) => {

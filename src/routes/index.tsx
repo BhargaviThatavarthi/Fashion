@@ -11,7 +11,9 @@ import {
   getFeaturedProducts,
   getBestSellers,
   getNewArrivals,
+  getFestivalProducts,
 } from '../services/products'
+import { getCollections } from '../services/collections'
 import { getYoutubeVideos } from '../services/youtube'
 
 export const Route = createFileRoute('/')({
@@ -30,6 +32,14 @@ export const Route = createFileRoute('/')({
         queryFn: getNewArrivals,
       }),
       queryClient.ensureQueryData({
+        queryKey: ['festival-products'],
+        queryFn: getFestivalProducts,
+      }),
+      queryClient.ensureQueryData({
+        queryKey: ['collections'],
+        queryFn: getCollections,
+      }),
+      queryClient.ensureQueryData({
         queryKey: ['youtube-videos'],
         queryFn: getYoutubeVideos,
       }),
@@ -41,7 +51,7 @@ export const Route = createFileRoute('/')({
       {
         name: 'description',
         content:
-          'Shop premium sarees, silk sarees, lehengas and ethnic wear at Sri Subhakari Fashions. Beautiful handcrafted ethnic wear with WhatsApp enquiry.',
+          'Shop premium sarees, silk sarees, tops, lehengas and ethnic wear at Sri Subhakari Fashions. Beautiful handcrafted ethnic wear with WhatsApp enquiry.',
       },
     ],
   }),
@@ -49,6 +59,12 @@ export const Route = createFileRoute('/')({
 })
 
 function HomePage() {
+  const { data: collections = [] } = useQuery({
+    queryKey: ['collections'],
+    queryFn: getCollections,
+    staleTime: 5 * 60 * 1000,
+  })
+
   const { data: featured, isLoading: loadingFeatured } = useQuery({
     queryKey: ['featured-products'],
     queryFn: getFeaturedProducts,
@@ -67,11 +83,23 @@ function HomePage() {
     staleTime: 5 * 60 * 1000,
   })
 
+  const { data: festivalProducts, isLoading: loadingFestival } = useQuery({
+    queryKey: ['festival-products'],
+    queryFn: getFestivalProducts,
+    staleTime: 5 * 60 * 1000,
+  })
+
   const { data: youtubeVideos } = useQuery({
     queryKey: ['youtube-videos'],
     queryFn: getYoutubeVideos,
     staleTime: 5 * 60 * 1000,
   })
+
+  // Find collection metadata from Sanity
+  const featuredCol = collections.find((c) => c.slug === 'featured-sarees')
+  const newArrivalsCol = collections.find((c) => c.slug === 'new-arrivals')
+  const bestSellersCol = collections.find((c) => c.slug === 'best-sellers')
+  const festivalCol = collections.find((c) => c.slug === 'festival-collections')
 
   return (
     <>
@@ -81,55 +109,67 @@ function HomePage() {
       {/* Category Quick Nav Story Carousel */}
       <CategoryQuickNav />
 
-      {/* Featured Sarees */}
+      {/* Featured Sarees Section */}
       <ProductSection
         sectionId="featured"
-        badge="⭐ Handpicked"
-        title="Featured Sarees"
-        subtitle="Explore our most-loved collection of sarees and ethnic wear, each crafted for the modern woman who celebrates tradition."
+        badge={featuredCol?.badge?.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim() || 'Handpicked'}
+        title={featuredCol?.title || 'Featured Sarees'}
+        subtitle={
+          featuredCol?.subtitle ||
+          'Explore our most-loved collection of sarees and ethnic wear, each crafted for the modern woman who celebrates tradition.'
+        }
         products={featured || []}
         isLoading={loadingFeatured}
-        viewAllLink="/shop"
-        viewAllLabel="View All Sarees"
+        viewAllLink="/shop?collection=featured-sarees"
+        viewAllLabel={featuredCol?.view_all_label || 'View All Featured Sarees'}
       />
 
-      {/* New Arrivals */}
+      {/* New Arrivals Section */}
       <ProductSection
         sectionId="new-arrivals"
-        badge="🆕 Just Arrived"
-        title="New Arrivals"
-        subtitle="Be the first to discover our freshest designs — straight from the looms of master weavers."
+        badge={newArrivalsCol?.badge?.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim() || 'Just Arrived'}
+        title={newArrivalsCol?.title || 'New Arrivals'}
+        subtitle={
+          newArrivalsCol?.subtitle ||
+          'Be the first to discover our freshest designs — straight from the looms of master weavers.'
+        }
         products={newArrivals || []}
         isLoading={loadingNew}
-        viewAllLink="/shop"
-        viewAllLabel="See All New Arrivals"
+        viewAllLink="/shop?collection=new-arrivals"
+        viewAllLabel={newArrivalsCol?.view_all_label || 'See All New Arrivals'}
       />
 
       {/* Why Choose Us */}
       <WhyChooseUs />
 
-      {/* Best Sellers */}
+      {/* Best Sellers Section */}
       <ProductSection
         sectionId="best-sellers"
-        badge="🏆 Top Rated"
-        title="Best Sellers"
-        subtitle="Our most popular designs — chosen by thousands of happy customers across India."
+        badge={bestSellersCol?.badge?.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim() || 'Top Rated'}
+        title={bestSellersCol?.title || 'Best Sellers'}
+        subtitle={
+          bestSellersCol?.subtitle ||
+          'Our most popular designs — chosen by thousands of happy customers across India.'
+        }
         products={bestSellers || []}
         isLoading={loadingBest}
-        viewAllLink="/shop"
-        viewAllLabel="View All Best Sellers"
+        viewAllLink="/shop?collection=best-sellers"
+        viewAllLabel={bestSellersCol?.view_all_label || 'View All Best Sellers'}
       />
 
-      {/* Festival Collections */}
+      {/* Festival Collections Section */}
       <ProductSection
         sectionId="festival"
-        badge="🎊 Festival Ready"
-        title="Festival Collections"
-        subtitle="Celebrate every festival in style with our exclusive festive wear collection."
-        products={(featured || []).filter((_, i) => i % 2 === 0)}
-        isLoading={loadingFeatured}
-        viewAllLink="/shop"
-        viewAllLabel="Shop Festival Wear"
+        badge={festivalCol?.badge?.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim() || 'Festival Ready'}
+        title={festivalCol?.title || 'Festival Collections'}
+        subtitle={
+          festivalCol?.subtitle ||
+          'Celebrate every festival in style with our exclusive festive wear collection.'
+        }
+        products={festivalProducts || []}
+        isLoading={loadingFestival}
+        viewAllLink="/shop?collection=festival-collections"
+        viewAllLabel={festivalCol?.view_all_label || 'Shop Festival Wear'}
       />
 
       {/* Testimonials */}
@@ -143,4 +183,3 @@ function HomePage() {
     </>
   )
 }
-

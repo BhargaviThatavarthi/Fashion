@@ -1,13 +1,14 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { Save, ArrowLeft, Plus, X, Upload, RotateCw, Eye } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { getProducts, updateProduct } from '../../services/products'
 import { getCategories } from '../../services/categories'
+import { STATIC_CATEGORIES } from '../../constants/categories'
 import { slugify, formatPrice, getImageUrl } from '../../utils/format'
 import { FABRIC_OPTIONS, SIZE_OPTIONS } from '../../constants'
-import { supabase, isSupabaseConfigured } from '../../lib/supabase'
+import { validateAndCompressImage, uploadProductImage } from '../../lib/storage'
 import { getSharedMedia, addSharedMedia, type MediaItem } from '../../utils/media'
 
 export const Route = createFileRoute('/admin/products/$id')({
@@ -17,6 +18,7 @@ export const Route = createFileRoute('/admin/products/$id')({
 function AdminProductEditForm() {
   const { id } = Route.useParams()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [saving, setSaving] = useState(false)
   const [imageUrl, setImageUrl] = useState('')
   const [discount, setDiscount] = useState('')
@@ -75,24 +77,32 @@ function AdminProductEditForm() {
     if (productsData?.data) {
       const prod = productsData.data.find((p) => p.id === id)
       if (prod) {
+        const rawCat =
+          prod.category_id ||
+          (typeof prod.category === 'object'
+            ? prod.category?.id || prod.category?.slug || prod.category?.name
+            : prod.category)
+        const staticCat = getStaticCategory(rawCat)
+        const resolvedCategoryId = staticCat?.id || prod.category_id || ''
+
         setForm({
           name: prod.name || '',
           slug: prod.slug || '',
           description: prod.description || '',
-          category_id: prod.category_id || '',
+          category_id: resolvedCategoryId,
           fabric: prod.fabric || '',
           color: prod.color || [],
           sizes: prod.sizes || [],
           price: prod.price?.toString() || '',
           offer_price: prod.offer_price?.toString() || '',
-          images: prod.images || [],
+          images: prod.images || (prod.image_url ? [prod.image_url] : []),
           sku: prod.sku || '',
           wash_care: prod.wash_care || '',
           featured: !!prod.featured,
           best_seller: !!prod.best_seller,
           new_arrival: !!prod.new_arrival,
-          stock: prod.stock?.toString() || '15',
-          in_stock: prod.in_stock !== false,
+          stock: (prod.stock_quantity ?? prod.stock ?? 15).toString(),
+          in_stock: prod.status !== 'out_of_stock' && (prod.stock_quantity ?? prod.stock ?? 0) > 0,
           tags: prod.tags || [],
         })
 
@@ -160,67 +170,6 @@ function AdminProductEditForm() {
     }
   }
 
-  // Optimize and Validate File
-  const validateAndOptimizeImage = (file: File): Promise<{ url: string; size: number }> => {
-    return new Promise((resolve, reject) => {
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-      if (!allowedTypes.includes(file.type)) {
-        reject(new Error(`Invalid format for ${file.name}. Allowed: JPG, JPEG, PNG, WEBP`))
-        return
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        reject(new Error(`File ${file.name} exceeds 5 MB size limit.`))
-        return
-      }
-
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const img = new Image()
-        img.onload = () => {
-          const canvas = document.createElement('canvas')
-          const ctx = canvas.getContext('2d')
-          if (!ctx) {
-            resolve({ url: e.target?.result as string, size: file.size })
-            return
-          }
-
-          // Downscale to 1000px max
-          const MAX_WIDTH = 1000
-          const MAX_HEIGHT = 1000
-          let width = img.width
-          let height = img.height
-
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height = Math.round((height * MAX_WIDTH) / width)
-              width = MAX_WIDTH
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width = Math.round((width * MAX_HEIGHT) / height)
-              height = MAX_HEIGHT
-            }
-          }
-
-          canvas.width = width
-          canvas.height = height
-          ctx.drawImage(img, 0, 0, width, height)
-
-          // 80% JPEG Compression
-          const optimizedUrl = canvas.toDataURL('image/jpeg', 0.8)
-          const strLength = optimizedUrl.length - 'data:image/jpeg;base64,'.length
-          const optimizedSize = Math.round(strLength * 0.75)
-
-          resolve({ url: optimizedUrl, size: optimizedSize })
-        }
-        img.onerror = () => reject(new Error('Invalid image file.'))
-        img.src = e.target?.result as string
-      }
-      reader.onerror = () => reject(new Error('Failed to read file.'))
-      reader.readAsDataURL(file)
-    })
-  }
-
   const handleLocalImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
@@ -230,67 +179,44 @@ function AdminProductEditForm() {
       return
     }
 
+    const selectedCategory = categories?.find((c) => c.id === form.category_id)?.name || form.category_id || 'general'
+
     setUploading(true)
     setUploadProgress(10)
     try {
-      const uploadedPaths: string[] = []
+      const uploadedUrls: string[] = []
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
-        setUploadProgress(Math.round(10 + (i / files.length) * 60))
+        setUploadProgress(Math.round(10 + (i / files.length) * 40))
 
-        const { url, size } = await validateAndOptimizeImage(file)
+        // 1. Validate & Compress Image on Client
+        const { blob, previewUrl, compressedSize } = await validateAndCompressImage(file, {
+          maxWidth: 1200,
+          maxHeight: 1200,
+          quality: 0.82,
+        })
 
-        if (isSupabaseConfigured()) {
-          try {
-            const sanitizeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-            const filePath = `${Date.now()}_${sanitizeName}`
+        setUploadProgress(Math.round(50 + (i / files.length) * 45))
 
-            // Try product-images bucket, then products bucket
-            let { error } = await supabase.storage
-              .from('product-images')
-              .upload(filePath, file, { upsert: true })
+        // 2. Upload to Supabase Storage in category-specific folder (e.g. tops/, dresses/, jeans/)
+        const { publicUrl } = await uploadProductImage(blob, file.name, selectedCategory)
 
-            if (error) {
-              const resAlt = await supabase.storage
-                .from('products')
-                .upload(filePath, file, { upsert: true })
-              error = resAlt.error
-            }
-
-            if (error) throw error
-
-            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-            const publicUrl = `${supabaseUrl}/storage/v1/object/public/product-images/${filePath}`
-
-            // Save metadata to database table
-            await supabase.from('media_assets').insert({
-              file_name: file.name,
-              file_path: filePath,
-              public_url: publicUrl,
-              file_type: file.type,
-              file_size: file.size,
-              created_at: new Date().toISOString(),
-            })
-
-            uploadedPaths.push(publicUrl)
-            addSharedMedia(file.name, publicUrl, size)
-          } catch (supabaseErr: any) {
-            console.warn('Supabase upload notice, using local image storage fallback:', supabaseErr.message)
-            uploadedPaths.push(url)
-            addSharedMedia(file.name, url, size)
-          }
-        } else {
-          // Local base64 mode
-          uploadedPaths.push(url)
-          addSharedMedia(file.name, url, size)
-        }
+        const finalUrl = publicUrl || previewUrl
+        uploadedUrls.push(finalUrl)
+        addSharedMedia(file.name, finalUrl, compressedSize)
       }
-      setUploadProgress(90)
-      setForm((f) => ({ ...f, images: [...f.images, ...uploadedPaths] }))
+
       setUploadProgress(100)
-      setTimeout(() => setUploadProgress(0), 800)
+      setForm((f) => {
+        const nextImages = [...f.images, ...uploadedUrls]
+        return {
+          ...f,
+          images: nextImages,
+        }
+      })
+      setTimeout(() => setUploadProgress(0), 600)
     } catch (err: any) {
-      alert('Upload failed: ' + err.message)
+      alert('Upload failed: ' + (err.message || err))
       setUploadProgress(0)
     } finally {
       setUploading(false)
@@ -422,14 +348,49 @@ function AdminProductEditForm() {
     e.preventDefault()
     setSaving(true)
     try {
-      const category = categories?.find((c) => c.id === form.category_id)
+      let currentImages = [...form.images]
+      if (imageUrl.trim() && !currentImages.includes(imageUrl.trim())) {
+        currentImages.push(imageUrl.trim())
+      }
+
+      const categoryObj =
+        (categories && categories.length > 0 ? categories : STATIC_CATEGORIES)?.find(
+          (c) => c.id === form.category_id || c.slug === form.category_id || c.name === form.category_id,
+        ) || getStaticCategory(form.category_id)
+      const categoryId = categoryObj?.id || form.category_id || undefined
+      const categoryName = categoryObj?.name || form.category_id || ''
+
+      if (!categoryId) {
+        alert('Please select a category for this product.')
+        setSaving(false)
+        return
+      }
+
+      const stockQty = parseInt(form.stock) || 0
+      const inStock = stockQty > 0 && form.in_stock !== false
+
       await updateProduct(id, {
         ...form,
+        images: currentImages,
+        image_url: currentImages[0] || null,
         price: parseFloat(form.price) || 0,
         offer_price: form.offer_price ? parseFloat(form.offer_price) : undefined,
-        stock: parseInt(form.stock) || 0,
-        category: category ? { id: category.id, name: category.name, slug: category.slug } : null,
+        stock: stockQty,
+        stock_quantity: stockQty,
+        in_stock: inStock,
+        category: categoryName,
+        category_id: categoryId,
       })
+
+      await queryClient.invalidateQueries({ queryKey: ['products'] })
+      await queryClient.invalidateQueries({ queryKey: ['admin-products'] })
+      await queryClient.invalidateQueries({ queryKey: ['product', form.slug] })
+      await queryClient.invalidateQueries({ queryKey: ['featured-products'] })
+      await queryClient.invalidateQueries({ queryKey: ['best-sellers'] })
+      await queryClient.invalidateQueries({ queryKey: ['new-arrivals'] })
+      await queryClient.invalidateQueries({ queryKey: ['festival-products'] })
+      await queryClient.invalidateQueries({ queryKey: ['categories'] })
+
       navigate({ to: '/admin/products' })
     } catch (err: any) {
       alert('Failed to save product: ' + (err.message || err))
@@ -822,15 +783,16 @@ function AdminProductEditForm() {
 
             <div className="space-y-5">
               <div>
-                <label className="block font-nav text-xs font-700 uppercase tracking-wide text-gray-500 mb-1.5">Category</label>
+                <label className="block font-nav text-xs font-700 uppercase tracking-wide text-gray-500 mb-1.5">Category *</label>
                 <select
+                  required
                   value={form.category_id}
                   onChange={(e) => set('category_id', e.target.value)}
-                  className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none bg-white text-gray-700"
+                  className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none bg-white text-gray-700 font-medium"
                   style={{ borderColor: 'var(--color-pink-light)' }}
                 >
-                  <option value="">Select Category</option>
-                  {(categories || []).map((c) => (
+                  <option value="">Select Category *</option>
+                  {(categories && categories.length > 0 ? categories : STATIC_CATEGORIES).map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
@@ -1053,11 +1015,11 @@ function AdminProductEditForm() {
                 {form.fabric && <p className="text-[10px] text-gray-400">Fabric: {form.fabric}</p>}
                 
                 <div className="flex items-baseline gap-2 pt-1">
-                  <span className="font-heading text-base font-700" style={{ color: 'var(--color-pink)' }}>
+                  <span className="font-price font-sans text-base font-bold" style={{ color: 'var(--color-pink)' }}>
                     {formatPrice(parseFloat(form.offer_price) || parseFloat(form.price) || 0)}
                   </span>
                   {form.offer_price && (
-                    <span className="text-xs text-gray-400 line-through">
+                    <span className="font-price font-sans text-xs text-gray-400 line-through">
                       {formatPrice(parseFloat(form.price) || 0)}
                     </span>
                   )}

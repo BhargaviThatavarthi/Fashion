@@ -1,9 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
 import { supabase, isSupabaseConfigured } from '../../lib/supabase'
 import type { Category } from '../../types'
+import { DEMO_CATEGORIES } from '../../types'
 import fs from 'fs/promises'
 import path from 'path'
-import crypto from 'crypto'
 
 const getFilePath = (fileName: string) => {
   return path.join(process.cwd(), 'src', 'server', 'data', fileName)
@@ -24,26 +24,40 @@ async function writeJson<T>(fileName: string, data: T): Promise<void> {
   await fs.writeFile(file, JSON.stringify(data, null, 2), 'utf-8')
 }
 
-// 1. Get Categories
 export const getCategoriesServerFn = createServerFn({
   method: 'GET',
-}).handler(async () => {
+}).handler(async (): Promise<Category[]> => {
+  const categoryMap = new Map<string, Category>()
+
+  // 1. Query Supabase categories table
   if (isSupabaseConfigured()) {
     try {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name')
-
-      if (!error && data && data.length > 0) {
-        return data as Category[]
+      const { data: dbCats } = await supabase.from('categories').select('*').order('id', { ascending: true })
+      if (dbCats && dbCats.length > 0) {
+        dbCats.forEach((c) => {
+          const defaultImage = `/images/categories/${c.slug}.jpg`
+          categoryMap.set(c.slug.toLowerCase(), {
+            id: String(c.id),
+            name: c.name,
+            slug: c.slug,
+            image: defaultImage,
+            description: c.description || null,
+          })
+        })
       }
     } catch (err: any) {
       console.warn('Supabase categories query notice:', err.message)
     }
   }
 
-  return await readJson<Category[]>('categories.json', [])
+  // 2. If no categories in DB, seed with base canonical categories
+  if (categoryMap.size === 0) {
+    DEMO_CATEGORIES.forEach((c) => {
+      categoryMap.set(c.slug.toLowerCase(), c)
+    })
+  }
+
+  return Array.from(categoryMap.values())
 })
 
 // 2. Get Category By Slug
@@ -52,22 +66,8 @@ export const getCategoryBySlugServerFn = createServerFn({
 })
   .validator((slug: string) => slug)
   .handler(async ({ data: slug }) => {
-    if (isSupabaseConfigured()) {
-      try {
-        const { data, error } = await supabase
-          .from('categories')
-          .select('*')
-          .eq('slug', slug)
-          .maybeSingle()
-
-        if (!error && data) return data as Category
-      } catch (err: any) {
-        console.warn('Supabase category slug notice:', err.message)
-      }
-    }
-
-    const categories = await readJson<Category[]>('categories.json', [])
-    return categories.find((c) => c.slug === slug) || null
+    const cats = await getCategoriesServerFn()
+    return cats.find((c) => c.slug.toLowerCase() === slug.toLowerCase()) || null
   })
 
 // 3. Create Category
@@ -92,7 +92,7 @@ export const createCategoryServerFn = createServerFn({
 
     const insertData = {
       id: cat.id || crypto.randomUUID(),
-      ...cat
+      ...cat,
     }
 
     const { data, error } = await supabase

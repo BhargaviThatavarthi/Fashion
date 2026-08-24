@@ -15,6 +15,7 @@ export interface CoverflowSlide {
   title?: string;
   subtitle?: string;
   link?: string;
+  buttonLabel?: string;
   meta?: { label: string; value: string }[];
 }
 
@@ -60,7 +61,7 @@ export function CoverflowCarousel({
   gap = 0.05,
   loop = true,
   autoplay = true,
-  autoplayInterval = 3000,
+  autoplayInterval = 3500,
   showCaption = true,
   showPagination = true,
   showNavigation = true,
@@ -76,8 +77,7 @@ export function CoverflowCarousel({
   const cardRefs = React.useRef<(HTMLDivElement | null)[]>([]);
   /** Fractional card index at the centre. The single source of truth. */
   const posRef = React.useRef(0);
-  /** Where the current settle is headed. Stepping off `pos` instead would
-      swallow a keypress that lands mid-flight, before the round-off moves. */
+  /** Where the current settle is headed. */
   const targetRef = React.useRef(0);
   const widthRef = React.useRef(0);
   const rafRef = React.useRef<number | null>(null);
@@ -94,23 +94,23 @@ export function CoverflowCarousel({
 
   /** Nearest whole card, folded back into 0..count-1. */
   const indexAt = React.useCallback(
-    (pos: number) => ((Math.round(pos) % count) + count) % count,
+    (pos: number) => {
+      if (count === 0) return 0;
+      return ((Math.round(pos) % count) + count) % count;
+    },
     [count],
   );
 
-  // Paint straight to the DOM. Sixty state updates a second would re-render
-  // every card for numbers React never needs to see.
+  // Paint straight to the DOM.
   const paint = React.useCallback(() => {
     const width = widthRef.current;
-    if (!width) return;
+    if (!width || count === 0) return;
     const pitch = width * (1 + gap);
     const pos = posRef.current;
 
     cardRefs.current.forEach((card, index) => {
       if (!card) return;
 
-      // Fold the distance into the shorter way round the ring. This is the
-      // whole looping mechanism — no cloned nodes, no shuffling the DOM.
       let offset = index - pos;
       if (loop) {
         offset = ((offset % count) + count) % count;
@@ -118,42 +118,42 @@ export function CoverflowCarousel({
       }
 
       const distance = Math.abs(offset);
-      // Both the tilt and the recession ease off as cards travel out —
-      // doubling the distance adds only about half again as much of each.
-      // A linear ramp folds the second card shut; this keeps it readable.
       const ramp = Math.pow(distance, falloff);
-      // Capped short of edge-on so a far card never turns its back.
       const tilt = Math.min(rotate * ramp, 82) * Math.sign(offset);
 
       card.style.transform =
         `translateX(calc(-50% + ${offset * pitch}px)) ` +
         `translateZ(${-depth * width * ramp}px) rotateY(${-tilt}deg)`;
 
-      // A card is teleported across the ring at exactly half a turn out, so it
-      // has to be gone by then or the jump is visible.
       const edge = loop ? Math.min(1, Math.max(0, count / 2 - distance)) : 1;
       card.style.opacity = String(Math.max(0, 1 - fade * distance) * edge);
       card.style.zIndex = String(100 - Math.round(distance));
     });
   }, [count, depth, fade, falloff, gap, loop, rotate]);
 
+  const clamp = React.useCallback(
+    (pos: number) => (loop ? pos : Math.max(0, Math.min(count - 1, pos))),
+    [count, loop],
+  );
+
   const settle = React.useCallback(
     (target: number) => {
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
       targetRef.current = target;
       setSelected(indexAt(target));
 
       const step = () => {
         const remaining = target - posRef.current;
-        if (Math.abs(remaining) < 0.0004) {
+        if (Math.abs(remaining) < 0.001) {
           posRef.current = target;
           paint();
           rafRef.current = null;
           return;
         }
-        // ponytail: exponential ease-out, not a spring. Swap in a spring only
-        // if the settle needs overshoot.
-        posRef.current += remaining * 0.14;
+        posRef.current += remaining * 0.16;
         paint();
         rafRef.current = requestAnimationFrame(step);
       };
@@ -162,14 +162,9 @@ export function CoverflowCarousel({
     [indexAt, paint],
   );
 
-  const clamp = React.useCallback(
-    (pos: number) => (loop ? pos : Math.max(0, Math.min(count - 1, pos))),
-    [count, loop],
-  );
-
   const goTo = React.useCallback(
     (index: number) => {
-      // Take the shorter way round rather than unwinding the whole ring.
+      if (count === 0) return;
       const target = loop
         ? index + Math.round((targetRef.current - index) / count) * count
         : index;
@@ -179,49 +174,77 @@ export function CoverflowCarousel({
   );
 
   const nudge = React.useCallback(
-    (by: number) => settle(clamp(Math.round(targetRef.current) + by)),
-    [clamp, settle],
+    (by: number) => {
+      if (count === 0) return;
+      settle(clamp(Math.round(targetRef.current) + by));
+    },
+    [clamp, count, settle],
   );
 
-  const handleCardClick = (index: number) => {
-    const slide = slides[index];
-    if (index === selected) {
-      if (onSlideClick) {
-        onSlideClick(slide, index);
-      } else if (slide?.link) {
-        navigate({ to: slide.link as any });
-      }
+  const nudgeRef = React.useRef(nudge);
+  React.useEffect(() => {
+    nudgeRef.current = nudge;
+  }, [nudge]);
+
+  const navigateToLink = (linkUrl?: string) => {
+    if (!linkUrl) return;
+    if (linkUrl.includes('?')) {
+      const [path, queryString] = linkUrl.split('?');
+      const params = new URLSearchParams(queryString);
+      const searchObj: Record<string, string> = {};
+      params.forEach((val, key) => {
+        searchObj[key] = val;
+      });
+      navigate({
+        to: (path || '/shop') as any,
+        search: searchObj as any,
+      });
     } else {
-      goTo(index);
+      navigate({ to: linkUrl as any });
     }
   };
 
-  // Autoplay loop timer
+  const handleCardClick = (index: number) => {
+    const slide = slides[index];
+    if (onSlideClick) {
+      onSlideClick(slide, index);
+      return;
+    }
+    if (slide?.link) {
+      navigateToLink(slide.link);
+      return;
+    }
+    goTo(index);
+  };
+
+  // Stable Autoplay Loop
   React.useEffect(() => {
     if (!autoplay || count <= 1) return;
 
     const timer = setInterval(() => {
       if (!isHoveredRef.current && !dragRef.current) {
-        nudge(1);
+        nudgeRef.current(1);
       }
     }, autoplayInterval);
 
     return () => clearInterval(timer);
-  }, [autoplay, autoplayInterval, count, nudge]);
+  }, [autoplay, autoplayInterval, count]);
 
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (rafRef.current !== null) {
       cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
     }
-    event.currentTarget.setPointerCapture(event.pointerId);
     targetRef.current = posRef.current;
     dragRef.current = {
       id: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
       x: event.clientX,
       pos: posRef.current,
       v: 0,
       t: performance.now(),
+      captured: false,
     };
   };
 
@@ -229,13 +252,19 @@ export function CoverflowCarousel({
     const drag = dragRef.current;
     if (!drag || drag.id !== event.pointerId) return;
 
+    if (!drag.captured && Math.abs(event.clientX - drag.startX) > 4) {
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch (e) {}
+      drag.captured = true;
+    }
+
     const pitch = widthRef.current * (1 + gap);
     if (!pitch) return;
 
     const now = performance.now();
     const previous = posRef.current;
-    posRef.current = clamp(drag.pos - (event.clientX - drag.x) / pitch);
-    // Cards per second, for the throw.
+    posRef.current = clamp(drag.pos - (event.clientX - drag.startX) / pitch);
     drag.v = ((posRef.current - previous) / Math.max(now - drag.t, 1)) * 1000;
     drag.t = now;
 
@@ -247,14 +276,16 @@ export function CoverflowCarousel({
   const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     const drag = dragRef.current;
     if (!drag || drag.id !== event.pointerId) return;
+    if (drag.captured) {
+      try {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      } catch (e) {}
+    }
     dragRef.current = null;
-    // Let a flick carry, but never more than two cards.
     const carried = Math.max(-2, Math.min(2, drag.v * 0.18));
     settle(clamp(Math.round(posRef.current + carried)));
   };
 
-  // Card width drives pitch, depth and perspective, so it is the only thing
-  // worth measuring — and only when the box actually changes.
   useIsoLayoutEffect(() => {
     const frame = frameRef.current;
     if (!frame) return;
@@ -280,6 +311,8 @@ export function CoverflowCarousel({
   );
 
   const active = slides[selected];
+
+  if (count === 0) return null;
 
   return (
     <div
@@ -312,18 +345,16 @@ export function CoverflowCarousel({
               nudge(1);
             }
           }}
-          // Vertical padding keeps the drop shadows clear of the overflow clip.
           className="cursor-grab overflow-hidden py-10 outline-none ring-ring focus-visible:ring-2 active:cursor-grabbing"
           style={{
             perspective: `calc(var(--cf-card) * ${perspective})`,
-            // Horizontal drag is ours; the page keeps vertical scrolling.
             touchAction: "pan-y",
           }}
         >
           <div
             className="relative select-none"
             style={{
-              height: "var(--cf-card)",
+              height: "calc(var(--cf-card) * 1.33)",
               transformStyle: "preserve-3d",
             }}
           >
@@ -338,12 +369,11 @@ export function CoverflowCarousel({
                 aria-label={`${index + 1} of ${count}`}
                 onClick={() => handleCardClick(index)}
                 className={cn(
-                  "absolute left-1/2 top-0 aspect-square overflow-hidden rounded-2xl bg-muted shadow-xl cursor-pointer transition-shadow hover:shadow-2xl will-change-transform group/card border border-white/20",
+                  "absolute left-1/2 top-0 aspect-[3/4] overflow-hidden rounded-2xl bg-muted shadow-xl cursor-pointer transition-shadow hover:shadow-2xl will-change-transform group/card border border-white/20",
                   cardClassName,
                 )}
                 style={{ width: "var(--cf-card)" }}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={slide.src}
                   alt={slide.alt}
@@ -398,10 +428,11 @@ export function CoverflowCarousel({
 
           {active.link && (
             <button
-              onClick={() => navigate({ to: active.link as any })}
-              className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-cyan-700 hover:text-cyan-800 transition-colors cursor-pointer group/link"
+              onClick={() => navigateToLink(active.link)}
+              className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-pink-600 hover:text-pink-700 transition-colors cursor-pointer group/link"
             >
-              Shop Collection <ArrowRight size={14} className="group-hover/link:translate-x-1 transition-transform" />
+              {active.buttonLabel || (active.link?.includes('category') ? 'Explore Category' : 'Shop Collection')}{' '}
+              <ArrowRight size={14} className="group-hover/link:translate-x-1 transition-transform" />
             </button>
           )}
 
@@ -430,7 +461,7 @@ export function CoverflowCarousel({
               className={cn(
                 "h-2.5 rounded-full transition-all duration-300 cursor-pointer",
                 index === selected
-                  ? "w-8 bg-cyan-600 shadow-xs"
+                  ? "w-8 bg-pink-500 shadow-xs"
                   : "w-2.5 bg-foreground/30 hover:bg-foreground/50",
               )}
             />

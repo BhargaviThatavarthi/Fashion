@@ -1,364 +1,381 @@
 import { createServerFn } from '@tanstack/react-start'
-import { supabase, isSupabaseConfigured } from '../../lib/supabase'
-import type { Product, ProductFilters, PaginatedResponse } from '../../types'
-import fs from 'fs/promises'
-import path from 'path'
-import crypto from 'crypto'
+import { supabase } from '../../lib/supabase'
+import { deleteProductImages } from '../../lib/storage'
+import type { Product, ProductFilters, PaginatedResponse, Category } from '../../types'
 
-const getFilePath = (fileName: string) => {
-  return path.join(process.cwd(), 'src', 'server', 'data', fileName)
-}
+// Helper to normalize product properties from database
+export function formatProductRecord(p: any, categoryObj?: any): Product {
+  const stockQty =
+    p.stock_quantity !== undefined && p.stock_quantity !== null
+      ? Number(p.stock_quantity)
+      : (p.stock !== undefined && p.stock !== null ? Number(p.stock) : 0)
 
-async function readJson<T>(fileName: string, defaultData: T): Promise<T> {
-  try {
-    const file = getFilePath(fileName)
-    const raw = await fs.readFile(file, 'utf-8')
-    return JSON.parse(raw)
-  } catch (err) {
-    return defaultData
-  }
-}
+  const inStock = p.in_stock !== undefined && p.in_stock !== null ? Boolean(p.in_stock) : stockQty > 0
+  const status = stockQty <= 0 ? 'out_of_stock' : (inStock ? 'active' : 'out_of_stock')
 
-async function writeJson<T>(fileName: string, data: T): Promise<void> {
-  const file = getFilePath(fileName)
-  await fs.writeFile(file, JSON.stringify(data, null, 2), 'utf-8')
-}
+  const images: string[] = Array.isArray(p.images) && p.images.length > 0
+    ? p.images
+    : (p.image_url ? [p.image_url] : [])
 
-// Local JSON Products Fallback Processor
-async function getLocalProductsResponse(filters: ProductFilters): Promise<PaginatedResponse<Product>> {
-  let products = await readJson<Product[]>('products.json', [])
-  const categories = await readJson<any[]>('categories.json', [])
+  const primaryImageUrl = images[0] || p.image_url || null
 
-  products = products.map((p) => ({
-    ...p,
-    category: categories.find((c) => c.id === p.category_id) || null,
-  }))
-
-  if (filters.search) {
-    const q = filters.search.toLowerCase()
-    products = products.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.description?.toLowerCase().includes(q) ||
-        (p.category?.name && p.category.name.toLowerCase().includes(q)),
-    )
-  }
-
-  if (filters.category) {
-    products = products.filter(
-      (p) =>
-        p.category_id === filters.category ||
-        p.category?.slug === filters.category,
-    )
-  }
-
-  if (filters.fabric) {
-    products = products.filter((p) => p.fabric === filters.fabric)
-  }
-  if (filters.newArrival) products = products.filter((p) => p.new_arrival)
-  if (filters.bestSeller) products = products.filter((p) => p.best_seller)
-  if (filters.featured) products = products.filter((p) => p.featured)
-  if (filters.minPrice !== undefined) {
-    products = products.filter((p) => (p.offer_price || p.price) >= filters.minPrice!)
-  }
-  if (filters.maxPrice !== undefined) {
-    products = products.filter((p) => (p.offer_price || p.price) <= filters.maxPrice!)
-  }
-  if (filters.color) {
-    products = products.filter((p) => p.color?.includes(filters.color!))
-  }
-  if (filters.size) {
-    products = products.filter((p) => p.sizes?.includes(filters.size!))
-  }
-
-  switch (filters.sortBy) {
-    case 'price_asc':
-      products.sort((a, b) => (a.offer_price || a.price) - (b.offer_price || b.price))
-      break
-    case 'price_desc':
-      products.sort((a, b) => (b.offer_price || b.price) - (a.offer_price || a.price))
-      break
-    case 'popular':
-      products.sort((a, b) => (b.review_count || 0) - (a.review_count || 0))
-      break
-    default:
-      products.sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime())
-  }
-
-  const page = filters.page || 1
-  const limit = filters.limit || 12
-  const start = (page - 1) * limit
   return {
-    data: products.slice(start, start + limit),
-    total: products.length,
-    page,
-    limit,
-    hasMore: start + limit < products.length,
-  } as PaginatedResponse<Product>
+    ...p,
+    stock_quantity: stockQty,
+    stock: stockQty,
+    status,
+    in_stock: status !== 'out_of_stock' && inStock && stockQty > 0,
+    image_url: primaryImageUrl,
+    images,
+    category: categoryObj || p.category || (p.category_id ? { id: p.category_id, name: p.category_id, slug: p.category_id } : null),
+  } as Product
 }
 
-// 1. Get Products
+const CANONICAL_CATEGORY_ALIASES: Record<string, string[]> = {
+  '1': ['1', 'sarees', 'saree', 'Sarees'],
+  'sarees': ['1', 'sarees', 'saree', 'Sarees'],
+  '2': ['2', 'silk-sarees', 'silk-saree', 'silksaree', 'silk sarees', 'silk saree', 'cat-silk-saree', 'Silk Sarees'],
+  'silk-sarees': ['2', 'silk-sarees', 'silk-saree', 'silksaree', 'silk sarees', 'silk saree', 'cat-silk-saree', 'Silk Sarees'],
+  '3': ['3', 'cotton-sarees', 'cotton-saree', 'cottonsaree', 'cotton sarees', 'cotton saree', 'cat-cotton-saree', 'Cotton Sarees'],
+  'cotton-sarees': ['3', 'cotton-sarees', 'cotton-saree', 'cottonsaree', 'cotton sarees', 'cotton saree', 'cat-cotton-saree', 'Cotton Sarees'],
+  '4': ['4', 'designer-sarees', 'designer-saree', 'design-saree', 'design saree', 'designer sarees', 'crepe-saree', 'cat-design-saree', 'cat-crepe-saree', 'Designer Sarees'],
+  'designer-sarees': ['4', 'designer-sarees', 'designer-saree', 'design-saree', 'design saree', 'designer sarees', 'crepe-saree', 'cat-design-saree', 'cat-crepe-saree', 'Designer Sarees'],
+  '5': ['5', 'lehengas', 'lehenga', 'lehenga-choli', 'bridal-lehenga', 'cat-lehengas', 'Lehengas'],
+  'lehengas': ['5', 'lehengas', 'lehenga', 'lehenga-choli', 'bridal-lehenga', 'cat-lehengas', 'Lehengas'],
+  '6': ['6', 'kurtis', 'kurti', 'tops', 'cat-tops', 'ethnic-tops', 'Kurtis'],
+  'kurtis': ['6', 'kurtis', 'kurti', 'tops', 'cat-tops', 'ethnic-tops', 'Kurtis'],
+  '7': ['7', 'dress-materials', 'dress-material', 'salwar-suit', 'dress materials', 'cat-dress-materials', 'Dress Materials'],
+  'dress-materials': ['7', 'dress-materials', 'dress-material', 'salwar-suit', 'dress materials', 'cat-dress-materials', 'Dress Materials'],
+  '8': ['8', 'ethnic-wear', 'ethnic wear', 'leggings', 'cat-leggings', 'traditional-wear', 'Ethnic Wear'],
+  'ethnic-wear': ['8', 'ethnic-wear', 'ethnic wear', 'leggings', 'cat-leggings', 'traditional-wear', 'Ethnic Wear'],
+}
+
+// Fetch categories map for joining with products
+async function fetchCategoriesMap(): Promise<Map<string, Category>> {
+  const map = new Map<string, Category>()
+  try {
+    const { data: dbCats } = await supabase.from('categories').select('*')
+    if (dbCats && dbCats.length > 0) {
+      dbCats.forEach((c) => {
+        const cat: Category = {
+          id: String(c.id),
+          name: c.name,
+          slug: c.slug,
+          image: `/images/categories/${c.slug}.jpg`,
+          description: c.description || null,
+        }
+        map.set(String(c.id), cat)
+        map.set(c.slug.toLowerCase(), cat)
+        map.set(c.name.toLowerCase(), cat)
+      })
+    }
+  } catch (err: any) {
+    console.warn('Failed to fetch categories map from Supabase:', err.message)
+  }
+  return map
+}
+
+// 1. Get Products (EXCLUSIVELY from Supabase)
 export const getProductsServerFn = createServerFn({
   method: 'GET',
 })
   .validator((filters: ProductFilters) => filters)
-  .handler(async ({ data: filters }) => {
-    if (isSupabaseConfigured()) {
-      try {
-        const page = filters.page || 1
-        const limit = filters.limit || 12
-        const from = (page - 1) * limit
-        const to = from + limit - 1
+  .handler(async ({ data: filters }): Promise<PaginatedResponse<Product>> => {
+    const page = filters.page || 1
+    const limit = filters.limit || 12
+    const from = (page - 1) * limit
+    const to = from + limit - 1
 
-        let query = supabase
-          .from('products')
-          .select('*, category:categories(*)', { count: 'exact' })
+    try {
+      const categoriesMap = await fetchCategoriesMap()
 
-        if (filters.search) query = query.ilike('name', `%${filters.search}%`)
+      let query = supabase
+        .from('products')
+        .select('*', { count: 'exact' })
 
-        if (filters.category) {
-          const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(filters.category)
-          if (isUUID) {
-            query = query.eq('category_id', filters.category)
-          } else {
-            const { data: catData } = await supabase
-              .from('categories')
-              .select('id')
-              .eq('slug', filters.category)
-              .maybeSingle()
+      if (filters.search) {
+        const s = filters.search.trim()
+        query = query.or(`name.ilike.%${s}%,description.ilike.%${s}%,fabric.ilike.%${s}%`)
+      }
 
-            if (catData?.id) {
-              query = query.eq('category_id', catData.id)
-            }
-          }
+      if (filters.category) {
+        const catKey = filters.category.toLowerCase().trim()
+        const aliases = CANONICAL_CATEGORY_ALIASES[catKey] || [filters.category]
+        const matched = categoriesMap.get(catKey) || categoriesMap.get(filters.category)
+        const idList = new Set<string>(aliases)
+        if (matched) {
+          idList.add(matched.id)
+          idList.add(matched.slug)
+          idList.add(matched.name)
         }
-
-        if (filters.fabric) query = query.eq('fabric', filters.fabric)
-        if (filters.minPrice !== undefined) query = query.gte('price', filters.minPrice)
-        if (filters.maxPrice !== undefined) query = query.lte('price', filters.maxPrice)
-        if (filters.newArrival) query = query.eq('new_arrival', true)
-        if (filters.bestSeller) query = query.eq('best_seller', true)
-        if (filters.featured) query = query.eq('featured', true)
-
-        switch (filters.sortBy) {
-          case 'price_asc':
-            query = query.order('price', { ascending: true })
-            break
-          case 'price_desc':
-            query = query.order('price', { ascending: false })
-            break
-          case 'popular':
-            query = query.order('review_count', { ascending: false })
-            break
-          default:
-            query = query.order('created_at', { ascending: false })
+        const orConditions = Array.from(idList)
+          .filter(Boolean)
+          .map((id) => `category_id.eq.${id}`)
+          .join(',')
+        if (orConditions) {
+          query = query.or(orConditions)
         }
+      }
 
-        query = query.range(from, to)
-        const { data, error, count } = await query
+      if (filters.fabric) query = query.eq('fabric', filters.fabric)
+      if (filters.minPrice !== undefined) query = query.gte('price', filters.minPrice)
+      if (filters.maxPrice !== undefined) query = query.lte('price', filters.maxPrice)
+      if (filters.newArrival || filters.collection === 'new-arrivals') query = query.eq('new_arrival', true)
+      if (filters.bestSeller || filters.collection === 'best-sellers') query = query.eq('best_seller', true)
+      if (filters.featured || filters.collection === 'featured-sarees') query = query.eq('featured', true)
 
-        if (error) throw error
+      switch (filters.sortBy) {
+        case 'price_asc':
+          query = query.order('price', { ascending: true })
+          break
+        case 'price_desc':
+          query = query.order('price', { ascending: false })
+          break
+        case 'popular':
+          query = query.order('review_count', { ascending: false, nullsFirst: false })
+          break
+        default:
+          query = query.order('created_at', { ascending: false })
+      }
 
-        if (data && data.length > 0) {
-          return {
-            data: (data as Product[]) || [],
-            total: count || 0,
-            page,
-            limit,
-            hasMore: (count || 0) > to + 1,
-          } as PaginatedResponse<Product>
-        }
-      } catch (err: any) {
-        console.warn('Supabase query notice, using local JSON fallback:', err.message)
+      query = query.range(from, to)
+      const { data, error, count } = await query
+
+      if (error) {
+        console.error('Supabase products query error:', error.message)
+        throw error
+      }
+
+      const formatted = (data || []).map((p) => {
+        const catObj = p.category_id
+          ? categoriesMap.get(String(p.category_id)) ||
+            categoriesMap.get(String(p.category_id).toLowerCase()) ||
+            null
+          : null
+        return formatProductRecord(p, catObj)
+      })
+
+      const totalCount = count !== null && count !== undefined ? count : formatted.length
+      return {
+        data: formatted,
+        total: totalCount,
+        page,
+        limit,
+        hasMore: totalCount > to + 1,
+      }
+    } catch (err: any) {
+      console.error('Error in getProductsServerFn:', err.message)
+      return {
+        data: [],
+        total: 0,
+        page,
+        limit,
+        hasMore: false,
       }
     }
-
-    return await getLocalProductsResponse(filters)
   })
 
-// 2. Get Product By Slug
+// 2. Get Product By Slug (EXCLUSIVELY from Supabase)
 export const getProductBySlugServerFn = createServerFn({
   method: 'GET',
 })
   .validator((slug: string) => slug)
-  .handler(async ({ data: slug }) => {
-    if (isSupabaseConfigured()) {
-      try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*, category:categories(*)')
-          .eq('slug', slug)
-          .maybeSingle()
+  .handler(async ({ data: slug }): Promise<Product | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('slug', slug)
+        .maybeSingle()
 
-        if (!error && data) return data as Product
-      } catch (err: any) {
-        console.warn('Supabase product slug query notice:', err.message)
+      if (error) {
+        console.error('Supabase getProductBySlug error:', error.message)
+        return null
       }
-    }
 
-    const products = await readJson<Product[]>('products.json', [])
-    const categories = await readJson<any[]>('categories.json', [])
-    const product = products.find((p) => p.slug === slug)
-    if (!product) return null
-    return {
-      ...product,
-      category: categories.find((c) => c.id === product.category_id) || null,
-    } as Product
+      if (!data) return null
+
+      let categoryObj = null
+      if (data.category_id) {
+        const { data: cat } = await supabase
+          .from('categories')
+          .select('id, name, slug, description, image')
+          .eq('id', data.category_id)
+          .maybeSingle()
+        categoryObj = cat
+      }
+
+      return formatProductRecord(data, categoryObj)
+    } catch (err: any) {
+      console.error('Error in getProductBySlugServerFn:', err.message)
+      return null
+    }
   })
 
-// 3. Get Featured Products
+// 3. Get Featured Products (EXCLUSIVELY from Supabase)
 export const getFeaturedProductsServerFn = createServerFn({
   method: 'GET',
+}).handler(async (): Promise<Product[]> => {
+  try {
+    const categoriesMap = await fetchCategoriesMap()
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('featured', true)
+      .order('created_at', { ascending: false })
+      .limit(8)
+
+    if (error) throw error
+    return (data || []).map((p) => {
+      const catObj = p.category_id ? categoriesMap.get(p.category_id) || categoriesMap.get(p.category_id.toLowerCase()) : null
+      return formatProductRecord(p, catObj)
+    })
+  } catch (err: any) {
+    console.error('Error in getFeaturedProductsServerFn:', err.message)
+    return []
+  }
 })
-  .handler(async () => {
-    if (isSupabaseConfigured()) {
-      try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*, category:categories(*)')
-          .eq('featured', true)
-          .order('created_at', { ascending: false })
-          .limit(8)
 
-        if (!error && data && data.length > 0) return data as Product[]
-      } catch (err: any) {
-        console.warn('Supabase featured products notice:', err.message)
-      }
-    }
-
-    const products = await readJson<Product[]>('products.json', [])
-    const categories = await readJson<any[]>('categories.json', [])
-    return products
-      .filter((p) => p.featured)
-      .slice(0, 8)
-      .map((p) => ({
-        ...p,
-        category: categories.find((c) => c.id === p.category_id) || null,
-      })) as Product[]
-  })
-
-// 4. Get Best Sellers
+// 4. Get Best Sellers (EXCLUSIVELY from Supabase)
 export const getBestSellersServerFn = createServerFn({
   method: 'GET',
+}).handler(async (): Promise<Product[]> => {
+  try {
+    const categoriesMap = await fetchCategoriesMap()
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('best_seller', true)
+      .order('created_at', { ascending: false })
+      .limit(8)
+
+    if (error) throw error
+    return (data || []).map((p) => {
+      const catObj = p.category_id ? categoriesMap.get(p.category_id) || categoriesMap.get(p.category_id.toLowerCase()) : null
+      return formatProductRecord(p, catObj)
+    })
+  } catch (err: any) {
+    console.error('Error in getBestSellersServerFn:', err.message)
+    return []
+  }
 })
-  .handler(async () => {
-    if (isSupabaseConfigured()) {
-      try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*, category:categories(*)')
-          .eq('best_seller', true)
-          .order('review_count', { ascending: false })
-          .limit(8)
 
-        if (!error && data && data.length > 0) return data as Product[]
-      } catch (err: any) {
-        console.warn('Supabase best sellers notice:', err.message)
-      }
-    }
-
-    const products = await readJson<Product[]>('products.json', [])
-    const categories = await readJson<any[]>('categories.json', [])
-    return products
-      .filter((p) => p.best_seller)
-      .slice(0, 8)
-      .map((p) => ({
-        ...p,
-        category: categories.find((c) => c.id === p.category_id) || null,
-      })) as Product[]
-  })
-
-// 5. Get New Arrivals
+// 5. Get New Arrivals (EXCLUSIVELY from Supabase)
 export const getNewArrivalsServerFn = createServerFn({
   method: 'GET',
+}).handler(async (): Promise<Product[]> => {
+  try {
+    const categoriesMap = await fetchCategoriesMap()
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('new_arrival', true)
+      .order('created_at', { ascending: false })
+      .limit(8)
+
+    if (error) throw error
+    return (data || []).map((p) => {
+      const catObj = p.category_id ? categoriesMap.get(p.category_id) || categoriesMap.get(p.category_id.toLowerCase()) : null
+      return formatProductRecord(p, catObj)
+    })
+  } catch (err: any) {
+    console.error('Error in getNewArrivalsServerFn:', err.message)
+    return []
+  }
 })
-  .handler(async () => {
-    if (isSupabaseConfigured()) {
-      try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*, category:categories(*)')
-          .eq('new_arrival', true)
-          .order('created_at', { ascending: false })
-          .limit(8)
 
-        if (!error && data && data.length > 0) return data as Product[]
-      } catch (err: any) {
-        console.warn('Supabase new arrivals notice:', err.message)
-      }
-    }
+// 6. Get Festival Products (EXCLUSIVELY from Supabase)
+export const getFestivalProductsServerFn = createServerFn({
+  method: 'GET',
+}).handler(async (): Promise<Product[]> => {
+  try {
+    const categoriesMap = await fetchCategoriesMap()
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(8)
 
-    const products = await readJson<Product[]>('products.json', [])
-    const categories = await readJson<any[]>('categories.json', [])
-    return products
-      .filter((p) => p.new_arrival)
-      .slice(0, 8)
-      .map((p) => ({
-        ...p,
-        category: categories.find((c) => c.id === p.category_id) || null,
-      })) as Product[]
-  })
+    if (error) throw error
+    return (data || []).map((p) => {
+      const catObj = p.category_id ? categoriesMap.get(p.category_id) || categoriesMap.get(p.category_id.toLowerCase()) : null
+      return formatProductRecord(p, catObj)
+    })
+  } catch (err: any) {
+    console.error('Error in getFestivalProductsServerFn:', err.message)
+    return []
+  }
+})
 
-// 6. Get Related Products
+// 7. Get Related Products (EXCLUSIVELY from Supabase)
 export const getRelatedProductsServerFn = createServerFn({
   method: 'GET',
 })
   .validator((data: { productId: string; categoryId?: string }) => data)
-  .handler(async ({ data: { productId, categoryId } }) => {
-    if (isSupabaseConfigured()) {
-      try {
-        let query = supabase
-          .from('products')
-          .select('*, category:categories(*)')
-          .neq('id', productId)
-          .limit(4)
-
-        if (categoryId) query = query.eq('category_id', categoryId)
-
-        const { data, error } = await query
-        if (!error && data && data.length > 0) return data as Product[]
-      } catch (err: any) {
-        console.warn('Supabase related products notice:', err.message)
+  .handler(async ({ data: { productId, categoryId } }): Promise<Product[]> => {
+    try {
+      const categoriesMap = await fetchCategoriesMap()
+      let query = supabase.from('products').select('*').neq('id', productId).limit(4)
+      if (categoryId) {
+        query = query.eq('category_id', categoryId)
       }
-    }
+      const { data, error } = await query
+      if (error) throw error
 
-    const products = await readJson<Product[]>('products.json', [])
-    return products
-      .filter((p) => p.id !== productId && (!categoryId || p.category_id === categoryId))
-      .slice(0, 4)
+      return (data || []).map((p) => {
+        const catObj = p.category_id ? categoriesMap.get(p.category_id) || categoriesMap.get(p.category_id.toLowerCase()) : null
+        return formatProductRecord(p, catObj)
+      })
+    } catch (err: any) {
+      console.error('Error in getRelatedProductsServerFn:', err.message)
+      return []
+    }
   })
 
-// 7. Create Product
+// 8. Create Product (EXCLUSIVELY in Supabase)
 export const createProductServerFn = createServerFn({
   method: 'POST',
 })
   .validator((product: Partial<Product>) => product)
-  .handler(async ({ data: product }) => {
-    if (!isSupabaseConfigured()) {
-      const products = await readJson<Product[]>('products.json', [])
-      const newProduct: Product = {
-        id: Math.random().toString(36).substring(2, 11),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: '',
-        slug: '',
-        price: 0,
-        stock: 0,
-        tags: [],
-        in_stock: true,
-        ...product,
-      } as Product
-      products.unshift(newProduct)
-      await writeJson('products.json', products)
-      return newProduct
-    }
+  .handler(async ({ data: product }): Promise<Product> => {
+    const stockQty =
+      product.stock_quantity !== undefined && product.stock_quantity !== null
+        ? Number(product.stock_quantity)
+        : (product.stock !== undefined && product.stock !== null ? Number(product.stock) : 0)
 
-    const { category, ...insertData } = product
-    if (!insertData.id) {
-      insertData.id = crypto.randomUUID()
-    }
-    if (insertData.category_id === '') {
-      insertData.category_id = null
+    const inStock = stockQty > 0 && product.in_stock !== false
+
+    const imagesArray = Array.isArray(product.images) && product.images.length > 0
+      ? product.images
+      : (product.image_url ? [product.image_url] : [])
+
+    const newId = product.id || ('prod_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7))
+
+    const insertData = {
+      id: newId,
+      name: product.name,
+      slug: product.slug,
+      description: product.description || '',
+      price: product.price ? Number(product.price) : 0,
+      offer_price: product.offer_price ? Number(product.offer_price) : null,
+      category_id: product.category_id || null,
+      stock_quantity: stockQty,
+      stock: stockQty,
+      in_stock: inStock,
+      images: imagesArray,
+      fabric: product.fabric || null,
+      color: product.color || [],
+      sizes: product.sizes || [],
+      sku: product.sku || null,
+      wash_care: product.wash_care || null,
+      rating: product.rating !== undefined ? Number(product.rating) : 4.8,
+      review_count: product.review_count !== undefined ? Number(product.review_count) : 0,
+      featured: Boolean(product.featured),
+      best_seller: Boolean(product.best_seller),
+      new_arrival: Boolean(product.new_arrival),
+      tags: product.tags || [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     }
 
     const { data, error } = await supabase
@@ -367,59 +384,96 @@ export const createProductServerFn = createServerFn({
       .select()
       .single()
 
-    if (error) throw new Error(error.message)
-    return data as Product
+    if (error) {
+      console.error('Supabase create product error:', error.message)
+      throw new Error(error.message)
+    }
+
+    return formatProductRecord(data)
   })
 
-// 8. Update Product
+// 9. Update Product (EXCLUSIVELY in Supabase)
 export const updateProductServerFn = createServerFn({
   method: 'POST',
 })
   .validator((data: { id: string; updates: Partial<Product> }) => data)
-  .handler(async ({ data: { id, updates } }) => {
-    if (!isSupabaseConfigured()) {
-      const products = await readJson<Product[]>('products.json', [])
-      const idx = products.findIndex((p) => p.id === id)
-      if (idx === -1) throw new Error('Product not found')
-      const updated = {
-        ...products[idx],
-        ...updates,
-        updated_at: new Date().toISOString(),
-      }
-      products[idx] = updated
-      await writeJson('products.json', products)
-      return updated
+  .handler(async ({ data: { id, updates } }): Promise<Product> => {
+    let stockQty = updates.stock_quantity !== undefined && updates.stock_quantity !== null
+      ? Number(updates.stock_quantity)
+      : (updates.stock !== undefined && updates.stock !== null ? Number(updates.stock) : undefined)
+
+    const imagesArray = Array.isArray(updates.images)
+      ? updates.images
+      : (updates.image_url ? [updates.image_url] : undefined)
+
+    const updatePayload: any = {
+      updated_at: new Date().toISOString(),
     }
 
-    const { category, ...updateData } = updates
-    if (updateData.category_id === '') {
-      updateData.category_id = null
+    if (updates.name !== undefined) updatePayload.name = updates.name
+    if (updates.slug !== undefined) updatePayload.slug = updates.slug
+    if (updates.description !== undefined) updatePayload.description = updates.description
+    if (updates.price !== undefined) updatePayload.price = Number(updates.price)
+    if (updates.offer_price !== undefined) updatePayload.offer_price = updates.offer_price ? Number(updates.offer_price) : null
+    if (updates.category_id !== undefined) updatePayload.category_id = updates.category_id || null
+    if (stockQty !== undefined) {
+      updatePayload.stock = stockQty
+      updatePayload.stock_quantity = stockQty
+      updatePayload.in_stock = stockQty > 0 && updates.in_stock !== false
+    } else if (updates.in_stock !== undefined) {
+      updatePayload.in_stock = Boolean(updates.in_stock)
     }
+    if (imagesArray !== undefined) updatePayload.images = imagesArray
+    if (updates.fabric !== undefined) updatePayload.fabric = updates.fabric
+    if (updates.color !== undefined) updatePayload.color = updates.color
+    if (updates.sizes !== undefined) updatePayload.sizes = updates.sizes
+    if (updates.sku !== undefined) updatePayload.sku = updates.sku
+    if (updates.wash_care !== undefined) updatePayload.wash_care = updates.wash_care
+    if (updates.featured !== undefined) updatePayload.featured = Boolean(updates.featured)
+    if (updates.best_seller !== undefined) updatePayload.best_seller = Boolean(updates.best_seller)
+    if (updates.new_arrival !== undefined) updatePayload.new_arrival = Boolean(updates.new_arrival)
+    if (updates.tags !== undefined) updatePayload.tags = updates.tags
 
     const { data, error } = await supabase
       .from('products')
-      .update({ ...updateData, updated_at: new Date().toISOString() })
+      .update(updatePayload)
       .eq('id', id)
       .select()
       .single()
 
-    if (error) throw new Error(error.message)
-    return data as Product
+    if (error) {
+      console.error('Supabase update product error:', error.message)
+      throw new Error(error.message)
+    }
+
+    return formatProductRecord(data)
   })
 
-// 9. Delete Product
+// 10. Delete Product (Deletes Associated Supabase Storage Images first, then deletes DB row)
 export const deleteProductServerFn = createServerFn({
   method: 'POST',
 })
   .validator((id: string) => id)
-  .handler(async ({ data: id }) => {
-    if (!isSupabaseConfigured()) {
-      const products = await readJson<Product[]>('products.json', [])
-      const updated = products.filter((p) => p.id !== id)
-      await writeJson('products.json', updated)
-      return
+  .handler(async ({ data: id }): Promise<void> => {
+    // 1. Fetch product first to get all associated image URLs
+    try {
+      const { data: prod } = await supabase
+        .from('products')
+        .select('images')
+        .eq('id', id)
+        .maybeSingle()
+
+      if (prod && Array.isArray(prod.images) && prod.images.length > 0) {
+        await deleteProductImages(prod.images)
+      }
+    } catch (storageErr: any) {
+      console.warn('Notice while cleaning up storage images for product delete:', storageErr.message)
     }
 
+    // 2. Delete the record from products table in Supabase Database
     const { error } = await supabase.from('products').delete().eq('id', id)
-    if (error) throw new Error(error.message)
+    if (error) {
+      console.error('Supabase delete product error:', error.message)
+      throw new Error(error.message)
+    }
   })

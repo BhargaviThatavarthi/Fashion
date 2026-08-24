@@ -3,7 +3,6 @@ import { supabase, isSupabaseConfigured } from '../../lib/supabase'
 import type { Testimonial } from '../../types'
 import fs from 'fs/promises'
 import path from 'path'
-import crypto from 'crypto'
 
 const getFilePath = (fileName: string) => {
   return path.join(process.cwd(), 'src', 'server', 'data', fileName)

@@ -10,7 +10,7 @@ export const Route = createFileRoute('/admin/media')({
   component: AdminMedia,
 })
 
-export function AdminMedia() {
+function AdminMedia() {
   const [mediaList, setMediaList] = useState<MediaAsset[]>([])
   const [search, setSearch] = useState('')
   const [uploading, setUploading] = useState(false)

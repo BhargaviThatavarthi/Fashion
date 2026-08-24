@@ -1,8 +1,8 @@
 [
-  { "id": "1", "name": "Cotton Saree", "slug": "cotton-sarees" },
-  { "id": "2", "name": "Silk Sarees", "slug": "silk-sarees" },
-  { "id": "3", "name": "Design Sarees", "slug": "design-sarees" },
-  { "id": "4", "name": "Crape Sarees", "slug": "crape-sarees" },
-  { "id": "5", "name": "Tops", "slug": "tops" },
-  { "id": "6", "name": "Legins", "slug": "legins" }
+  { "id": "cat-tops", "name": "Tops", "slug": "tops", "image": "/images/ethnic-top.png", "order": 1, "description": "Trendy Ethnic & Fusion Designer Kurti Tops" },
+  { "id": "cat-cotton-saree", "name": "Cotton Saree", "slug": "cotton-saree", "image": "/images/cotton-saree.png", "order": 2, "description": "Lightweight & Breathable Handloom Cotton Sarees" },
+  { "id": "cat-design-saree", "name": "Design Saree", "slug": "design-saree", "image": "/images/designer-saree.png", "order": 3, "description": "Contemporary Embellished & Party Wear Sarees" },
+  { "id": "cat-crepe-saree", "name": "Crepe Saree", "slug": "crepe-saree", "image": "/images/crape-saree.png", "order": 4, "description": "Fluid Drapes & Soft Luxurious Crepe Chiffon" },
+  { "id": "cat-leggings", "name": "Leggings", "slug": "leggings", "image": "/images/leggings.png", "order": 5, "description": "Premium Stretch & Comfortable Ethnic Leggings" },
+  { "id": "cat-silk-saree", "name": "Silk Saree", "slug": "silk-saree", "image": "/images/silk-saree.png", "order": 6, "description": "Pure Zari & Heritage Kanjivaram Silk Weaves" }
 ]

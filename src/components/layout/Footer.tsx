@@ -1,7 +1,8 @@
 import { Link } from '@tanstack/react-router'
 import { Instagram, Youtube, Linkedin, Facebook, MapPin, Phone, Mail, Clock, Heart } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa'
-import { SITE_NAME, SITE_TAGLINE, SOCIAL, CONTACT, NAV_LINKS, DEMO_CATEGORIES } from '../../constants'
+import { SITE_NAME, SITE_TAGLINE, SOCIAL, CONTACT, NAV_LINKS } from '../../constants'
+import { STATIC_CATEGORIES } from '../../constants/categories'
 import { useState } from 'react'
 
 export default function Footer() {
@@ -16,7 +17,7 @@ export default function Footer() {
     }
   }
 
-  const categories = DEMO_CATEGORIES.slice(0, 6)
+  const categories = STATIC_CATEGORIES
 
   return (
     <footer className="site-footer">

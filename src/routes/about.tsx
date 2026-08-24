@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
-import { Target, Eye, Award } from 'lucide-react'
+import { Target, Eye, Award, Sparkles, Gem, HeartHandshake, ShieldCheck } from 'lucide-react'
 
 export const Route = createFileRoute('/about')({
   head: () => ({
@@ -25,10 +25,10 @@ const TIMELINE = [
 ]
 
 const VALUES = [
-  { icon: '✨', title: 'Authenticity', desc: 'We source only genuine handcrafted pieces from verified artisans and weavers.' },
-  { icon: '💎', title: 'Quality', desc: 'Every saree and outfit is personally curated and quality-checked before dispatch.' },
-  { icon: '🌸', title: 'Tradition', desc: 'We celebrate India\'s rich textile heritage while embracing contemporary design.' },
-  { icon: '🤝', title: 'Trust', desc: 'Building lasting relationships with our customers through transparency and care.' },
+  { icon: Sparkles, title: 'Authenticity', desc: 'We source only genuine handcrafted pieces from verified artisans and weavers.' },
+  { icon: Gem, title: 'Quality', desc: 'Every saree and outfit is personally curated and quality-checked before dispatch.' },
+  { icon: ShieldCheck, title: 'Tradition', desc: 'We celebrate India\'s rich textile heritage while embracing contemporary design.' },
+  { icon: HeartHandshake, title: 'Trust', desc: 'Building lasting relationships with our customers through transparency and care.' },
 ]
 
 function AboutPage() {
@@ -44,7 +44,7 @@ function AboutPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
         >
-          <span className="section-badge">🌸 About Us</span>
+          <span className="section-badge">About Us</span>
           <h1 className="section-heading mt-2">
             Our{' '}
             <span
@@ -77,7 +77,7 @@ function AboutPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.7 }}
             >
-              <span className="section-badge">📖 About Us</span>
+              <span className="section-badge">About Us</span>
               <h2 className="section-heading mt-2 mb-5">
                 Sri Subhakari Fashions
               </h2>
@@ -192,26 +192,31 @@ function AboutPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <span className="section-badge">💎 Our Values</span>
+            <span className="section-badge">Our Values</span>
             <h2 className="section-heading mt-2">What We Stand For</h2>
             <div className="gold-divider" />
           </motion.div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {VALUES.map((val, i) => (
-              <motion.div
-                key={val.title}
-                className="premium-card p-6 text-center"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <div className="text-4xl mb-3">{val.icon}</div>
-                <h3 className="font-heading font-700 text-gray-800 mb-2">{val.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{val.desc}</p>
-              </motion.div>
-            ))}
+            {VALUES.map((val, i) => {
+              const IconComp = val.icon
+              return (
+                <motion.div
+                  key={val.title}
+                  className="premium-card p-6 text-center flex flex-col items-center"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-pink-50 border border-pink-100 flex items-center justify-center text-pink-600 mb-3">
+                    <IconComp size={24} />
+                  </div>
+                  <h3 className="font-heading font-700 text-gray-800 mb-2">{val.title}</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">{val.desc}</p>
+                </motion.div>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -225,7 +230,7 @@ function AboutPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <span className="section-badge">📅 Our Journey</span>
+            <span className="section-badge">Our Journey</span>
             <h2 className="section-heading mt-2">Milestones &amp; Memories</h2>
             <div className="gold-divider" />
           </motion.div>
@@ -286,7 +291,7 @@ function AboutPage() {
               We are committed to delivering nothing less than perfection — because you deserve the finest.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              {['✓ Authentic Handcraft', '✓ Quality Certified', '✓ Easy Returns', '✓ Pan-India Delivery'].map((item) => (
+              {['✓ Authentic Handcraft', '✓ Quality Certified', '✓ 100% Quality Inspected', '✓ Pan-India Delivery'].map((item) => (
                 <span
                   key={item}
                   className="px-4 py-2 rounded-full text-sm font-nav font-600"

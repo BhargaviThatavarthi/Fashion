@@ -1,5 +1,5 @@
 // Sri Subhakari Fashions — Constants
-export { DEMO_CATEGORIES, DEMO_PRODUCTS, DEMO_TESTIMONIALS } from '../types'
+export { DEMO_CATEGORIES, DEMO_COLLECTIONS, DEMO_PRODUCTS, DEMO_TESTIMONIALS } from '../types'
 
 export const SITE_NAME = 'Sri Subhakari Fashions'
 export const SITE_TAGLINE = 'Elegance in Every Thread'
@@ -32,6 +32,7 @@ export const NAV_LINKS = [
 
 export const ADMIN_NAV = [
   { label: 'Dashboard', href: '/admin', icon: 'LayoutDashboard' },
+  { label: 'Sanity CMS', href: '/studio', icon: 'Edit' },
   { label: 'Products', href: '/admin/products', icon: 'Package' },
   { label: 'Categories', href: '/admin/categories', icon: 'Tag' },
   { label: 'Homepage', href: '/admin/homepage', icon: 'Home' },
@@ -114,9 +115,9 @@ export const WHY_CHOOSE_US = [
     description: 'We deliver across India with safe and secure packaging to keep your precious garments pristine.',
   },
   {
-    icon: 'RotateCcw',
-    title: 'Easy Returns',
-    description: 'Not satisfied? We offer hassle-free returns within 7 days of delivery.',
+    icon: 'ShieldCheck',
+    title: '100% Quality Inspected',
+    description: 'Every handloom piece undergoes rigorous inspection & secure waterproof packaging prior to dispatch.',
   },
   {
     icon: 'Award',

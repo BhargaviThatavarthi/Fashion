@@ -82,7 +82,7 @@ function ContactPage() {
         style={{ background: '#FFFFFF' }}
       >
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-          <span className="section-badge">📬 Get In Touch</span>
+          <span className="section-badge">Get In Touch</span>
           <h1 className="section-heading mt-2">Contact Us</h1>
           <div className="gold-divider" />
           <p className="section-subtitle max-w-lg mx-auto mt-4">

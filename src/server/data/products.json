@@ -3,221 +3,318 @@
     "id": "1",
     "name": "Royal Kanjivaram Silk Saree",
     "slug": "royal-kanjivaram-silk-saree",
-    "description": "A magnificent Kanjivaram silk saree woven with pure mulberry silk and gold zari. This exquisite piece features a rich rose-pink body with an elaborate golden border depicting traditional temple motifs. Perfect for weddings and festive occasions.",
-    "category_id": "2",
+    "description": "A magnificent Kanjivaram silk saree woven with pure mulberry silk and gold zari. Features an intricate temple border in rose pink.",
+    "category_id": "cat-silk-saree",
     "fabric": "Pure Silk",
-    "color": [
-      "Teal",
-      "Gold"
-    ],
-    "sizes": [
-      "Free Size"
-    ],
+    "color": ["Rose Pink", "Gold"],
+    "sizes": ["Free Size"],
     "price": 12500,
     "offer_price": 10999,
-    "images": [
-      "/images/silk-saree.png"
-    ],
+    "images": ["/images/silk-saree.png"],
     "sku": "SSF-KSS-001",
     "wash_care": "Dry clean only. Store with camphor balls in a cotton cloth.",
-    "rating": 4.7,
-    "review_count": 105,
+    "rating": 4.8,
+    "review_count": 124,
     "featured": true,
     "best_seller": true,
     "new_arrival": false,
     "stock": 25,
-    "tags": [
-      "Silk",
-      "Wedding",
-      "Traditional"
-    ],
+    "tags": ["Silk", "Wedding", "Traditional", "Festival"],
     "in_stock": true,
-    "created_at": "2026-07-28T09:44:23.461Z",
-    "updated_at": "2026-07-28T09:44:23.463Z"
+    "collections": [
+      {
+        "id": "col-featured-sarees",
+        "title": "Featured Sarees",
+        "slug": "featured-sarees",
+        "badge": "⭐ Handpicked"
+      },
+      {
+        "id": "col-best-sellers",
+        "title": "Best Sellers",
+        "slug": "best-sellers",
+        "badge": "🏆 Top Rated"
+      },
+      {
+        "id": "col-festival-collections",
+        "title": "Festival Collections",
+        "slug": "festival-collections",
+        "badge": "🎊 Festival Ready"
+      }
+    ],
+    "created_at": "2026-08-01T09:44:23.461Z",
+    "updated_at": "2026-08-01T09:44:23.463Z"
   },
   {
     "id": "2",
     "name": "Mysore Crepe Chiffon Saree",
     "slug": "mysore-crepe-chiffon-saree",
     "description": "Lightweight and breathable Mysore crepe chiffon saree with delicate hand-block printed florals. Ideal for daytime events and parties.",
-    "category_id": "4",
-    "fabric": "Chiffon",
-    "color": [
-      "Teal",
-      "Gold"
-    ],
-    "sizes": [
-      "Free Size"
-    ],
+    "category_id": "cat-crepe-saree",
+    "fabric": "Crepe",
+    "color": ["Sky Blue", "White"],
+    "sizes": ["Free Size"],
     "price": 4500,
     "offer_price": 3799,
-    "images": [
-      "/images/crape-saree.png"
-    ],
+    "images": ["/images/crape-saree.png"],
     "sku": "SSF-CCS-002",
     "wash_care": "Hand wash gently in cold water.",
-    "rating": 4.2,
-    "review_count": 208,
+    "rating": 4.6,
+    "review_count": 87,
     "featured": true,
     "best_seller": false,
     "new_arrival": true,
     "stock": 12,
-    "tags": [
-      "Traditional",
-      "New"
-    ],
+    "tags": ["Crepe", "Block Print", "Floral"],
     "in_stock": true,
-    "created_at": "2026-07-28T09:44:23.463Z",
-    "updated_at": "2026-07-28T09:44:23.463Z"
+    "collections": [
+      {
+        "id": "col-featured-sarees",
+        "title": "Featured Sarees",
+        "slug": "featured-sarees",
+        "badge": "⭐ Handpicked"
+      },
+      {
+        "id": "col-new-arrivals",
+        "title": "New Arrivals",
+        "slug": "new-arrivals",
+        "badge": "🆕 Just Arrived"
+      }
+    ],
+    "created_at": "2026-08-05T09:44:23.461Z",
+    "updated_at": "2026-08-05T09:44:23.463Z"
   },
   {
     "id": "3",
-    "name": "Bridal Red Lehenga Choli",
-    "slug": "bridal-red-lehenga-choli",
-    "description": "Stunning bridal red lehenga choli with heavy gold embroidery and mirror work. The set includes a fully embellished lehenga, blouse, and dupatta — your complete bridal look.",
-    "category_id": "5",
-    "fabric": "Net & Georgette",
-    "color": [
-      "Red",
-      "Gold"
-    ],
-    "sizes": [
-      "XS",
-      "S",
-      "M",
-      "L",
-      "XL"
-    ],
-    "price": 28000,
-    "offer_price": 24500,
-    "images": [
-      "/images/designer-saree.png"
-    ],
-    "sku": "SSF-BRL-003",
-    "wash_care": "Dry clean only.",
-    "rating": 4.2,
-    "review_count": 18,
+    "name": "Designer Georgette Party Saree",
+    "slug": "designer-georgette-party-saree",
+    "description": "Contemporary designer saree with sequin embellishments and fine zari embroidery, designed for receptions and festive celebrations.",
+    "category_id": "cat-design-saree",
+    "fabric": "Georgette",
+    "color": ["Wine", "Silver"],
+    "sizes": ["Free Size"],
+    "price": 8900,
+    "offer_price": 7499,
+    "images": ["/images/designer-saree.png"],
+    "sku": "SSF-DGS-003",
+    "wash_care": "Dry clean recommended.",
+    "rating": 4.9,
+    "review_count": 63,
     "featured": true,
     "best_seller": true,
     "new_arrival": false,
-    "stock": 5,
-    "tags": [
-      "Lehenga",
-      "Bridal",
-      "Embroidery"
-    ],
+    "stock": 8,
+    "tags": ["Designer", "Party", "Sequin", "Festival"],
     "in_stock": true,
-    "created_at": "2026-07-28T09:44:23.463Z",
-    "updated_at": "2026-07-28T09:44:23.463Z"
+    "collections": [
+      {
+        "id": "col-featured-sarees",
+        "title": "Featured Sarees",
+        "slug": "featured-sarees",
+        "badge": "⭐ Handpicked"
+      },
+      {
+        "id": "col-best-sellers",
+        "title": "Best Sellers",
+        "slug": "best-sellers",
+        "badge": "🏆 Top Rated"
+      },
+      {
+        "id": "col-festival-collections",
+        "title": "Festival Collections",
+        "slug": "festival-collections",
+        "badge": "🎊 Festival Ready"
+      }
+    ],
+    "created_at": "2026-08-08T09:44:23.461Z",
+    "updated_at": "2026-08-08T09:44:23.463Z"
   },
   {
     "id": "4",
-    "name": "Handloom Pochampally Ikat Saree",
-    "slug": "handloom-pochampally-ikat-saree",
-    "description": "Authentic handloom Pochampally ikat saree showcasing the traditional double ikat weaving technique from Telangana. Each saree is unique, made by skilled artisans.",
-    "category_id": "1",
-    "fabric": "Handloom Cotton",
-    "color": [
-      "Teal",
-      "Gold"
-    ],
-    "sizes": [
-      "Free Size"
-    ],
+    "name": "Handloom Cotton Ikat Saree",
+    "slug": "handloom-cotton-ikat-saree",
+    "description": "Authentic handloom cotton ikat saree showcasing traditional double ikat weaving techniques with geometric motifs.",
+    "category_id": "cat-cotton-saree",
+    "fabric": "Cotton",
+    "color": ["Teal", "Orange"],
+    "sizes": ["Free Size"],
     "price": 6800,
     "offer_price": 5999,
-    "images": [
-      "/images/cotton-saree.png"
-    ],
+    "images": ["/images/cotton-saree.png"],
     "sku": "SSF-HPI-004",
-    "wash_care": "First wash separately. Machine washable on gentle cycle.",
-    "rating": 4.4,
-    "review_count": 62,
+    "wash_care": "First wash separately. Hand wash gently.",
+    "rating": 4.7,
+    "review_count": 152,
     "featured": false,
     "best_seller": true,
-    "new_arrival": false,
-    "stock": 0,
-    "tags": [
-      "Traditional",
-      "New"
+    "new_arrival": true,
+    "stock": 15,
+    "tags": ["Cotton", "Handloom", "Ikat"],
+    "in_stock": true,
+    "collections": [
+      {
+        "id": "col-new-arrivals",
+        "title": "New Arrivals",
+        "slug": "new-arrivals",
+        "badge": "🆕 Just Arrived"
+      },
+      {
+        "id": "col-best-sellers",
+        "title": "Best Sellers",
+        "slug": "best-sellers",
+        "badge": "🏆 Top Rated"
+      }
     ],
-    "in_stock": false,
-    "created_at": "2026-07-28T09:44:23.463Z",
-    "updated_at": "2026-07-28T09:44:23.463Z"
+    "created_at": "2026-08-10T09:44:23.461Z",
+    "updated_at": "2026-08-10T09:44:23.463Z"
   },
   {
     "id": "5",
-    "name": "Designer Georgette Party Saree",
-    "slug": "designer-georgette-party-saree",
-    "description": "Contemporary designer georgette saree with sequin and thread embroidery. Perfect for cocktail parties, receptions, and festive gatherings.",
-    "category_id": "3",
-    "fabric": "Georgette",
-    "color": [
-      "Teal",
-      "Gold"
-    ],
-    "sizes": [
-      "Free Size"
-    ],
-    "price": 8900,
-    "offer_price": 7499,
-    "images": [
-      "/images/designer-saree.png"
-    ],
-    "sku": "SSF-DGS-005",
-    "wash_care": "Dry clean recommended.",
-    "rating": 4.7,
-    "review_count": 88,
-    "featured": true,
+    "name": "Embroidered Ethnic Peplum Top",
+    "slug": "embroidered-ethnic-peplum-top",
+    "description": "Chic embroidered ethnic designer top with mirror work and zari borders. Pairs beautifully with ethnic skirts and palazzos.",
+    "category_id": "cat-tops",
+    "fabric": "Rayon",
+    "color": ["Powder Blue", "White"],
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "price": 2499,
+    "offer_price": 1899,
+    "images": ["/images/ethnic-top.png"],
+    "sku": "SSF-TOP-005",
+    "wash_care": "Hand wash or gentle machine wash.",
+    "rating": 4.8,
+    "review_count": 58,
+    "featured": false,
     "best_seller": false,
     "new_arrival": true,
-    "stock": 8,
-    "tags": [
-      "Traditional",
-      "New"
-    ],
+    "stock": 20,
+    "tags": ["Tops", "Chikankari", "Fusion", "Festival"],
     "in_stock": true,
-    "created_at": "2026-07-28T09:44:23.463Z",
-    "updated_at": "2026-07-28T09:44:23.463Z"
+    "collections": [
+      {
+        "id": "col-new-arrivals",
+        "title": "New Arrivals",
+        "slug": "new-arrivals",
+        "badge": "🆕 Just Arrived"
+      },
+      {
+        "id": "col-festival-collections",
+        "title": "Festival Collections",
+        "slug": "festival-collections",
+        "badge": "🎊 Festival Ready"
+      }
+    ],
+    "created_at": "2026-08-12T09:44:23.461Z",
+    "updated_at": "2026-08-12T09:44:23.463Z"
   },
   {
-    "id": "6",
-    "name": "Anarkali Kurti with Dupatta",
-    "slug": "anarkali-kurti-with-dupatta",
-    "description": "Floor-length Anarkali kurti in premium rayon fabric with intricate chikankari embroidery. Paired with a matching embroidered dupatta.",
-    "category_id": "5",
-    "fabric": "Rayon",
-    "color": [
-      "Teal",
-      "Gold"
-    ],
-    "sizes": [
-      "XS",
-      "S",
-      "M",
-      "L",
-      "XL"
-    ],
-    "price": 3500,
-    "offer_price": 2899,
-    "images": [
-      "/images/ethnic-top.png"
-    ],
-    "sku": "SSF-AKD-006",
-    "wash_care": "Hand wash or gentle machine wash.",
-    "rating": 4.6,
-    "review_count": 206,
-    "featured": false,
+    "id": "7",
+    "name": "Floral Georgette Flared Peplum Top",
+    "slug": "floral-georgette-flared-peplum-top",
+    "description": "Breezy floral georgette flared top featuring gathered waist and designer flared sleeves with delicate buttons.",
+    "category_id": "cat-tops",
+    "fabric": "Georgette",
+    "color": ["Sage Green", "Silver"],
+    "sizes": ["M", "L", "XL"],
+    "price": 1999,
+    "offer_price": 1499,
+    "images": ["/images/ethnic-top.png"],
+    "sku": "SSF-TOP-007",
+    "wash_care": "Gentle hand wash in cold water.",
+    "rating": 4.7,
+    "review_count": 34,
+    "featured": true,
     "best_seller": true,
     "new_arrival": true,
     "stock": 18,
-    "tags": [
-      "Anarkali",
-      "Kurti",
-      "Chikankari"
-    ],
+    "tags": ["Tops", "Floral", "Casual", "Festival"],
     "in_stock": true,
-    "created_at": "2026-07-28T09:44:23.463Z",
-    "updated_at": "2026-07-28T09:44:23.463Z"
+    "collections": [
+      {
+        "id": "col-new-arrivals",
+        "title": "New Arrivals",
+        "slug": "new-arrivals",
+        "badge": "🆕 Just Arrived"
+      },
+      {
+        "id": "col-best-sellers",
+        "title": "Best Sellers",
+        "slug": "best-sellers",
+        "badge": "🏆 Top Rated"
+      }
+    ],
+    "created_at": "2026-08-15T09:44:23.461Z",
+    "updated_at": "2026-08-15T09:44:23.463Z"
+  },
+  {
+    "id": "8",
+    "name": "Chikankari Embroidered Designer Kurti Top",
+    "slug": "chikankari-embroidered-designer-kurti-top",
+    "description": "Exquisite Lucknowi chikankari embroidered ethnic top crafted with soft breathable cotton and subtle sequin highlights.",
+    "category_id": "cat-tops",
+    "fabric": "Cotton",
+    "color": ["Pistachio Green", "White"],
+    "sizes": ["S", "M", "L", "XL"],
+    "price": 2799,
+    "offer_price": 2199,
+    "images": ["/images/ethnic-top.png"],
+    "sku": "SSF-TOP-008",
+    "wash_care": "Hand wash separately.",
+    "rating": 4.9,
+    "review_count": 42,
+    "featured": true,
+    "best_seller": false,
+    "new_arrival": true,
+    "stock": 14,
+    "tags": ["Tops", "Chikankari", "Handcrafted", "Festival"],
+    "in_stock": true,
+    "collections": [
+      {
+        "id": "col-new-arrivals",
+        "title": "New Arrivals",
+        "slug": "new-arrivals",
+        "badge": "🆕 Just Arrived"
+      },
+      {
+        "id": "col-festival-collections",
+        "title": "Festival Collections",
+        "slug": "festival-collections",
+        "badge": "🎊 Festival Ready"
+      }
+    ],
+    "created_at": "2026-08-16T09:44:23.461Z",
+    "updated_at": "2026-08-16T09:44:23.463Z"
+  },
+  {
+    "id": "6",
+    "name": "Premium 4-Way Stretch Ethnic Leggings",
+    "slug": "premium-stretch-ethnic-leggings",
+    "description": "Ultra-comfortable 4-way stretch churidar leggings crafted from premium combed bio-washed cotton with high durability elastic waistband.",
+    "category_id": "cat-leggings",
+    "fabric": "Cotton",
+    "color": ["Maroon", "Gold", "Black", "White"],
+    "sizes": ["Free Size", "Plus Size"],
+    "price": 899,
+    "offer_price": 699,
+    "images": ["/images/leggings.png"],
+    "sku": "SSF-LEG-006",
+    "wash_care": "Machine wash warm.",
+    "rating": 4.8,
+    "review_count": 210,
+    "featured": false,
+    "best_seller": true,
+    "new_arrival": false,
+    "stock": 50,
+    "tags": ["Leggings", "Stretch", "Daily Wear"],
+    "in_stock": true,
+    "collections": [
+      {
+        "id": "col-best-sellers",
+        "title": "Best Sellers",
+        "slug": "best-sellers",
+        "badge": "🏆 Top Rated"
+      }
+    ],
+    "created_at": "2026-08-14T09:44:23.461Z",
+    "updated_at": "2026-08-14T09:44:23.463Z"
   }
 ]

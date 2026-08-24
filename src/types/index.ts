@@ -5,6 +5,22 @@ export interface Category {
   name: string
   slug: string
   image?: string | null
+  description?: string | null
+  order?: number
+  created_at?: string
+}
+
+export interface Collection {
+  id: string
+  title: string
+  slug: string
+  badge?: string | null
+  subtitle?: string | null
+  description?: string | null
+  image?: string | null
+  order?: number
+  show_on_homepage?: boolean
+  view_all_label?: string | null
   created_at?: string
 }
 
@@ -14,13 +30,17 @@ export interface Product {
   slug: string
   description?: string | null
   category_id?: string | null
-  category?: Category | null
+  category?: Category | string | null
+  collections?: Collection[] | null
   fabric?: string | null
   color?: string[] | null
   sizes?: string[] | null
   price: number
   offer_price?: number | null
+  image_url?: string | null
   images?: string[] | null
+  stock_quantity?: number | null
+  status?: 'active' | 'out_of_stock' | 'draft' | 'archived' | string | null
   sku?: string | null
   wash_care?: string | null
   rating?: number | null
@@ -118,6 +138,7 @@ export interface AdminUser {
 export interface ProductFilters {
   search?: string
   category?: string
+  collection?: string
   fabric?: string
   minPrice?: number
   maxPrice?: number
@@ -139,13 +160,79 @@ export interface PaginatedResponse<T> {
   hasMore: boolean
 }
 
-// Mock product with full details for demo
+// ------------------------------------------------------------------
+// Canonical 8 Categories (Static Frontend display representation)
+// ------------------------------------------------------------------
+export const DEMO_CATEGORIES: Category[] = [
+  { id: '1', name: 'Sarees', slug: 'sarees', image: '/images/categories/sarees.jpg', order: 1 },
+  { id: '2', name: 'Silk Sarees', slug: 'silk-sarees', image: '/images/categories/silk-sarees.jpg', order: 2 },
+  { id: '3', name: 'Cotton Sarees', slug: 'cotton-sarees', image: '/images/categories/cotton-sarees.jpg', order: 3 },
+  { id: '4', name: 'Designer Sarees', slug: 'designer-sarees', image: '/images/categories/designer-sarees.jpg', order: 4 },
+  { id: '5', name: 'Lehengas', slug: 'lehengas', image: '/images/categories/lehengas.jpg', order: 5 },
+  { id: '6', name: 'Kurtis', slug: 'kurtis', image: '/images/categories/kurtis.jpg', order: 6 },
+  { id: '7', name: 'Dress Materials', slug: 'dress-materials', image: '/images/categories/dress-materials.jpg', order: 7 },
+  { id: '8', name: 'Ethnic Wear', slug: 'ethnic-wear', image: '/images/categories/ethnic-wear.jpg', order: 8 },
+]
+
+// ------------------------------------------------------------------
+// Canonical 4 Collections / Sections (Managed dynamically in Sanity)
+// ------------------------------------------------------------------
+export const DEMO_COLLECTIONS: Collection[] = [
+  {
+    id: 'col-featured-sarees',
+    title: 'Featured Sarees',
+    slug: 'featured-sarees',
+    badge: 'Handpicked',
+    subtitle: 'Explore our most-loved collection of sarees and ethnic wear, crafted for the modern woman who celebrates tradition.',
+    image: '/images/silk-saree.png',
+    order: 1,
+    show_on_homepage: true,
+    view_all_label: 'View All Featured Sarees',
+  },
+  {
+    id: 'col-new-arrivals',
+    title: 'New Arrivals',
+    slug: 'new-arrivals',
+    badge: 'Just Arrived',
+    subtitle: 'Be the first to discover our freshest designs — straight from the looms of master weavers.',
+    image: '/images/cotton-saree.png',
+    order: 2,
+    show_on_homepage: true,
+    view_all_label: 'See All New Arrivals',
+  },
+  {
+    id: 'col-best-sellers',
+    title: 'Best Sellers',
+    slug: 'best-sellers',
+    badge: 'Top Rated',
+    subtitle: 'Our most popular designs — chosen by thousands of happy customers across India.',
+    image: '/images/designer-saree.png',
+    order: 3,
+    show_on_homepage: true,
+    view_all_label: 'View All Best Sellers',
+  },
+  {
+    id: 'col-festival-collections',
+    title: 'Festival Collections',
+    slug: 'festival-collections',
+    badge: 'Festival Ready',
+    subtitle: 'Celebrate every auspicious occasion and festival in breathtaking elegance with our festive collection.',
+    image: '/images/silk-saree.png',
+    order: 4,
+    show_on_homepage: true,
+    view_all_label: 'Shop Festival Wear',
+  },
+]
+
+// ------------------------------------------------------------------
+// Products with Category and Multi-Collection Associations
+// ------------------------------------------------------------------
 export const DEMO_PRODUCTS: Product[] = [
   {
     id: '1',
     name: 'Royal Kanjivaram Silk Saree',
     slug: 'royal-kanjivaram-silk-saree',
-    description: 'A magnificent Kanjivaram silk saree woven with pure mulberry silk and gold zari. This exquisite piece features a rich rose-pink body with an elaborate golden border depicting traditional temple motifs. Perfect for weddings and festive occasions.',
+    description: 'A magnificent Kanjivaram silk saree woven with pure mulberry silk and gold zari. Features an intricate temple border in rose pink.',
     fabric: 'Pure Silk',
     color: ['Rose Pink', 'Gold'],
     sizes: ['Free Size'],
@@ -156,20 +243,26 @@ export const DEMO_PRODUCTS: Product[] = [
     wash_care: 'Dry clean only. Store with camphor balls in a cotton cloth.',
     rating: 4.8,
     review_count: 124,
+    stock: 25,
+    tags: ['Silk', 'Wedding', 'Traditional', 'Festival'],
+    in_stock: true,
+    category: DEMO_CATEGORIES.find((c) => c.slug === 'silk-saree'),
+    category_id: 'cat-silk-saree',
+    collections: [
+      DEMO_COLLECTIONS.find((c) => c.slug === 'featured-sarees')!,
+      DEMO_COLLECTIONS.find((c) => c.slug === 'best-sellers')!,
+      DEMO_COLLECTIONS.find((c) => c.slug === 'festival-collections')!,
+    ],
     featured: true,
     best_seller: true,
     new_arrival: false,
-    stock: 25,
-    tags: ['Silk', 'Wedding', 'Traditional'],
-    in_stock: true,
-    category: { id: '1', name: 'Silk Sarees', slug: 'silk-sarees' },
   },
   {
     id: '2',
     name: 'Mysore Crepe Chiffon Saree',
     slug: 'mysore-crepe-chiffon-saree',
     description: 'Lightweight and breathable Mysore crepe chiffon saree with delicate hand-block printed florals. Ideal for daytime events and parties.',
-    fabric: 'Chiffon',
+    fabric: 'Crepe',
     color: ['Sky Blue', 'White'],
     sizes: ['Free Size'],
     price: 4500,
@@ -179,117 +272,187 @@ export const DEMO_PRODUCTS: Product[] = [
     wash_care: 'Hand wash gently in cold water.',
     rating: 4.6,
     review_count: 87,
+    stock: 12,
+    tags: ['Crepe', 'Block Print', 'Floral'],
+    in_stock: true,
+    category: DEMO_CATEGORIES.find((c) => c.slug === 'crepe-saree'),
+    category_id: 'cat-crepe-saree',
+    collections: [
+      DEMO_COLLECTIONS.find((c) => c.slug === 'featured-sarees')!,
+      DEMO_COLLECTIONS.find((c) => c.slug === 'new-arrivals')!,
+    ],
     featured: true,
     best_seller: false,
     new_arrival: true,
-    stock: 12,
-    tags: ['Chiffon', 'Block Print', 'Floral'],
-    in_stock: true,
-    category: { id: '4', name: 'Crape Sarees', slug: 'crape-sarees' },
   },
   {
     id: '3',
-    name: 'Bridal Red Lehenga Choli',
-    slug: 'bridal-red-lehenga-choli',
-    description: 'Stunning bridal red lehenga choli with heavy gold embroidery and mirror work. The set includes a fully embellished lehenga, blouse, and dupatta — your complete bridal look.',
-    fabric: 'Net & Georgette',
-    color: ['Red', 'Gold'],
-    sizes: ['XS', 'S', 'M', 'L', 'XL'],
-    price: 28000,
-    offer_price: 24500,
-    images: ['/images/designer-saree.png'],
-    sku: 'SSF-BRL-003',
-    wash_care: 'Dry clean only.',
-    rating: 4.9,
-    review_count: 63,
-    featured: true,
-    best_seller: true,
-    new_arrival: false,
-    stock: 5,
-    tags: ['Lehenga', 'Bridal', 'Embroidery'],
-    in_stock: true,
-    category: { id: '5', name: 'Lehengas', slug: 'lehengas' },
-  },
-  {
-    id: '4',
-    name: 'Handloom Pochampally Ikat Saree',
-    slug: 'handloom-pochampally-ikat-saree',
-    description: 'Authentic handloom Pochampally ikat saree showcasing the traditional double ikat weaving technique from Telangana. Each saree is unique, made by skilled artisans.',
-    fabric: 'Handloom Cotton',
-    color: ['Teal', 'Orange'],
-    sizes: ['Free Size'],
-    price: 6800,
-    offer_price: 5999,
-    images: ['/images/cotton-saree.png'],
-    sku: 'SSF-HPI-004',
-    wash_care: 'First wash separately. Machine washable on gentle cycle.',
-    rating: 4.7,
-    review_count: 152,
-    featured: false,
-    best_seller: true,
-    new_arrival: false,
-    stock: 0,
-    tags: ['Ikat', 'Handloom', 'Cotton'],
-    in_stock: false,
-    category: { id: '3', name: 'Cotton Sarees', slug: 'cotton-sarees' },
-  },
-  {
-    id: '5',
     name: 'Designer Georgette Party Saree',
     slug: 'designer-georgette-party-saree',
-    description: 'Contemporary designer georgette saree with sequin and thread embroidery. Perfect for cocktail parties, receptions, and festive gatherings.',
+    description: 'Contemporary designer saree with sequin embellishments and fine zari embroidery, designed for receptions and festive celebrations.',
     fabric: 'Georgette',
     color: ['Wine', 'Silver'],
     sizes: ['Free Size'],
     price: 8900,
     offer_price: 7499,
     images: ['/images/designer-saree.png'],
-    sku: 'SSF-DGS-005',
+    sku: 'SSF-DGS-003',
     wash_care: 'Dry clean recommended.',
-    rating: 4.5,
-    review_count: 78,
-    featured: true,
-    best_seller: false,
-    new_arrival: true,
+    rating: 4.9,
+    review_count: 63,
     stock: 8,
-    tags: ['Georgette', 'Designer', 'Party'],
+    tags: ['Designer', 'Party', 'Sequin'],
     in_stock: true,
-    category: { id: '4', name: 'Designer Sarees', slug: 'designer-sarees' },
+    category: DEMO_CATEGORIES.find((c) => c.slug === 'design-saree'),
+    category_id: 'cat-design-saree',
+    collections: [
+      DEMO_COLLECTIONS.find((c) => c.slug === 'featured-sarees')!,
+      DEMO_COLLECTIONS.find((c) => c.slug === 'best-sellers')!,
+      DEMO_COLLECTIONS.find((c) => c.slug === 'festival-collections')!,
+    ],
+    featured: true,
+    best_seller: true,
+    new_arrival: false,
   },
   {
-    id: '6',
-    name: 'Anarkali Kurti with Dupatta',
-    slug: 'anarkali-kurti-with-dupatta',
-    description: 'Floor-length Anarkali kurti in premium rayon fabric with intricate chikankari embroidery. Paired with a matching embroidered dupatta.',
-    fabric: 'Rayon',
-    color: ['Powder Blue', 'White'],
-    sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-    price: 3500,
-    offer_price: 2899,
-    images: ['/images/ethnic-top.png'],
-    sku: 'SSF-AKD-006',
-    wash_care: 'Hand wash or gentle machine wash.',
-    rating: 4.4,
-    review_count: 211,
+    id: '4',
+    name: 'Handloom Cotton Ikat Saree',
+    slug: 'handloom-cotton-ikat-saree',
+    description: 'Authentic handloom cotton ikat saree showcasing traditional double ikat weaving techniques with geometric motifs.',
+    fabric: 'Cotton',
+    color: ['Teal', 'Orange'],
+    sizes: ['Free Size'],
+    price: 6800,
+    offer_price: 5999,
+    images: ['/images/cotton-saree.png'],
+    sku: 'SSF-HPI-004',
+    wash_care: 'First wash separately. Hand wash gently.',
+    rating: 4.7,
+    review_count: 152,
+    stock: 15,
+    tags: ['Cotton', 'Handloom', 'Ikat'],
+    in_stock: true,
+    category: DEMO_CATEGORIES.find((c) => c.slug === 'cotton-saree'),
+    category_id: 'cat-cotton-saree',
+    collections: [
+      DEMO_COLLECTIONS.find((c) => c.slug === 'new-arrivals')!,
+      DEMO_COLLECTIONS.find((c) => c.slug === 'best-sellers')!,
+    ],
     featured: false,
     best_seller: true,
     new_arrival: true,
-    stock: 18,
-    tags: ['Anarkali', 'Kurti', 'Chikankari'],
-    in_stock: true,
-    category: { id: '6', name: 'Kurtis', slug: 'kurtis' },
   },
-]
-
-export const DEMO_CATEGORIES: Category[] = [
-  { id: '1', name: 'Sarees', slug: 'sarees' },
-  { id: '2', name: 'Silk Sarees', slug: 'silk-sarees' },
-  { id: '3', name: 'Cotton Sarees', slug: 'cotton-sarees' },
-  { id: '4', name: 'Designer Sarees', slug: 'designer-sarees' },
-  { id: '5', name: 'Lehengas', slug: 'lehengas' },
-  { id: '6', name: 'Kurtis', slug: 'kurtis' },
-  { id: '7', name: 'Dress Materials', slug: 'dress-materials' },
-  { id: '8', name: 'Ethnic Wear', slug: 'ethnic-wear' },
+  {
+    id: '5',
+    name: 'Embroidered Ethnic Peplum Top',
+    slug: 'embroidered-ethnic-peplum-top',
+    description: 'Chic embroidered ethnic designer top with mirror work and zari borders. Pairs beautifully with ethnic skirts and palazzos.',
+    fabric: 'Rayon',
+    color: ['Powder Blue', 'White'],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    price: 2499,
+    offer_price: 1899,
+    images: ['/images/ethnic-top.png'],
+    sku: 'SSF-TOP-005',
+    wash_care: 'Hand wash or gentle machine wash.',
+    rating: 4.8,
+    review_count: 58,
+    stock: 20,
+    tags: ['Tops', 'Chikankari', 'Fusion', 'Festival'],
+    in_stock: true,
+    category: DEMO_CATEGORIES.find((c) => c.slug === 'tops'),
+    category_id: 'cat-tops',
+    collections: [
+      DEMO_COLLECTIONS.find((c) => c.slug === 'new-arrivals')!,
+      DEMO_COLLECTIONS.find((c) => c.slug === 'festival-collections')!,
+    ],
+    featured: false,
+    best_seller: false,
+    new_arrival: true,
+  },
+  {
+    id: '7',
+    name: 'Floral Georgette Flared Peplum Top',
+    slug: 'floral-georgette-flared-peplum-top',
+    description: 'Breezy floral georgette flared top featuring gathered waist and designer flared sleeves with delicate buttons.',
+    fabric: 'Georgette',
+    color: ['Sage Green', 'Silver'],
+    sizes: ['M', 'L', 'XL'],
+    price: 1999,
+    offer_price: 1499,
+    images: ['/images/ethnic-top.png'],
+    sku: 'SSF-TOP-007',
+    wash_care: 'Gentle hand wash in cold water.',
+    rating: 4.7,
+    review_count: 34,
+    stock: 18,
+    tags: ['Tops', 'Floral', 'Casual', 'Festival'],
+    in_stock: true,
+    category: DEMO_CATEGORIES.find((c) => c.slug === 'tops'),
+    category_id: 'cat-tops',
+    collections: [
+      DEMO_COLLECTIONS.find((c) => c.slug === 'new-arrivals')!,
+      DEMO_COLLECTIONS.find((c) => c.slug === 'best-sellers')!,
+    ],
+    featured: true,
+    best_seller: true,
+    new_arrival: true,
+  },
+  {
+    id: '8',
+    name: 'Chikankari Embroidered Designer Kurti Top',
+    slug: 'chikankari-embroidered-designer-kurti-top',
+    description: 'Exquisite Lucknowi chikankari embroidered ethnic top crafted with soft breathable cotton and subtle sequin highlights.',
+    fabric: 'Cotton',
+    color: ['Pistachio Green', 'White'],
+    sizes: ['S', 'M', 'L', 'XL'],
+    price: 2799,
+    offer_price: 2199,
+    images: ['/images/ethnic-top.png'],
+    sku: 'SSF-TOP-008',
+    wash_care: 'Hand wash separately.',
+    rating: 4.9,
+    review_count: 42,
+    stock: 14,
+    tags: ['Tops', 'Chikankari', 'Handcrafted', 'Festival'],
+    in_stock: true,
+    category: DEMO_CATEGORIES.find((c) => c.slug === 'tops'),
+    category_id: 'cat-tops',
+    collections: [
+      DEMO_COLLECTIONS.find((c) => c.slug === 'new-arrivals')!,
+      DEMO_COLLECTIONS.find((c) => c.slug === 'festival-collections')!,
+    ],
+    featured: true,
+    best_seller: false,
+    new_arrival: true,
+  },
+  {
+    id: '6',
+    name: 'Premium 4-Way Stretch Ethnic Leggings',
+    slug: 'premium-stretch-ethnic-leggings',
+    description: 'Ultra-comfortable 4-way stretch churidar leggings crafted from premium combed bio-washed cotton with high durability elastic waistband.',
+    fabric: 'Cotton',
+    color: ['Maroon', 'Gold', 'Black', 'White'],
+    sizes: ['Free Size', 'Plus Size'],
+    price: 899,
+    offer_price: 699,
+    images: ['/images/leggings.png'],
+    sku: 'SSF-LEG-006',
+    wash_care: 'Machine wash warm.',
+    rating: 4.8,
+    review_count: 210,
+    stock: 50,
+    tags: ['Leggings', 'Stretch', 'Daily Wear'],
+    in_stock: true,
+    category: DEMO_CATEGORIES.find((c) => c.slug === 'leggings'),
+    category_id: 'cat-leggings',
+    collections: [
+      DEMO_COLLECTIONS.find((c) => c.slug === 'best-sellers')!,
+    ],
+    featured: false,
+    best_seller: true,
+    new_arrival: false,
+  },
 ]
 
 export const DEMO_TESTIMONIALS: Testimonial[] = [
@@ -314,7 +477,7 @@ export const DEMO_TESTIMONIALS: Testimonial[] = [
   {
     id: '4',
     customer_name: 'Kavitha Nair',
-    review: 'The Pochampally Ikat saree I ordered is stunning. You can tell it\'s authentically handcrafted. The team was very responsive and even helped me pick the perfect color. Will definitely order again!',
+    review: "The Pochampally Ikat saree I ordered is stunning. You can tell it's authentically handcrafted. The team was very responsive and even helped me pick the perfect color. Will definitely order again!",
     rating: 4,
   },
 ]

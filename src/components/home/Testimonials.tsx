@@ -21,7 +21,7 @@ export default function Testimonials() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <span className="section-badge">💬 Customer Love</span>
+          <span className="section-badge">Customer Love</span>
           <h2 className="section-heading">What Our Customers Say</h2>
           <div className="gold-divider" />
         </motion.div>
