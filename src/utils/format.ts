@@ -60,17 +60,22 @@ export function getImageUrl(path: string | null | undefined, fallback: string = 
 
   // Supabase storage URL resolution
   if (supabaseUrl && !supabaseUrl.includes('placeholder')) {
+    const cleanSupabaseUrl = supabaseUrl.replace(/\/+$/, '')
+
     if (trimmed.startsWith('/storage/v1/object/public/')) {
-      return `${supabaseUrl}${trimmed}`
+      return `${cleanSupabaseUrl}${trimmed}`
     }
-    if (trimmed.startsWith('/product-images/')) {
-      return `${supabaseUrl}/storage/v1/object/public${trimmed}`
+    if (trimmed.startsWith('storage/v1/object/public/')) {
+      return `${cleanSupabaseUrl}/${trimmed}`
     }
-    if (trimmed.startsWith('product-images/')) {
-      return `${supabaseUrl}/storage/v1/object/public/${trimmed}`
+    if (trimmed.startsWith('/product-images/') || trimmed.startsWith('/products/')) {
+      return `${cleanSupabaseUrl}/storage/v1/object/public${trimmed}`
     }
-    // Relative category path e.g. "tops/123_pic.jpg"
-    return `${supabaseUrl}/storage/v1/object/public/product-images/${trimmed.replace(/^\//, '')}`
+    if (trimmed.startsWith('product-images/') || trimmed.startsWith('products/')) {
+      return `${cleanSupabaseUrl}/storage/v1/object/public/${trimmed}`
+    }
+    // Relative category path or image filename
+    return `${cleanSupabaseUrl}/storage/v1/object/public/product-images/${trimmed.replace(/^\//, '')}`
   }
 
   return trimmed
