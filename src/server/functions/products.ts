@@ -381,11 +381,19 @@ export const createProductServerFn = createServerFn({
       updated_at: new Date().toISOString(),
     }
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('products')
       .insert(insertData)
       .select()
       .single()
+
+    if (error && error.message?.includes('image_url')) {
+      const fallbackData = { ...insertData }
+      delete fallbackData.image_url
+      const retry = await supabase.from('products').insert(fallbackData).select().single()
+      data = retry.data
+      error = retry.error
+    }
 
     if (error) {
       console.error('Supabase create product error:', error.message)
@@ -442,12 +450,20 @@ export const updateProductServerFn = createServerFn({
     if (updates.new_arrival !== undefined) updatePayload.new_arrival = Boolean(updates.new_arrival)
     if (updates.tags !== undefined) updatePayload.tags = updates.tags
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('products')
       .update(updatePayload)
       .eq('id', id)
       .select()
       .single()
+
+    if (error && error.message?.includes('image_url')) {
+      const fallbackPayload = { ...updatePayload }
+      delete fallbackPayload.image_url
+      const retry = await supabase.from('products').update(fallbackPayload).eq('id', id).select().single()
+      data = retry.data
+      error = retry.error
+    }
 
     if (error) {
       console.error('Supabase update product error:', error.message)

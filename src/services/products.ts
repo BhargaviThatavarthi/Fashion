@@ -333,11 +333,20 @@ export async function createProduct(product: Partial<Product>): Promise<Product>
   }
 
   if (isSupabaseConfigured() && typeof window !== 'undefined') {
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('products')
       .insert(insertData)
       .select()
       .single()
+
+    // If image_url column does not exist yet in DB schema, retry without it
+    if (error && error.message?.includes('image_url')) {
+      const fallbackData = { ...insertData }
+      delete fallbackData.image_url
+      const retry = await supabase.from('products').insert(fallbackData).select().single()
+      data = retry.data
+      error = retry.error
+    }
 
     if (!error && data) {
       return formatProductRecord(data)
@@ -395,12 +404,20 @@ export async function updateProduct(id: string, updates: Partial<Product>): Prom
   if (updates.tags !== undefined) updatePayload.tags = updates.tags
 
   if (isSupabaseConfigured() && typeof window !== 'undefined') {
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('products')
       .update(updatePayload)
       .eq('id', id)
       .select()
       .single()
+
+    if (error && error.message?.includes('image_url')) {
+      const fallbackPayload = { ...updatePayload }
+      delete fallbackPayload.image_url
+      const retry = await supabase.from('products').update(fallbackPayload).eq('id', id).select().single()
+      data = retry.data
+      error = retry.error
+    }
 
     if (!error && data) {
       return formatProductRecord(data)
