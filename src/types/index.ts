@@ -55,6 +55,21 @@ export interface Product {
   updated_at?: string
 }
 
+export interface CartItem {
+  id: string
+  productId: string
+  name: string
+  slug: string
+  price: number
+  originalPrice?: number | null
+  image?: string | null
+  quantity: number
+  color?: string | null
+  size?: string | null
+  fabric?: string | null
+  stock?: number | null
+}
+
 export interface Testimonial {
   id: string
   customer_name: string

@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
-import { Heart, Star, Eye } from 'lucide-react'
+import { Heart, Star, Eye, ShoppingBag } from 'lucide-react'
 import type { Product } from '../../types'
 import { formatPrice, formatDiscount, getImageUrl } from '../../utils/format'
+import { useCart } from '../../context/CartContext'
 
 interface ProductCardProps {
   product: Product
@@ -13,6 +14,7 @@ interface ProductCardProps {
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [imgIndex, setImgIndex] = useState(0)
+  const { addToCart } = useCart()
 
   const images = Array.isArray(product.images) && product.images.length > 0
     ? product.images
@@ -180,45 +182,37 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
 
         {/* Actions */}
         <div className="flex gap-2">
-          <Link
-            to="/shop/$slug"
-            params={{ slug: product.slug }}
-            className="flex-1 text-center text-xs font-nav font-600 py-2 rounded-full border-2 transition-all duration-200 hover:text-white"
-            style={{
-              borderColor: 'var(--color-pink)',
-              color: 'var(--color-pink)',
-            }}
-            onMouseEnter={(e) => {
-              const t = e.currentTarget
-              t.style.background = 'var(--color-pink)'
-              t.style.color = 'white'
-            }}
-            onMouseLeave={(e) => {
-              const t = e.currentTarget
-              t.style.background = ''
-              t.style.color = 'var(--color-pink)'
-            }}
-          >
-            View Details
-          </Link>
           {isOutOfStock ? (
             <button
               disabled
-              className="flex items-center justify-center text-gray-400 bg-gray-100 text-xs font-nav font-600 px-3 py-2 rounded-full cursor-not-allowed border border-gray-200"
+              className="flex-1 text-center text-gray-400 bg-gray-100 text-xs font-nav font-600 py-2 rounded-full cursor-not-allowed border border-gray-200"
               title="This product is currently out of stock"
             >
               Out of Stock
             </button>
           ) : (
-            <Link
-              to="/contact"
-              search={{ product: product.name }}
-              className="flex items-center gap-1.5 text-white text-xs font-nav font-600 px-3 py-2 rounded-full transition-all duration-200 hover:opacity-90"
-              style={{ background: 'var(--color-pink)' }}
-              aria-label="Enquire Now"
-            >
-              Enquire Now
-            </Link>
+            <>
+              <Link
+                to="/shop/$slug"
+                params={{ slug: product.slug }}
+                className="flex-1 text-center text-xs font-nav font-600 py-2 rounded-full border transition-all duration-200 hover:border-pink-500 hover:text-pink-600"
+                style={{
+                  borderColor: 'var(--color-pink-light)',
+                  color: 'var(--color-text-muted)',
+                }}
+              >
+                Details
+              </Link>
+              <button
+                onClick={() => addToCart(product)}
+                className="flex items-center justify-center gap-1.5 text-white text-xs font-nav font-600 px-3.5 py-2 rounded-full transition-all duration-200 hover:opacity-90 cursor-pointer shadow-xs"
+                style={{ background: 'var(--color-pink)' }}
+                aria-label="Add to Cart"
+              >
+                <ShoppingBag size={13} />
+                <span>Add</span>
+              </button>
+            </>
           )}
         </div>
       </div>

@@ -7,6 +7,8 @@ import {
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { WhatsAppFab, BackToTop } from '../components/layout/FloatingWidgets'
+import { CartProvider } from '../context/CartContext'
+import CartDrawer from '../components/cart/CartDrawer'
 
 import appCss from '../styles.css?url'
 
@@ -52,13 +54,14 @@ function RootContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <>
+    <CartProvider>
       <Header />
       <main>{children}</main>
       <Footer />
       <WhatsAppFab />
       <BackToTop />
-    </>
+      <CartDrawer />
+    </CartProvider>
   )
 }
 

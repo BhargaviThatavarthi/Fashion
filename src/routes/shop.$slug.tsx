@@ -2,9 +2,10 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
-import { Star, Heart, Share2, ZoomIn } from 'lucide-react'
+import { Star, Heart, Share2, ZoomIn, ShoppingBag, Plus, Minus } from 'lucide-react'
 import { getProductBySlug, getRelatedProducts } from '../services/products'
 import { formatPrice, formatDiscount, getImageUrl } from '../utils/format'
+import { useCart } from '../context/CartContext'
 import ProductCard from '../components/shop/ProductCard'
 import { Skeleton } from '../components/ui/skeleton'
 
@@ -34,8 +35,10 @@ function ProductDetailPage() {
   const [activeImg, setActiveImg] = useState(0)
   const [selectedColor, setSelectedColor] = useState<string | null>(null)
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
+  const [quantity, setQuantity] = useState(1)
   const [wishlisted, setWishlisted] = useState(false)
   const [zoomed, setZoomed] = useState(false)
+  const { addToCart } = useCart()
 
   const { data: product, isLoading } = useQuery({
     queryKey: ['product', slug],
@@ -303,45 +306,101 @@ function ProductDetailPage() {
                 </div>
               </div>
             )}
+            {/* Quantity Selector & CTAs */}
+            {!isOutOfStock && (
+              <div className="mb-6">
+                <p className="font-nav text-xs font-700 uppercase tracking-wide text-gray-500 mb-2">
+                  Quantity:
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <span className="w-12 text-center text-sm font-bold font-nav text-gray-900">
+                      {quantity}
+                    </span>
+                    <button
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                      aria-label="Increase quantity"
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
+                  <span className="text-xs text-gray-400 font-nav">
+                    Total: <span className="font-semibold text-gray-700 font-price">{formatPrice((product.offer_price || product.price) * quantity)}</span>
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            <div className="space-y-3 mb-6">
               {isOutOfStock ? (
                 <button
                   disabled
-                  className="flex items-center justify-center gap-2.5 flex-1 text-base py-3.5 rounded-full bg-gray-200 text-gray-400 font-nav font-700 cursor-not-allowed border border-gray-300"
+                  className="flex items-center justify-center gap-2.5 w-full text-base py-3.5 rounded-full bg-gray-200 text-gray-400 font-nav font-700 cursor-not-allowed border border-gray-300"
                 >
                   Currently Out of Stock
                 </button>
               ) : (
-                <Link
-                  to="/contact"
-                  search={{ product: product.name }}
-                  className="btn-pink flex items-center justify-center gap-2.5 flex-1 text-base py-3.5"
-                >
-                  Enquire Now
-                </Link>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {/* Add to Cart */}
+                  <button
+                    onClick={() => {
+                      addToCart(product, {
+                        quantity,
+                        color: selectedColor,
+                        size: selectedSize,
+                      })
+                    }}
+                    className="btn-pink flex items-center justify-center gap-2.5 flex-1 text-base py-3.5 cursor-pointer shadow-lg shadow-pink-500/20"
+                    id="add-to-cart-detail-btn"
+                  >
+                    <ShoppingBag size={18} />
+                    <span>Add to Cart</span>
+                  </button>
+
+                  {/* Direct Enquire */}
+                  <Link
+                    to="/contact"
+                    search={{ product: product.name }}
+                    className="btn-outline-pink flex items-center justify-center gap-2 px-6 text-sm py-3.5"
+                  >
+                    <span>Enquire</span>
+                  </Link>
+
+                  {/* Wishlist & Share */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setWishlisted(!wishlisted)}
+                      className="w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer"
+                      style={{
+                        borderColor: wishlisted ? 'var(--color-pink)' : 'var(--color-pink-light)',
+                        background: wishlisted ? 'var(--color-pink-light)' : 'white',
+                      }}
+                      aria-label="Add to wishlist"
+                    >
+                      <Heart
+                        size={18}
+                        style={wishlisted ? { fill: 'var(--color-pink)', color: 'var(--color-pink)' } : { color: 'var(--color-gray)' }}
+                      />
+                    </button>
+                    <button
+                      onClick={() => navigator.share?.({ title: product.name, url: shareUrl })}
+                      className="w-12 h-12 rounded-full border-2 border-gray-200 flex items-center justify-center hover:border-pink-300 transition-colors"
+                      aria-label="Share"
+                    >
+                      <Share2 size={16} style={{ color: 'var(--color-gray)' }} />
+                    </button>
+                  </div>
+                </div>
               )}
-              <button
-                onClick={() => setWishlisted(!wishlisted)}
-                className="w-14 h-14 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer"
-                style={{
-                  borderColor: wishlisted ? 'var(--color-pink)' : 'var(--color-pink-light)',
-                  background: wishlisted ? 'var(--color-pink-light)' : 'white',
-                }}
-                aria-label="Add to wishlist"
-              >
-                <Heart
-                  size={20}
-                  style={wishlisted ? { fill: 'var(--color-pink)', color: 'var(--color-pink)' } : { color: 'var(--color-gray)' }}
-                />
-              </button>
-              <button
-                onClick={() => navigator.share?.({ title: product.name, url: shareUrl })}
-                className="w-14 h-14 rounded-full border-2 border-gray-200 flex items-center justify-center hover:border-pink-300 transition-colors"
-                aria-label="Share"
-              >
-                <Share2 size={18} style={{ color: 'var(--color-gray)' }} />
-              </button>
             </div>
 
             {/* Wash Care */}

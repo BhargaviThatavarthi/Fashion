@@ -2,15 +2,17 @@
 import { useState, useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Search, Instagram, Youtube } from 'lucide-react'
+import { Menu, X, Search, Instagram, Youtube, ShoppingBag } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa'
 import { NAV_LINKS, SOCIAL, CONTACT } from '../../constants'
+import { useCart } from '../../context/CartContext'
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const { totalItems, openCart } = useCart()
 
   useEffect(() => {
     const handler = () => setIsScrolled(window.scrollY > 20)
@@ -76,10 +78,28 @@ export default function Header() {
               {/* Search */}
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
-                className="text-gray-300 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10"
+                className="text-gray-300 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10 cursor-pointer"
                 aria-label="Search"
               >
                 <Search size={18} />
+              </button>
+
+              {/* Shopping Cart Button */}
+              <button
+                onClick={openCart}
+                className="relative text-gray-200 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10 flex items-center justify-center cursor-pointer"
+                aria-label="Shopping Cart"
+                id="header-cart-btn"
+              >
+                <ShoppingBag size={20} />
+                {totalItems > 0 && (
+                  <span
+                    className="absolute -top-0.5 -right-0.5 min-w-[19px] h-[19px] px-1 rounded-full text-[10px] font-bold font-nav flex items-center justify-center text-white shadow-md animate-pulse"
+                    style={{ background: 'var(--color-pink)' }}
+                  >
+                    {totalItems > 99 ? '99+' : totalItems}
+                  </span>
+                )}
               </button>
 
               {/* Social Icons */}
@@ -125,14 +145,32 @@ export default function Header() {
               </a>
             </div>
 
-            {/* Mobile Menu Toggle */}
-            <button
-              onClick={() => setIsMobileOpen(!isMobileOpen)}
-              className="md:hidden text-white p-2"
-              aria-label="Toggle menu"
-            >
-              {isMobileOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
+            {/* Mobile Actions (Cart + Menu Toggle) */}
+            <div className="flex md:hidden items-center gap-2">
+              <button
+                onClick={openCart}
+                className="relative text-white p-2 rounded-full hover:bg-white/10"
+                aria-label="Shopping Cart"
+              >
+                <ShoppingBag size={21} />
+                {totalItems > 0 && (
+                  <span
+                    className="absolute top-0 right-0 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold font-nav flex items-center justify-center text-white shadow-md"
+                    style={{ background: 'var(--color-pink)' }}
+                  >
+                    {totalItems}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setIsMobileOpen(!isMobileOpen)}
+                className="text-white p-2"
+                aria-label="Toggle menu"
+              >
+                {isMobileOpen ? <X size={22} /> : <Menu size={22} />}
+              </button>
+            </div>
           </div>
 
           {/* Search Bar (Desktop) */}
@@ -239,6 +277,33 @@ export default function Header() {
                     </Link>
                   </motion.div>
                 ))}
+
+                {/* Mobile Cart Link */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: NAV_LINKS.length * 0.07 }}
+                >
+                  <Link
+                    to="/cart"
+                    onClick={() => setIsMobileOpen(false)}
+                    className="flex items-center justify-between font-nav font-bold font-700 text-base text-white hover:text-pink-300 py-3 px-3 rounded-xl hover:bg-white/8 transition-all"
+                    activeProps={{ style: { color: 'var(--color-pink)', background: 'rgba(216,92,138,0.15)', fontWeight: 'bold' } }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <ShoppingBag size={18} />
+                      <span>Shopping Cart</span>
+                    </div>
+                    {totalItems > 0 && (
+                      <span
+                        className="px-2 py-0.5 rounded-full text-xs font-bold font-nav"
+                        style={{ background: 'var(--color-pink)', color: 'white' }}
+                      >
+                        {totalItems}
+                      </span>
+                    )}
+                  </Link>
+                </motion.div>
               </nav>
 
               {/* Mobile Social */}

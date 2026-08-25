@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CarouselDemoRouteImport } from './routes/carousel-demo'
+import { Route as CartRouteImport } from './routes/cart'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as StudioRouteImport } from './routes/studio'
@@ -57,6 +58,11 @@ const AdminRoute = AdminRouteImport.update({
 const CarouselDemoRoute = CarouselDemoRouteImport.update({
   id: '/carousel-demo',
   path: '/carousel-demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CartRoute = CartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -190,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/carousel-demo': typeof CarouselDemoRoute
+  '/cart': typeof CartRoute
   '/contact': typeof ContactRoute
   '/shop': typeof ShopRouteWithChildren
   '/studio': typeof StudioRouteWithChildren
@@ -220,6 +227,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/carousel-demo': typeof CarouselDemoRoute
+  '/cart': typeof CartRoute
   '/contact': typeof ContactRoute
   '/studio': typeof StudioRouteWithChildren
   '/admin/categories': typeof AdminCategoriesRoute
@@ -250,6 +258,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/carousel-demo': typeof CarouselDemoRoute
+  '/cart': typeof CartRoute
   '/contact': typeof ContactRoute
   '/shop': typeof ShopRouteWithChildren
   '/studio': typeof StudioRouteWithChildren
@@ -283,6 +292,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/carousel-demo'
+    | '/cart'
     | '/contact'
     | '/shop'
     | '/studio'
@@ -313,6 +323,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/carousel-demo'
+    | '/cart'
     | '/contact'
     | '/studio'
     | '/admin/categories'
@@ -342,6 +353,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/carousel-demo'
+    | '/cart'
     | '/contact'
     | '/shop'
     | '/studio'
@@ -374,6 +386,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
   CarouselDemoRoute: typeof CarouselDemoRoute
+  CartRoute: typeof CartRoute
   ContactRoute: typeof ContactRoute
   ShopRoute: typeof ShopRouteWithChildren
   StudioRoute: typeof StudioRouteWithChildren
@@ -409,6 +422,13 @@ declare module '@tanstack/react-router' {
       path: '/carousel-demo'
       fullPath: '/carousel-demo'
       preLoaderRoute: typeof CarouselDemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -669,6 +689,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
   CarouselDemoRoute: CarouselDemoRoute,
+  CartRoute: CartRoute,
   ContactRoute: ContactRoute,
   ShopRoute: ShopRouteWithChildren,
   StudioRoute: StudioRouteWithChildren,

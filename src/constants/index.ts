@@ -6,8 +6,13 @@ export const SITE_TAGLINE = 'Elegance in Every Thread'
 export const SITE_DESCRIPTION =
   'Discover beautiful sarees and ethnic wear crafted with elegance and tradition. Premium quality silk sarees, designer lehengas, and ethnic wear at Sri Subhakari Fashions.'
 
+// Store WhatsApp Number in international format (without +, spaces, or dashes)
+// Configurable via VITE_WHATSAPP_NUMBER env var or directly here
+const envWhatsApp = typeof import.meta !== 'undefined' && import.meta.env?.VITE_WHATSAPP_NUMBER
+export const WHATSAPP_NUMBER = (envWhatsApp || '919346397838').replace(/[^0-9]/g, '')
+
 export const CONTACT = {
-  whatsapp: '+919346397838',
+  whatsapp: `+${WHATSAPP_NUMBER}`,
   phone: '+91 93463 97838',
   email: 'thatavathibhargavi@gmail.com',
   address: 'Sri subhakari cloth showroom, 13-21-16, 4thward, opposite bhavana rushi mandir, Repalle, Andhra Pradesh-522265',
@@ -21,7 +26,7 @@ export const SOCIAL = {
   youtube: 'https://youtube.com/@srisubhakarifashions',
   facebook: 'https://facebook.com/srisubhakarifashions',
   linkedin: 'https://linkedin.com/company/srisubhakarifashions',
-  whatsapp: `https://wa.me/${'+919346397838'.replace(/[^0-9]/g, '')}`,
+  whatsapp: `https://wa.me/${WHATSAPP_NUMBER}`,
 }
 
 export const NAV_LINKS = [
