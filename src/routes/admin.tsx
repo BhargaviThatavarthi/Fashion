@@ -6,7 +6,8 @@ import {
   LayoutDashboard, Package,
   Inbox, Settings, LogOut, Menu, ChevronRight,
   ShoppingBag, Users, Image, Sparkles, ExternalLink,
-  ChevronLeft, Sun, Moon, Grid, MessageCircle, Calendar, Activity, DollarSign
+  ChevronLeft, Sun, Moon, Grid, MessageCircle, Calendar, Activity, DollarSign,
+  Tag, Video, Star, Home, Share2
 } from 'lucide-react'
 
 export const Route = createFileRoute('/admin')({
@@ -43,21 +44,22 @@ interface NavItem {
 const OVERVIEW_ITEMS: NavItem[] = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Products', href: '/admin/products', icon: Package },
-  { label: 'Messages', href: '/admin/enquiries', icon: Inbox, badge: 2 },
+  { label: 'Categories', href: '/admin/categories', icon: Tag },
   { label: 'Orders', href: '/admin/orders', icon: ShoppingBag },
-  { label: 'Calendar', href: '/admin/reports', icon: Calendar },
-  { label: 'Activity', href: '/admin/reports', icon: Activity },
-  { label: 'Media', href: '/admin/media', icon: Image },
+  { label: 'Customer Leads', href: '/admin/enquiries', icon: Inbox, badge: 3 },
+  { label: 'Customers', href: '/admin/customers', icon: Users },
 ]
 
 const STORE_MANAGEMENT_ITEMS: NavItem[] = [
-  { label: 'Customer Leads', href: '/admin/enquiries', icon: Users },
-  { label: 'Revenue', href: '/admin/reports', icon: DollarSign },
-  { label: 'Inventory', href: '/admin/products', icon: Package },
+  { label: 'Reports & Sales', href: '/admin/reports', icon: DollarSign },
+  { label: 'Media Gallery', href: '/admin/media', icon: Image },
+  { label: 'YouTube Feeds', href: '/admin/youtube', icon: Video },
+  { label: 'Testimonials', href: '/admin/testimonials', icon: Star },
+  { label: 'Homepage Banners', href: '/admin/homepage', icon: Home },
 ]
 
 const ACCOUNT_ITEMS: NavItem[] = [
-  { label: 'Chat', href: '/admin/enquiries', icon: MessageCircle },
+  { label: 'Social Links', href: '/admin/social', icon: Share2 },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
 ]
 

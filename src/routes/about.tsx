@@ -17,11 +17,64 @@ export const Route = createFileRoute('/about')({
 })
 
 const TIMELINE = [
-  { year: '2010', event: 'Sri Subhakari Fashions was founded with a vision to bring authentic handcrafted sarees to modern women.' },
-  { year: '2014', event: 'Expanded to designer and bridal wear, partnering with master weavers across South India.' },
-  { year: '2018', event: 'Launched our online presence and started pan-India delivery through trusted logistics.' },
-  { year: '2021', event: 'Crossed 5,000+ happy customers milestone. Introduced WhatsApp-first shopping experience.' },
-  { year: '2024', event: 'Launched our premium digital boutique — bringing the store experience online with a personal touch.' },
+  {
+    year: '2001',
+    code: '01',
+    content: (
+      <>
+        Sri Subhakari Fashions was founded with a passion for authentic sarees, serving customers through both{' '}
+        <strong className="text-black font-bold">wholesale and retail</strong> with a commitment to quality and tradition.
+      </>
+    ),
+  },
+  {
+    year: '2008',
+    code: '08',
+    content: (
+      <>
+        Expanded our collection with a wider range of{' '}
+        <strong className="text-black font-bold">traditional, designer, and handcrafted sarees</strong>, building strong relationships with skilled weavers across South India.
+      </>
+    ),
+  },
+  {
+    year: '2015',
+    code: '15',
+    content: (
+      <>
+        Grew our wholesale and retail presence, bringing beautiful sarees and ethnic wear to customers across different regions of India.
+      </>
+    ),
+  },
+  {
+    year: '2021',
+    code: '21',
+    content: (
+      <>
+        Introduced a more personalized shopping experience, combining our traditional store service with modern customer engagement through{' '}
+        <strong className="text-black font-bold">WhatsApp and online shopping</strong>.
+      </>
+    ),
+  },
+  {
+    year: '2024',
+    code: '24',
+    content: (
+      <>
+        Launched our <strong className="text-black font-bold">premium digital boutique</strong>, bringing the Sri Subhakari Fashions store experience online while continuing our trusted wholesale and retail services.
+      </>
+    ),
+  },
+  {
+    year: '2026',
+    code: '26',
+    content: (
+      <>
+        Today, Sri Subhakari Fashions continues its journey of blending{' '}
+        <strong className="text-black font-bold">tradition, quality, and modern fashion</strong>, offering carefully selected sarees and ethnic wear for every occasion.
+      </>
+    ),
+  },
 ]
 
 const VALUES = [
@@ -45,7 +98,7 @@ function AboutPage() {
           transition={{ duration: 0.7 }}
         >
           <span className="section-badge">About Us</span>
-          <h1 className="section-heading mt-2">
+          <h1 className="section-heading mt-2 !text-black">
             Our{' '}
             <span
               className="italic"
@@ -60,7 +113,7 @@ function AboutPage() {
             </span>
           </h1>
           <div className="gold-divider" />
-          <p className="section-subtitle max-w-2xl mx-auto mt-4">
+          <p className="section-subtitle max-w-2xl mx-auto mt-4 !text-black font-medium">
             A journey of passion, elegance, and timeless fashion — bringing the art of Indian ethnic wear
             to every woman who loves to celebrate her culture.
           </p>
@@ -78,49 +131,66 @@ function AboutPage() {
               transition={{ duration: 0.7 }}
             >
               <span className="section-badge">About Us</span>
-              <h2 className="section-heading mt-2 mb-5">
+              <h2 className="section-heading mt-2 mb-5 !text-black">
                 Sri Subhakari Fashions
               </h2>
-              <p className="text-gray-600 leading-relaxed mb-4">
-                Welcome to <strong>Sri Subhakari Fashions</strong>, your trusted destination for trendy and affordable fashion. We proudly offer both <strong>wholesale and retail</strong> shopping, making us the perfect choice for individual customers, retailers, and bulk buyers.
+              <p className="text-black leading-relaxed mb-4 font-normal">
+                Welcome to <strong className="text-black font-bold">Sri Subhakari Fashions</strong>, your trusted destination for trendy and affordable fashion. We proudly offer both <strong className="text-black font-bold">wholesale and retail</strong> shopping, making us the perfect choice for individual customers, retailers, and bulk buyers.
               </p>
-              <p className="text-gray-600 leading-relaxed mb-4">
-                We specialize in a wide range of <strong>women's clothing</strong>, including stylish dresses, palazzo sets, kurtis, sarees, nightwear and many more fashionable collections. Whether you're looking for daily wear, office wear, festive outfits, or elegant traditional attire, we have something for every style and occasion.
+              <p className="text-black leading-relaxed mb-4 font-normal">
+                We specialize in a wide range of <strong className="text-black font-bold">women's clothing</strong>, including stylish dresses, palazzo sets, kurtis, sarees, nightwear and many more fashionable collections. Whether you're looking for daily wear, office wear, festive outfits, or elegant traditional attire, we have something for every style and occasion.
               </p>
-              <p className="text-gray-600 leading-relaxed mb-4">
+              <p className="text-black leading-relaxed mb-4 font-normal">
                 At Sri Subhakari Fashions, we believe that everyone deserves quality fashion at affordable prices. That's why we carefully select our collections to ensure the latest designs, comfortable fabrics, and excellent craftsmanship. Our commitment to quality, customer satisfaction, and friendly service has helped us build lasting relationships with our customers.
               </p>
-              <p className="text-gray-600 leading-relaxed mb-4">
+              <p className="text-black leading-relaxed mb-4 font-normal">
                 Whether you're shopping for yourself or purchasing in bulk for your business, Sri Subhakari Fashions is dedicated to providing the best products at the best prices.
               </p>
-              <p className="font-heading font-700 leading-relaxed text-pink-600 mt-6" style={{ color: 'var(--color-pink)' }}>
+              <p className="font-heading font-bold leading-relaxed text-pink-700 mt-6">
                 Sri Subhakari Fashions – Where Style Meets Quality, and Fashion Becomes Affordable.
               </p>
             </motion.div>
 
-            {/* Founder Image Placeholder */}
+            {/* Story Showcase Image with Luxury Designer Shape */}
             <motion.div
-              className="relative"
+              className="relative flex items-center justify-center py-6"
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7 }}
             >
+              {/* Glowing ambient backlight in theme colors */}
               <div
-                className="rounded-[40%_60%_60%_40%/50%_40%_60%_50%] overflow-hidden"
+                className="absolute inset-0 rounded-full scale-110 opacity-70 blur-3xl pointer-events-none"
                 style={{
-                  height: '450px',
-                  background: 'linear-gradient(135deg, var(--color-pink-light), var(--color-pink), var(--color-gold))',
-                  boxShadow: '0 20px 60px rgba(216,92,138,0.2)',
+                  background: 'radial-gradient(circle, rgba(192, 125, 196, 0.45) 0%, rgba(56, 189, 248, 0.3) 50%, transparent 75%)',
                 }}
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1594938298603-c8148c4b4889?w=500&q=80"
-                  alt="Our founder in traditional saree"
-                  className="w-full h-full object-cover mix-blend-overlay opacity-60"
+              />
+
+              <div className="relative w-full max-w-[500px] aspect-[4/3] sm:aspect-[1.18] group">
+                {/* Decorative Offset Gold Frame */}
+                <div
+                  className="absolute inset-0 rounded-[50px_140px_50px_140px] translate-x-3.5 translate-y-3.5 border-2 border-amber-400/50 bg-gradient-to-br from-pink-500/10 to-amber-500/10 pointer-events-none transition-transform duration-700 group-hover:translate-x-5 group-hover:translate-y-5 shadow-lg"
                 />
-                <div className="absolute inset-0 flex items-center justify-center text-white text-8xl">
-                  🥻
+
+                {/* Main Image Container */}
+                <div
+                  className="relative z-10 w-full h-full rounded-[50px_140px_50px_140px] overflow-hidden shadow-2xl border-2 transition-all duration-700 group-hover:-translate-y-1"
+                  style={{
+                    borderColor: 'rgba(216, 92, 138, 0.4)',
+                    boxShadow: '0 25px 60px -10px rgba(192, 125, 196, 0.4), 0 0 0 1px rgba(212, 168, 83, 0.3)',
+                  }}
+                >
+                  <img
+                    src="/images/about-us.jpg"
+                    alt="Welcome to Sri Subhakari Fashions"
+                    className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700"
+                  />
+
+                  {/* Subtle luxury shine overlay */}
+                  <div
+                    className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/15 opacity-60 group-hover:opacity-30 transition-opacity pointer-events-none"
+                  />
                 </div>
               </div>
             </motion.div>
@@ -193,7 +263,7 @@ function AboutPage() {
             viewport={{ once: true }}
           >
             <span className="section-badge">Our Values</span>
-            <h2 className="section-heading mt-2">What We Stand For</h2>
+            <h2 className="section-heading mt-2 !text-black">What We Stand For</h2>
             <div className="gold-divider" />
           </motion.div>
 
@@ -212,8 +282,8 @@ function AboutPage() {
                   <div className="w-12 h-12 rounded-2xl bg-pink-50 border border-pink-100 flex items-center justify-center text-pink-600 mb-3">
                     <IconComp size={24} />
                   </div>
-                  <h3 className="font-heading font-700 text-gray-800 mb-2">{val.title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{val.desc}</p>
+                  <h3 className="font-heading font-bold text-black mb-2">{val.title}</h3>
+                  <p className="text-black text-sm leading-relaxed font-normal">{val.desc}</p>
                 </motion.div>
               )
             })}
@@ -231,7 +301,7 @@ function AboutPage() {
             viewport={{ once: true }}
           >
             <span className="section-badge">Our Journey</span>
-            <h2 className="section-heading mt-2">Milestones &amp; Memories</h2>
+            <h2 className="section-heading mt-2 !text-black">Milestones &amp; Memories</h2>
             <div className="gold-divider" />
           </motion.div>
 
@@ -239,7 +309,7 @@ function AboutPage() {
             {/* Vertical line */}
             <div
               className="absolute left-6 top-2 bottom-2 w-0.5"
-              style={{ background: 'linear-gradient(to bottom, var(--color-pink), var(--color-gold))' }}
+              style={{ background: 'linear-gradient(to bottom, #b83280, #c045c7)' }}
             />
 
             <div className="space-y-8">
@@ -255,18 +325,20 @@ function AboutPage() {
                   {/* Year dot */}
                   <div className="shrink-0 relative z-10">
                     <div
-                      className="w-12 h-12 rounded-full flex items-center justify-center text-white text-xs font-nav font-700"
-                      style={{ background: 'linear-gradient(135deg, var(--color-pink), var(--color-gold))' }}
+                      className="w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-sans font-bold shadow-md shadow-pink-500/20"
+                      style={{ background: 'linear-gradient(135deg, #b83280, #802080)' }}
                     >
-                      {item.year.slice(2)}
+                      {item.code}
                     </div>
                   </div>
-                  {/* Content */}
-                  <div className="premium-card p-5 flex-1">
-                    <div className="font-heading font-700 text-lg mb-1" style={{ color: 'var(--color-pink)' }}>
+                  {/* Content Card */}
+                  <div className="premium-card p-6 flex-1 rounded-2xl border border-pink-100/80 shadow-sm bg-white hover:shadow-md transition-shadow">
+                    <div className="font-heading font-bold text-xl mb-2 tracking-wide" style={{ color: '#b83280' }}>
                       {item.year}
                     </div>
-                    <p className="text-gray-600 text-sm leading-relaxed">{item.event}</p>
+                    <div className="text-black text-sm sm:text-[15px] leading-relaxed font-normal">
+                      {item.content}
+                    </div>
                   </div>
                 </motion.div>
               ))}

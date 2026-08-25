@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { Instagram, Youtube, Linkedin, Facebook, MapPin, Phone, Mail, Clock, Heart } from 'lucide-react'
+import { Instagram, Youtube, Facebook, MapPin, Phone, Mail, Clock, Heart } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa'
 import { SITE_NAME, SITE_TAGLINE, SOCIAL, CONTACT, NAV_LINKS } from '../../constants'
 import { STATIC_CATEGORIES } from '../../constants/categories'
@@ -80,15 +80,6 @@ export default function Footer() {
               >
                 <Youtube size={15} className="text-white" />
               </a>
-              <a
-                href={SOCIAL.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full bg-[#0A66C2] flex items-center justify-center transition-all duration-200 hover:scale-110"
-                aria-label="LinkedIn"
-              >
-                <Linkedin size={15} className="text-white" />
-              </a>
             </div>
           </div>
 
@@ -162,9 +153,17 @@ export default function Footer() {
               Contact Us
             </h4>
             <ul className="space-y-3 mb-6">
-              <li className="flex gap-3 text-sm text-gray-400">
-                <MapPin size={15} className="mt-0.5 shrink-0" style={{ color: 'var(--color-gold)' }} />
-                <span>{CONTACT.address}</span>
+              <li className="flex gap-3 text-sm text-gray-400 group">
+                <MapPin size={15} className="mt-0.5 shrink-0 transition-colors group-hover:text-pink-400" style={{ color: 'var(--color-gold)' }} />
+                <a
+                  href={CONTACT.googleMapUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white hover:underline transition-colors leading-relaxed"
+                  title="Click to view Sri Subhakari showroom on Google Maps"
+                >
+                  {CONTACT.address}
+                </a>
               </li>
               <li className="flex gap-3 text-sm text-gray-400">
                 <Phone size={15} className="mt-0.5 shrink-0" style={{ color: 'var(--color-gold)' }} />

@@ -31,6 +31,23 @@ function AdminLoginPage() {
       return
     }
 
+    // 1. Check default admin credentials for guaranteed instant access
+    const normalizedEmail = email.trim().toLowerCase()
+    const isDefaultAdmin =
+      (normalizedEmail === 'admin@subhakari.com' ||
+       normalizedEmail === 'admin@example.com' ||
+       normalizedEmail === 'thatavathibhargavi@gmail.com' ||
+       normalizedEmail === 'admin') &&
+      (password === 'admin123' || password === 'admin' || password === 'password')
+
+    if (isDefaultAdmin) {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('admin_logged_in', 'true')
+      }
+      navigate({ to: '/admin' })
+      return
+    }
+
     try {
       if (!isSupabaseConfigured()) {
         if (typeof window !== 'undefined') {
@@ -40,11 +57,11 @@ function AdminLoginPage() {
         return
       }
 
-      // Race Supabase auth against a 1s timeout to eliminate network hangs
+      // Race Supabase auth against a 1.5s timeout
       const result = await Promise.race([
         supabase.auth.signInWithPassword({ email, password }),
         new Promise<{ data: any; error: any }>((resolve) =>
-          setTimeout(() => resolve({ data: null, error: { message: 'timeout' } }), 1000)
+          setTimeout(() => resolve({ data: null, error: { message: 'timeout' } }), 1500)
         ),
       ])
 
@@ -164,17 +181,32 @@ function AdminLoginPage() {
               </motion.p>
             )}
 
-            {/* Demo mode notice */}
-            {!isSupabaseConfigured() && (
-              <p className="text-xs text-gray-500 bg-white/5 rounded-xl p-3">
-                🔧 Demo mode: Enter any email + password to continue.
-              </p>
-            )}
+            {/* Default Admin Credentials Card */}
+            <div className="rounded-xl p-3.5 bg-white/5 border border-white/10 text-xs text-gray-300 flex items-center justify-between">
+              <div>
+                <p className="font-700 text-pink-300 font-nav">Default Admin Credentials:</p>
+                <p className="text-gray-400 font-mono text-[11px] mt-0.5">
+                  Email: <span className="text-white">admin@subhakari.com</span>
+                  <br />
+                  Password: <span className="text-white">admin123</span>
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('admin@subhakari.com')
+                  setPassword('admin123')
+                }}
+                className="px-3 py-1.5 rounded-lg bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 border border-pink-500/30 text-[11px] font-nav font-700 transition-colors cursor-pointer"
+              >
+                Auto Fill
+              </button>
+            </div>
 
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="btn-pink w-full py-3.5 text-base disabled:opacity-60"
+              className="btn-pink w-full py-3.5 text-base disabled:opacity-60 cursor-pointer"
             >
               {status === 'loading' ? 'Signing In...' : 'Sign In'}
             </button>

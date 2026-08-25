@@ -11,7 +11,8 @@ export const CONTACT = {
   phone: '+91 93463 97838',
   email: 'thatavathibhargavi@gmail.com',
   address: 'Sri subhakari cloth showroom, 13-21-16, 4thward, opposite bhavana rushi mandir, Repalle, Andhra Pradesh-522265',
-  googleMapUrl: 'https://www.google.com/maps/search/?api=1&query=Sri+subhakari+cloth+showroom+13-21-16+4th+ward+opposite+bhavana+rushi+mandir+Repalle+Andhra+Pradesh+522265',
+  googleMapUrl: 'https://q.me-qr.com/19x1qvhh',
+  qrLocationUrl: 'https://q.me-qr.com/19x1qvhh',
   businessHours: 'Mon–Sun: 09:00 AM – 10:00 PM',
 }
 

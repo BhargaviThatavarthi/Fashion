@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from 'lucide-react'
-import { FaWhatsapp, FaInstagram, FaFacebook, FaYoutube, FaLinkedin } from 'react-icons/fa'
+import { FaWhatsapp, FaInstagram, FaFacebook, FaYoutube } from 'react-icons/fa'
 import { CONTACT, SOCIAL } from '../constants'
 import { submitEnquiry } from '../services/enquiries'
 import { z } from 'zod'
@@ -83,9 +83,9 @@ function ContactPage() {
       >
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
           <span className="section-badge">Get In Touch</span>
-          <h1 className="section-heading mt-2">Contact Us</h1>
+          <h1 className="section-heading mt-2 !text-black">Contact Us</h1>
           <div className="gold-divider" />
-          <p className="section-subtitle max-w-lg mx-auto mt-4">
+          <p className="section-subtitle max-w-lg mx-auto mt-4 !text-black font-medium">
             We'd love to hear from you! Reach us through WhatsApp, phone, email, or by filling out the form below.
           </p>
         </motion.div>
@@ -102,7 +102,7 @@ function ContactPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="font-heading text-2xl font-700 text-gray-800 mb-6">
+              <h2 className="font-heading text-2xl font-bold text-black mb-6">
                 Send Us a Message
               </h2>
 
@@ -113,13 +113,13 @@ function ContactPage() {
                   className="text-center py-8"
                 >
                   <CheckCircle size={56} className="mx-auto mb-4" style={{ color: 'var(--color-whatsapp)' }} />
-                  <h3 className="font-heading text-xl font-700 text-gray-800 mb-2">Message Sent!</h3>
-                  <p className="text-gray-500 text-sm">
+                  <h3 className="font-heading text-xl font-bold text-black mb-2">Message Sent!</h3>
+                  <p className="text-black text-sm">
                     Thank you for reaching out. We'll get back to you within 24 hours.
                   </p>
                   <button
                     onClick={() => setStatus('idle')}
-                    className="mt-6 btn-outline-pink px-6 py-2.5 text-sm"
+                    className="mt-6 btn-outline-pink px-6 py-2.5 text-sm cursor-pointer"
                   >
                     Send Another Message
                   </button>
@@ -128,13 +128,13 @@ function ContactPage() {
                 <form onSubmit={handleSubmit} noValidate className="space-y-5">
                   {/* Name */}
                   <div>
-                    <label className="block font-nav text-xs font-700 uppercase tracking-wide text-gray-500 mb-1.5">
+                    <label className="block font-nav text-xs font-bold uppercase tracking-wide text-black mb-1.5">
                       Full Name *
                     </label>
                     <input
                       type="text"
                       placeholder="Enter your full name"
-                      className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors"
+                      className="w-full border rounded-xl px-4 py-3 text-sm text-black placeholder:text-gray-400 focus:outline-none transition-colors"
                       style={{
                         borderColor: errors.name ? '#ef4444' : 'var(--color-pink-light)',
                         background: 'white',
@@ -146,13 +146,13 @@ function ContactPage() {
 
                   {/* Phone */}
                   <div>
-                    <label className="block font-nav text-xs font-700 uppercase tracking-wide text-gray-500 mb-1.5">
+                    <label className="block font-nav text-xs font-bold uppercase tracking-wide text-black mb-1.5">
                       Phone Number
                     </label>
                     <input
                       type="tel"
                       placeholder="+91 XXXXXXXXXX"
-                      className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none"
+                      className="w-full border rounded-xl px-4 py-3 text-sm text-black placeholder:text-gray-400 focus:outline-none"
                       style={{ borderColor: 'var(--color-pink-light)' }}
                       {...field('phone')}
                     />
@@ -160,13 +160,13 @@ function ContactPage() {
 
                   {/* Email */}
                   <div>
-                    <label className="block font-nav text-xs font-700 uppercase tracking-wide text-gray-500 mb-1.5">
+                    <label className="block font-nav text-xs font-bold uppercase tracking-wide text-black mb-1.5">
                       Email Address
                     </label>
                     <input
                       type="email"
                       placeholder="your@email.com"
-                      className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none"
+                      className="w-full border rounded-xl px-4 py-3 text-sm text-black placeholder:text-gray-400 focus:outline-none"
                       style={{
                         borderColor: errors.email ? '#ef4444' : 'var(--color-pink-light)',
                         background: 'white',
@@ -178,13 +178,13 @@ function ContactPage() {
 
                   {/* Message */}
                   <div>
-                    <label className="block font-nav text-xs font-700 uppercase tracking-wide text-gray-500 mb-1.5">
+                    <label className="block font-nav text-xs font-bold uppercase tracking-wide text-black mb-1.5">
                       Message *
                     </label>
                     <textarea
                       rows={5}
                       placeholder="Tell us how we can help you..."
-                      className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none resize-none"
+                      className="w-full border rounded-xl px-4 py-3 text-sm text-black placeholder:text-gray-400 focus:outline-none resize-none"
                       style={{
                         borderColor: errors.message ? '#ef4444' : 'var(--color-pink-light)',
                         background: 'white',
@@ -205,7 +205,7 @@ function ContactPage() {
                   <button
                     type="submit"
                     disabled={status === 'loading'}
-                    className="btn-pink w-full flex items-center justify-center gap-2 py-3.5 disabled:opacity-60"
+                    className="btn-pink w-full flex items-center justify-center gap-2 py-3.5 disabled:opacity-60 cursor-pointer"
                   >
                     <Send size={16} />
                     {status === 'loading' ? 'Sending...' : 'Send Message'}
@@ -221,7 +221,7 @@ function ContactPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="font-heading text-2xl font-700 text-gray-800 mb-6">
+              <h2 className="font-heading text-2xl font-bold text-black mb-6">
                 Our Information
               </h2>
 
@@ -238,13 +238,13 @@ function ContactPage() {
                       <Icon size={18} style={{ color }} />
                     </div>
                     <div>
-                      <p className="font-nav text-xs font-700 uppercase tracking-wide text-gray-400 mb-0.5">{title}</p>
+                      <p className="font-nav text-xs font-bold uppercase tracking-wide text-black mb-0.5">{title}</p>
                       {link ? (
-                        <a href={link} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-700 hover:text-pink-600 transition-colors">
+                        <a href={link} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-black hover:text-pink-600 transition-colors">
                           {value}
                         </a>
                       ) : (
-                        <p className="text-sm text-gray-700">{value}</p>
+                        <p className="text-sm font-medium text-black">{value}</p>
                       )}
                     </div>
                   </div>
@@ -256,7 +256,7 @@ function ContactPage() {
                 href={`https://wa.me/${CONTACT.whatsapp.replace(/[^0-9]/g, '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-whatsapp flex items-center justify-center gap-3 w-full py-4 mb-8 text-base"
+                className="btn-whatsapp flex items-center justify-center gap-3 w-full py-4 mb-8 text-base cursor-pointer"
               >
                 <FaWhatsapp size={22} />
                 Chat on WhatsApp — Quick Response!
@@ -264,7 +264,7 @@ function ContactPage() {
 
               {/* Social Links */}
               <div>
-                <h3 className="font-nav font-700 text-xs uppercase tracking-widest text-gray-400 mb-4">
+                <h3 className="font-nav font-bold text-xs uppercase tracking-widest text-black mb-4">
                   Follow Us
                 </h3>
                 <div className="flex gap-3">
@@ -273,7 +273,6 @@ function ContactPage() {
                     { href: SOCIAL.instagram, icon: FaInstagram, bg: 'linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045)', label: 'Instagram' },
                     { href: SOCIAL.facebook, icon: FaFacebook, bg: '#1877F2', label: 'Facebook' },
                     { href: SOCIAL.youtube, icon: FaYoutube, bg: '#FF0000', label: 'YouTube' },
-                    { href: SOCIAL.linkedin, icon: FaLinkedin, bg: '#0A66C2', label: 'LinkedIn' },
                   ].map(({ href, icon: Icon, bg, label }) => (
                     <a
                       key={label}
@@ -292,25 +291,65 @@ function ContactPage() {
             </motion.div>
           </div>
 
-          {/* Google Map Placeholder */}
+          {/* Visit Showroom & Google Map Section with Location QR Code */}
           <motion.div
-            className="mt-12 rounded-2xl overflow-hidden shadow-lg"
-            style={{ height: '400px', border: '2px solid var(--color-pink-light)' }}
+            className="mt-12 bg-white rounded-3xl p-6 sm:p-8 border shadow-sm"
+            style={{ borderColor: 'var(--color-pink-light)' }}
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
           >
-            <iframe
-              src={`https://maps.google.com/maps?q=${encodeURIComponent(CONTACT.address)}&output=embed`}
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="Sri Subhakari Fashions Location"
-            />
+            <div className="grid lg:grid-cols-3 gap-8 items-center">
+              {/* Interactive Google Map */}
+              <div className="lg:col-span-2 rounded-2xl overflow-hidden shadow-md h-[380px] border" style={{ borderColor: 'var(--color-pink-light)' }}>
+                <iframe
+                  src="https://maps.google.com/maps?q=16.023271,80.8393811(Sri+subhakari+cloth+showroom)&t=&z=17&ie=UTF8&iwloc=B&output=embed"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Sri Subhakari Fashions Location"
+                />
+              </div>
+
+              {/* Location QR Code Navigation Card */}
+              <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-gradient-to-br from-pink-50/70 via-white to-amber-50/70 border" style={{ borderColor: 'var(--color-pink-light)' }}>
+                <span className="section-badge mb-2">Scan &amp; Navigate</span>
+                <h3 className="font-heading font-bold text-lg text-black mb-1">
+                  Visit Our Showroom
+                </h3>
+                <p className="text-xs text-black font-medium mb-4 max-w-xs leading-relaxed">
+                  Scan this QR code with your smartphone camera to open turn-by-turn directions in Google Maps.
+                </p>
+
+                {/* QR Code Container (Clickable) */}
+                <a
+                  href={CONTACT.googleMapUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-48 h-48 p-3 bg-white rounded-2xl shadow-md border-2 border-pink-200/80 flex items-center justify-center transition-transform hover:scale-105 group cursor-pointer"
+                  title="Click to open QR code location in Google Maps"
+                >
+                  <img
+                    src="/images/location-qr.png"
+                    alt="Sri Subhakari Fashions Store Location QR Code"
+                    className="w-full h-full object-contain"
+                  />
+                </a>
+
+                <a
+                  href={CONTACT.googleMapUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center gap-1.5 text-xs font-nav font-bold text-pink-600 hover:text-pink-700 bg-pink-50 hover:bg-pink-100 px-4 py-2 rounded-xl transition-all"
+                >
+                  <MapPin size={14} /> Open in Google Maps &rarr;
+                </a>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>

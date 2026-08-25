@@ -94,7 +94,7 @@ export const STATIC_CATEGORIES: StaticCategory[] = [
     subtitle: 'Trendy Ethnic & Fusion Designer Kurtis',
     description: 'Chic everyday and festive kurtis, tunics, and coordinated sets for contemporary style.',
     order: 6,
-    aliases: ['kurtis', 'kurti', 'tops', 'cat-tops', 'ethnic-tops'],
+    aliases: ['kurtis', 'kurti', "kurti's", 'tops', 'cat-tops', 'ethnic-tops', '3pc-kurta-sets', '3pc kurta sets', '2-piece-sets', '2 piece sets'],
   },
   {
     id: '7',
@@ -105,7 +105,7 @@ export const STATIC_CATEGORIES: StaticCategory[] = [
     subtitle: 'Unstitched Luxury Salwar Suit Sets',
     description: 'Premium unstitched salwar suit fabrics and luxury matching dupatta sets ready to custom tailor.',
     order: 7,
-    aliases: ['dress-materials', 'dress-material', 'salwar-suit', 'dress materials', 'cat-dress-materials'],
+    aliases: ['dress-materials', 'dress-material', 'salwar-suit', 'dress materials', 'cat-dress-materials', 'unstitched-suit'],
   },
   {
     id: '8',
