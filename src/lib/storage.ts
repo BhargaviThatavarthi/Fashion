@@ -122,7 +122,8 @@ export async function uploadProductImage(
     .replace(/[^a-z0-9_-]/g, '_')
     .slice(0, 32)
   const timestamp = Date.now()
-  const filePath = `${folder}/${timestamp}_${sanitizedName}.jpg`
+  const randomSuffix = Math.random().toString(36).substring(2, 8)
+  const filePath = `${folder}/${timestamp}_${randomSuffix}_${sanitizedName}.jpg`
 
   if (!isSupabaseConfigured()) {
     // Local / offline preview mode fallback
@@ -152,7 +153,18 @@ export async function uploadProductImage(
 
   // 2. Obtain the public URL from Supabase Storage
   const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath)
-  const publicUrl = data?.publicUrl || ''
+  let publicUrl = data?.publicUrl || ''
+
+  if (!publicUrl && typeof window !== 'undefined') {
+    const rawUrl = (import.meta as any).env?.VITE_SUPABASE_URL || ''
+    if (rawUrl && !rawUrl.includes('placeholder')) {
+      publicUrl = `${rawUrl.replace(/\/+$/, '')}/storage/v1/object/public/${STORAGE_BUCKET}/${filePath}`
+    }
+  }
+
+  if (!publicUrl) {
+    throw new Error('Failed to retrieve public URL from Supabase Storage.')
+  }
 
   // 3. Track asset in media_assets table if available
   try {
