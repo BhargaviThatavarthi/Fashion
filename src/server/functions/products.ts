@@ -364,7 +364,6 @@ export const createProductServerFn = createServerFn({
       stock_quantity: stockQty,
       stock: stockQty,
       in_stock: inStock,
-      image_url: primaryImageUrl,
       images: imagesArray,
       fabric: product.fabric || null,
       color: product.color || [],
@@ -436,9 +435,6 @@ export const updateProductServerFn = createServerFn({
     }
     if (imagesArray !== undefined) {
       updatePayload.images = imagesArray
-      updatePayload.image_url = imagesArray[0] || null
-    } else if (updates.image_url !== undefined) {
-      updatePayload.image_url = updates.image_url
     }
     if (updates.fabric !== undefined) updatePayload.fabric = updates.fabric
     if (updates.color !== undefined) updatePayload.color = updates.color

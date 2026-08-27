@@ -108,6 +108,17 @@ export function validateAndCompressImage(
 }
 
 /**
+ * Converts a data URL (base64) or blob URL string into a standard Blob.
+ */
+export async function dataUrlToBlob(urlOrData: string): Promise<Blob> {
+  if (urlOrData.startsWith('data:') || urlOrData.startsWith('blob:')) {
+    const res = await fetch(urlOrData)
+    return await res.blob()
+  }
+  throw new Error('Provided string is not a valid data or blob URL')
+}
+
+/**
  * Uploads a compressed image Blob or File to Supabase Storage in the appropriate category folder.
  */
 export async function uploadProductImage(
@@ -125,19 +136,6 @@ export async function uploadProductImage(
   const randomSuffix = Math.random().toString(36).substring(2, 8)
   const filePath = `${folder}/${timestamp}_${randomSuffix}_${sanitizedName}.jpg`
 
-  if (!isSupabaseConfigured()) {
-    // Local / offline preview mode fallback
-    const previewUrl =
-      fileOrBlob instanceof Blob && !(fileOrBlob instanceof File)
-        ? URL.createObjectURL(fileOrBlob)
-        : URL.createObjectURL(fileOrBlob)
-    return {
-      publicUrl: previewUrl,
-      filePath,
-      size: fileOrBlob.size,
-    }
-  }
-
   // 1. Upload to Supabase Storage bucket 'product-images'
   const { error: uploadError } = await supabase.storage
     .from(STORAGE_BUCKET)
@@ -148,6 +146,7 @@ export async function uploadProductImage(
     })
 
   if (uploadError) {
+    console.error('Supabase Storage upload error:', uploadError)
     throw new Error(`Failed to upload to Supabase Storage: ${uploadError.message}`)
   }
 
@@ -155,15 +154,9 @@ export async function uploadProductImage(
   const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath)
   let publicUrl = data?.publicUrl || ''
 
-  if (!publicUrl && typeof window !== 'undefined') {
-    const rawUrl = (import.meta as any).env?.VITE_SUPABASE_URL || ''
-    if (rawUrl && !rawUrl.includes('placeholder')) {
-      publicUrl = `${rawUrl.replace(/\/+$/, '')}/storage/v1/object/public/${STORAGE_BUCKET}/${filePath}`
-    }
-  }
-
   if (!publicUrl) {
-    throw new Error('Failed to retrieve public URL from Supabase Storage.')
+    const cleanUrl = supabaseUrl.replace(/\/+$/, '')
+    publicUrl = `${cleanUrl}/storage/v1/object/public/${STORAGE_BUCKET}/${filePath}`
   }
 
   // 3. Track asset in media_assets table if available
@@ -177,7 +170,6 @@ export async function uploadProductImage(
       created_at: new Date().toISOString(),
     })
   } catch (trackErr) {
-    // Non-fatal tracking notice
     console.debug('Media tracking notice:', trackErr)
   }
 

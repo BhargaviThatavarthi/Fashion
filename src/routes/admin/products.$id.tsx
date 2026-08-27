@@ -8,7 +8,7 @@ import { getCategories } from '../../services/categories'
 import { STATIC_CATEGORIES, getStaticCategory } from '../../constants/categories'
 import { slugify, formatPrice, getImageUrl } from '../../utils/format'
 import { FABRIC_OPTIONS, SIZE_OPTIONS } from '../../constants'
-import { validateAndCompressImage, uploadProductImage } from '../../lib/storage'
+import { validateAndCompressImage, uploadProductImage, dataUrlToBlob } from '../../lib/storage'
 import { getSharedMedia, addSharedMedia, type MediaItem } from '../../utils/media'
 
 export const Route = createFileRoute('/admin/products/$id')({
@@ -198,12 +198,10 @@ function AdminProductEditForm() {
 
         setUploadProgress(Math.round(50 + (i / files.length) * 45))
 
-        // 2. Upload to Supabase Storage in category-specific folder (e.g. tops/, dresses/, jeans/)
+        // 2. Upload to Supabase Storage in category-specific folder (e.g. tops/, dresses/, sarees/)
         const { publicUrl } = await uploadProductImage(blob, file.name, selectedCategory)
-
-        const finalUrl = publicUrl || previewUrl
-        uploadedUrls.push(finalUrl)
-        addSharedMedia(file.name, finalUrl, compressedSize)
+        uploadedUrls.push(publicUrl)
+        addSharedMedia(file.name, publicUrl, compressedSize)
       }
 
       setUploadProgress(100)
@@ -303,7 +301,7 @@ function AdminProductEditForm() {
     if (croppingIdx === null) return
     const src = form.images[croppingIdx]
 
-    if (!src.startsWith('data:') && !src.startsWith('http') && !src.startsWith('/')) {
+    if (!src.startsWith('data:') && !src.startsWith('http') && !src.startsWith('/') && !src.startsWith('blob:')) {
       alert('Cannot crop this image format.')
       setCroppingIdx(null)
       return
@@ -348,9 +346,9 @@ function AdminProductEditForm() {
     e.preventDefault()
     setSaving(true)
     try {
-      let currentImages = [...form.images]
-      if (imageUrl.trim() && !currentImages.includes(imageUrl.trim())) {
-        currentImages.push(imageUrl.trim())
+      let rawImages = [...form.images]
+      if (imageUrl.trim() && !rawImages.includes(imageUrl.trim())) {
+        rawImages.push(imageUrl.trim())
       }
 
       const categoryObj =
@@ -358,7 +356,7 @@ function AdminProductEditForm() {
           (c) => c.id === form.category_id || c.slug === form.category_id || c.name === form.category_id,
         ) || getStaticCategory(form.category_id)
       const categoryId = categoryObj?.id || form.category_id || undefined
-      const categoryName = categoryObj?.name || form.category_id || ''
+      const categoryName = categoryObj?.name || form.category_id || 'general'
 
       if (!categoryId) {
         alert('Please select a category for this product.')
@@ -366,13 +364,30 @@ function AdminProductEditForm() {
         return
       }
 
+      // Convert any base64 data URLs or local blob URLs to Supabase Storage before persisting
+      const finalImages: string[] = []
+      for (let i = 0; i < rawImages.length; i++) {
+        const img = rawImages[i]
+        if (img.startsWith('data:') || img.startsWith('blob:')) {
+          try {
+            const blob = await dataUrlToBlob(img)
+            const { publicUrl } = await uploadProductImage(blob, `product_${Date.now()}_${i}.jpg`, categoryName)
+            finalImages.push(publicUrl)
+          } catch (blobErr: any) {
+            console.error('Failed to upload image blob:', blobErr)
+          }
+        } else if (!img.includes('localhost') && !img.includes('127.0.0.1')) {
+          finalImages.push(img)
+        }
+      }
+
       const stockQty = parseInt(form.stock) || 0
       const inStock = stockQty > 0 && form.in_stock !== false
 
       await updateProduct(id, {
         ...form,
-        images: currentImages,
-        image_url: currentImages[0] || null,
+        images: finalImages,
+        image_url: finalImages[0] || null,
         price: parseFloat(form.price) || 0,
         offer_price: form.offer_price ? parseFloat(form.offer_price) : undefined,
         stock: stockQty,

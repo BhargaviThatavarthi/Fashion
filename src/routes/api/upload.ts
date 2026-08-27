@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
-import { supabase, isSupabaseConfigured } from '../../lib/supabase'
+import { supabase, isSupabaseConfigured, supabaseUrl } from '../../lib/supabase'
+import { STORAGE_BUCKET } from '../../lib/storage'
 
 export const Route = createFileRoute('/api/upload')({
   server: {
@@ -15,28 +16,25 @@ export const Route = createFileRoute('/api/upload')({
 
           if (isSupabaseConfigured()) {
             const fileExt = file.name.split('.').pop()
-            const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`
+            const fileName = `uploads/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`
             const buffer = await file.arrayBuffer()
 
             const { error } = await supabase.storage
-              .from('products')
+              .from(STORAGE_BUCKET)
               .upload(fileName, buffer, {
-                contentType: file.type,
+                contentType: file.type || 'image/jpeg',
+                upsert: true,
               })
 
             if (error) {
               return json({ error: error.message }, { status: 500 })
             }
 
-            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-            const publicUrl = `${supabaseUrl}/storage/v1/object/public/products/${fileName}`
+            const cleanUrl = supabaseUrl.replace(/\/+$/, '')
+            const publicUrl = `${cleanUrl}/storage/v1/object/public/${STORAGE_BUCKET}/${fileName}`
             return json({ url: publicUrl })
           } else {
-            // Fallback for demo mode: Convert file to Base64 data URL
-            const buffer = await file.arrayBuffer()
-            const base64 = Buffer.from(buffer).toString('base64')
-            const dataUrl = `data:${file.type};base64,${base64}`
-            return json({ url: dataUrl })
+            return json({ error: 'Supabase storage is not configured' }, { status: 500 })
           }
         } catch (err: any) {
           return json({ error: err.message }, { status: 500 })
@@ -45,3 +43,4 @@ export const Route = createFileRoute('/api/upload')({
     },
   },
 })
+

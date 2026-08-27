@@ -38,47 +38,54 @@ const PLACEHOLDERS: Record<string, string> = {
 }
 
 export function getImageUrl(path: string | null | undefined, fallback: string = '/images/silk-saree.png'): string {
-  if (!path || path.trim() === '') return fallback
+  if (!path || typeof path !== 'string' || path.trim() === '') return fallback
   const trimmed = path.trim()
 
-  if (
-    trimmed.startsWith('http://') ||
-    trimmed.startsWith('https://') ||
-    trimmed.startsWith('data:') ||
-    trimmed.startsWith('blob:')
-  ) {
+  // 1. Direct external HTTP / HTTPS URLs (e.g. public Supabase Storage CDN, Unsplash, etc.)
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    // If it points to localhost or private 127.0.0.1 in production, reject and use fallback
+    if (trimmed.includes('localhost') || trimmed.includes('127.0.0.1')) {
+      return fallback
+    }
     return trimmed
   }
 
+  // 2. Allow active browser blob/data URLs only in browser environment
+  if (trimmed.startsWith('blob:') || trimmed.startsWith('data:')) {
+    return trimmed
+  }
+
+  // 3. Known static placeholders
   if (PLACEHOLDERS[trimmed]) {
     return PLACEHOLDERS[trimmed]
   }
 
+  // 4. Bundled local static assets (e.g. /images/silk-saree.png)
   if (trimmed.startsWith('/images/')) {
     return trimmed
   }
 
-  // Supabase storage URL resolution
-  if (supabaseUrl && !supabaseUrl.includes('placeholder')) {
-    const cleanSupabaseUrl = supabaseUrl.replace(/\/+$/, '')
+  // 5. Supabase Storage resolution
+  const targetBaseUrl = (supabaseUrl && !supabaseUrl.includes('placeholder'))
+    ? supabaseUrl.replace(/\/+$/, '')
+    : 'https://kmxsgomxxhwpmoayeqmj.supabase.co'
 
-    if (trimmed.startsWith('/storage/v1/object/public/')) {
-      return `${cleanSupabaseUrl}${trimmed}`
-    }
-    if (trimmed.startsWith('storage/v1/object/public/')) {
-      return `${cleanSupabaseUrl}/${trimmed}`
-    }
-    if (trimmed.startsWith('/product-images/') || trimmed.startsWith('/products/')) {
-      return `${cleanSupabaseUrl}/storage/v1/object/public${trimmed}`
-    }
-    if (trimmed.startsWith('product-images/') || trimmed.startsWith('products/')) {
-      return `${cleanSupabaseUrl}/storage/v1/object/public/${trimmed}`
-    }
-    // Relative category path or image filename
-    return `${cleanSupabaseUrl}/storage/v1/object/public/product-images/${trimmed.replace(/^\//, '')}`
+  if (trimmed.startsWith('/storage/v1/object/public/')) {
+    return `${targetBaseUrl}${trimmed}`
+  }
+  if (trimmed.startsWith('storage/v1/object/public/')) {
+    return `${targetBaseUrl}/${trimmed}`
+  }
+  if (trimmed.startsWith('/product-images/') || trimmed.startsWith('/products/')) {
+    return `${targetBaseUrl}/storage/v1/object/public${trimmed}`
+  }
+  if (trimmed.startsWith('product-images/') || trimmed.startsWith('products/')) {
+    return `${targetBaseUrl}/storage/v1/object/public/${trimmed}`
   }
 
-  return trimmed
+  // Relative category path or image filename (e.g. "dress-materials/1787567_tt.jpg" or "general/photo.jpg")
+  const cleanPath = trimmed.replace(/^\/+/, '')
+  return `${targetBaseUrl}/storage/v1/object/public/product-images/${cleanPath}`
 }
 
 export function formatRating(rating: number): string {

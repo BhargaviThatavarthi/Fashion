@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Send } from 'lucide-react'
-import { supabase } from '../../lib/supabase'
+import { supabase, isSupabaseConfigured } from '../../lib/supabase'
 
 const DECORATIONS = [
   { emoji: '🌸', top: '15%', left: '10%', delay: '0s' },
@@ -23,7 +23,7 @@ export default function Newsletter() {
     setStatus('loading')
     try {
       // Try Supabase if configured
-      if (import.meta.env.VITE_SUPABASE_URL) {
+      if (isSupabaseConfigured()) {
         await supabase.from('newsletter_subscribers').insert({ email })
       }
       setStatus('success')

@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Upload, Trash2, Eye, Clipboard, CheckCircle2, AlertCircle, RefreshCw, Image as ImageIcon } from 'lucide-react'
-import { supabase, isSupabaseConfigured } from '../../lib/supabase'
+import { supabase, isSupabaseConfigured, supabaseUrl } from '../../lib/supabase'
 import { getSharedMedia, saveSharedMedia, addSharedMedia } from '../../utils/media'
 import type { MediaAsset } from '../../types'
 
@@ -102,6 +102,7 @@ function AdminMedia() {
               .from('product-images')
               .upload(filePath, file, { cacheControl: '3600', upsert: true })
 
+            const cleanBase = supabaseUrl.replace(/\/+$/, '')
             if (storageErr) {
               // Fallback bucket check if 'product-images' does not exist yet
               const { error: altErr } = await supabase.storage
@@ -109,9 +110,9 @@ function AdminMedia() {
                 .upload(filePath, file, { cacheControl: '3600', upsert: true })
 
               if (altErr) throw storageErr
-              publicUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/products/${filePath}`
+              publicUrl = `${cleanBase}/storage/v1/object/public/products/${filePath}`
             } else {
-              publicUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/product-images/${filePath}`
+              publicUrl = `${cleanBase}/storage/v1/object/public/product-images/${filePath}`
             }
 
             // 2. Save metadata to Supabase 'media_assets' database table

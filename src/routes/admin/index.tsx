@@ -9,6 +9,7 @@ import { getProducts } from '../../services/products'
 import { getCategories } from '../../services/categories'
 import { getEnquiries } from '../../services/enquiries'
 import { formatPrice } from '../../utils/format'
+import { isSupabaseConfigured } from '../../lib/supabase'
 
 export const Route = createFileRoute('/admin/')({
   component: AdminDashboard,
@@ -28,9 +29,9 @@ interface Order {
 
 const MOCK_ORDERS: Order[] = [
   { id: 'ORD-001', customer_name: 'Priya Sharma', email: 'priya@gmail.com', phone: '9876543210', product_name: 'Royal Kanjivaram Silk Saree', quantity: 1, total_price: 10999, status: 'Pending', date: '2026-08-08' },
-  { id: 'ORD-002', customer_name: 'Ananya Nair', email: 'ananya@gmail.com', phone: '8765432109', product_name: 'Mysore Crepe Chiffon Saree', quantity: 2, total_price: 7598, status: 'Shipped', date: '2026-08-07' },
-  { id: 'ORD-003', customer_name: 'Kavitha Nair', email: 'kavitha@gmail.com', phone: '7654321098', product_name: 'Anarkali Kurti with Dupatta', quantity: 1, total_price: 2899, status: 'Delivered', date: '2026-08-06' },
-  { id: 'ORD-004', customer_name: 'Meera Reddy', email: 'meera@gmail.com', phone: '6543210987', product_name: 'Bridal Red Lehenga Choli', quantity: 1, total_price: 24500, status: 'Delivered', date: '2026-08-04' },
+  { id: 'ORD-002', customer_name: 'Ananya Rao', email: 'ananya@gmail.com', phone: '9876543211', product_name: 'Crimson Bridal Silk Saree', quantity: 1, total_price: 24999, status: 'Shipped', date: '2026-08-07' },
+  { id: 'ORD-003', customer_name: 'Deepa Patel', email: 'deepa@gmail.com', phone: '9876543212', product_name: 'Handwoven Chanderi Cotton Saree', quantity: 2, total_price: 7998, status: 'Delivered', date: '2026-08-06' },
+  { id: 'ORD-004', customer_name: 'Kavitha Reddy', email: 'kavitha@gmail.com', phone: '9876543213', product_name: 'Emerald Green Banarasi Saree', quantity: 1, total_price: 18999, status: 'Pending', date: '2026-08-05' },
 ]
 
 const MOCK_ENQUIRIES = [
@@ -98,7 +99,7 @@ function AdminDashboard() {
   const { data: enquiries } = useQuery({
     queryKey: ['enquiries'],
     queryFn: getEnquiries,
-    enabled: !!import.meta.env.VITE_SUPABASE_URL,
+    enabled: isSupabaseConfigured(),
   })
 
   const allProducts = productsData?.data || []
