@@ -46,7 +46,7 @@ export const getCategoriesServerFn = createServerFn({
         })
       }
     } catch (err: any) {
-      console.warn('Supabase categories query notice:', err.message)
+      console.warn('Supabase categories query notice:', err?.message || String(err))
     }
   }
 

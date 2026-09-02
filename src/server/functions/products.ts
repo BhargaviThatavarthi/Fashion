@@ -70,7 +70,7 @@ async function fetchCategoriesMap(): Promise<Map<string, Category>> {
       })
     }
   } catch (err: any) {
-    console.warn('Failed to fetch categories map from Supabase:', err.message)
+    console.warn('Failed to fetch categories map from Supabase:', err?.message || String(err))
   }
   return map
 }
@@ -164,7 +164,7 @@ export const getProductsServerFn = createServerFn({
         hasMore: totalCount > to + 1,
       }
     } catch (err: any) {
-      console.error('Error in getProductsServerFn:', err.message)
+      console.error('Error in getProductsServerFn:', err?.message || String(err))
       return {
         data: [],
         total: 0,
@@ -207,7 +207,7 @@ export const getProductBySlugServerFn = createServerFn({
 
       return formatProductRecord(data, categoryObj)
     } catch (err: any) {
-      console.error('Error in getProductBySlugServerFn:', err.message)
+      console.error('Error in getProductBySlugServerFn:', err?.message || String(err))
       return null
     }
   })
@@ -231,7 +231,7 @@ export const getFeaturedProductsServerFn = createServerFn({
       return formatProductRecord(p, catObj)
     })
   } catch (err: any) {
-    console.error('Error in getFeaturedProductsServerFn:', err.message)
+    console.error('Error in getFeaturedProductsServerFn:', err?.message || String(err))
     return []
   }
 })
@@ -255,7 +255,7 @@ export const getBestSellersServerFn = createServerFn({
       return formatProductRecord(p, catObj)
     })
   } catch (err: any) {
-    console.error('Error in getBestSellersServerFn:', err.message)
+    console.error('Error in getBestSellersServerFn:', err?.message || String(err))
     return []
   }
 })
@@ -279,7 +279,7 @@ export const getNewArrivalsServerFn = createServerFn({
       return formatProductRecord(p, catObj)
     })
   } catch (err: any) {
-    console.error('Error in getNewArrivalsServerFn:', err.message)
+    console.error('Error in getNewArrivalsServerFn:', err?.message || String(err))
     return []
   }
 })
@@ -302,7 +302,7 @@ export const getFestivalProductsServerFn = createServerFn({
       return formatProductRecord(p, catObj)
     })
   } catch (err: any) {
-    console.error('Error in getFestivalProductsServerFn:', err.message)
+    console.error('Error in getFestivalProductsServerFn:', err?.message || String(err))
     return []
   }
 })
@@ -327,7 +327,7 @@ export const getRelatedProductsServerFn = createServerFn({
         return formatProductRecord(p, catObj)
       })
     } catch (err: any) {
-      console.error('Error in getRelatedProductsServerFn:', err.message)
+      console.error('Error in getRelatedProductsServerFn:', err?.message || String(err))
       return []
     }
   })
