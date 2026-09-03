@@ -2,10 +2,11 @@
 import { useState, useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Search, Instagram, Youtube, ShoppingBag } from 'lucide-react'
+import { Menu, X, Search, Instagram, Youtube, ShoppingBag, Heart } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa'
 import { NAV_LINKS, SOCIAL, CONTACT } from '../../constants'
 import { useCart } from '../../context/CartContext'
+import { useWishlist } from '../../context/WishlistContext'
 import Logo from '../common/Logo'
 
 export default function Header() {
@@ -14,6 +15,7 @@ export default function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const { totalItems, openCart } = useCart()
+  const { totalItems: totalWishlistItems, openWishlist } = useWishlist()
 
   useEffect(() => {
     const handler = () => setIsScrolled(window.scrollY > 20)
@@ -71,6 +73,27 @@ export default function Header() {
                 aria-label="Search"
               >
                 <Search size={18} />
+              </button>
+
+              {/* Wishlist / Likes Button (Top Heart Symbol) */}
+              <button
+                onClick={openWishlist}
+                className="relative text-gray-200 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10 flex items-center justify-center cursor-pointer group"
+                aria-label="Wishlist / Liked Items"
+                id="header-wishlist-btn"
+              >
+                <Heart
+                  size={20}
+                  className="transition-transform group-hover:scale-110"
+                  fill={totalWishlistItems > 0 ? 'var(--color-pink)' : 'none'}
+                  color={totalWishlistItems > 0 ? 'var(--color-pink)' : 'currentColor'}
+                />
+                <span
+                  className="absolute -top-0.5 -right-0.5 min-w-[19px] h-[19px] px-1 rounded-full text-[10px] font-bold font-nav flex items-center justify-center text-white shadow-md"
+                  style={{ background: 'var(--color-pink)' }}
+                >
+                  {totalWishlistItems > 99 ? '99+' : totalWishlistItems}
+                </span>
               </button>
 
               {/* Shopping Cart Button */}
@@ -134,8 +157,27 @@ export default function Header() {
               </a>
             </div>
 
-            {/* Mobile Actions (Cart + Menu Toggle) */}
+            {/* Mobile Actions (Wishlist + Cart + Menu Toggle) */}
             <div className="flex md:hidden items-center gap-2">
+              {/* Mobile Heart (Like) Button */}
+              <button
+                onClick={openWishlist}
+                className="relative text-white p-2 rounded-full hover:bg-white/10 flex items-center justify-center"
+                aria-label="Wishlist"
+              >
+                <Heart
+                  size={21}
+                  fill={totalWishlistItems > 0 ? 'var(--color-pink)' : 'none'}
+                  color={totalWishlistItems > 0 ? 'var(--color-pink)' : 'currentColor'}
+                />
+                <span
+                  className="absolute top-0 right-0 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold font-nav flex items-center justify-center text-white shadow-md"
+                  style={{ background: 'var(--color-pink)' }}
+                >
+                  {totalWishlistItems}
+                </span>
+              </button>
+
               <button
                 onClick={openCart}
                 className="relative text-white p-2 rounded-full hover:bg-white/10"
@@ -243,13 +285,13 @@ export default function Header() {
               </div>
 
               {/* Mobile Nav Links */}
-              <nav className="flex-1 p-5 flex flex-col gap-1">
+              <nav className="flex-1 p-5 flex flex-col gap-1 overflow-y-auto">
                 {NAV_LINKS.map((link, i) => (
                   <motion.div
                     key={link.href}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.07 }}
+                    transition={{ delay: i * 0.05 }}
                   >
                     <Link
                       to={link.href}
@@ -262,17 +304,48 @@ export default function Header() {
                   </motion.div>
                 ))}
 
+                {/* Mobile Wishlist Link */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: NAV_LINKS.length * 0.05 }}
+                >
+                  <button
+                    onClick={() => {
+                      setIsMobileOpen(false)
+                      openWishlist()
+                    }}
+                    className="w-full flex items-center justify-between font-nav font-bold font-700 text-base text-white hover:text-pink-300 py-3 px-3 rounded-xl hover:bg-white/8 transition-all text-left"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Heart
+                        size={18}
+                        fill={totalWishlistItems > 0 ? 'var(--color-pink)' : 'none'}
+                        color={totalWishlistItems > 0 ? 'var(--color-pink)' : 'currentColor'}
+                      />
+                      <span>My Wishlist</span>
+                    </div>
+                    <span
+                      className="px-2 py-0.5 rounded-full text-xs font-bold font-nav"
+                      style={{ background: 'var(--color-pink)', color: 'white' }}
+                    >
+                      {totalWishlistItems}
+                    </span>
+                  </button>
+                </motion.div>
+
                 {/* Mobile Cart Link */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: NAV_LINKS.length * 0.07 }}
+                  transition={{ delay: (NAV_LINKS.length + 1) * 0.05 }}
                 >
-                  <Link
-                    to="/cart"
-                    onClick={() => setIsMobileOpen(false)}
-                    className="flex items-center justify-between font-nav font-bold font-700 text-base text-white hover:text-pink-300 py-3 px-3 rounded-xl hover:bg-white/8 transition-all"
-                    activeProps={{ style: { color: 'var(--color-pink)', background: 'rgba(216,92,138,0.15)', fontWeight: 'bold' } }}
+                  <button
+                    onClick={() => {
+                      setIsMobileOpen(false)
+                      openCart()
+                    }}
+                    className="w-full flex items-center justify-between font-nav font-bold font-700 text-base text-white hover:text-pink-300 py-3 px-3 rounded-xl hover:bg-white/8 transition-all text-left"
                   >
                     <div className="flex items-center gap-2">
                       <ShoppingBag size={18} />
@@ -286,7 +359,7 @@ export default function Header() {
                         {totalItems}
                       </span>
                     )}
-                  </Link>
+                  </button>
                 </motion.div>
               </nav>
 
@@ -319,9 +392,6 @@ export default function Header() {
           </>
         )}
       </AnimatePresence>
-
-      {/* Spacer for sticky header */}
-      <div className="h-16 md:h-20" />
     </>
   )
 }
