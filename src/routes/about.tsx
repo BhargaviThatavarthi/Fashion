@@ -29,7 +29,7 @@ const TIMELINE = [
   },
   {
     year: '2008',
-    code: '08',
+    code: '02',
     content: (
       <>
         Expanded our collection with a wider range of{' '}
@@ -39,7 +39,7 @@ const TIMELINE = [
   },
   {
     year: '2015',
-    code: '15',
+    code: '03',
     content: (
       <>
         Grew our wholesale and retail presence, bringing beautiful sarees and ethnic wear to customers across different regions of India.
@@ -48,7 +48,7 @@ const TIMELINE = [
   },
   {
     year: '2021',
-    code: '21',
+    code: '04',
     content: (
       <>
         Introduced a more personalized shopping experience, combining our traditional store service with modern customer engagement through{' '}
@@ -58,7 +58,7 @@ const TIMELINE = [
   },
   {
     year: '2024',
-    code: '24',
+    code: '05',
     content: (
       <>
         Launched our <strong className="text-black font-bold">premium digital boutique</strong>, bringing the Sri Subhakari Fashions store experience online while continuing our trusted wholesale and retail services.
@@ -67,7 +67,7 @@ const TIMELINE = [
   },
   {
     year: '2026',
-    code: '26',
+    code: '06',
     content: (
       <>
         Today, Sri Subhakari Fashions continues its journey of blending{' '}
@@ -87,37 +87,62 @@ const VALUES = [
 function AboutPage() {
   return (
     <div style={{ background: 'var(--color-bg)' }}>
-      {/* Hero */}
-      <section
-        className="relative py-20 md:py-28 text-center px-4"
-        style={{ background: '#FFFFFF' }}
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-        >
-          <span className="section-badge">About Us</span>
-          <h1 className="section-heading mt-2 !text-black">
-            Our{' '}
-            <span
-              className="italic"
-              style={{
-                background: 'linear-gradient(135deg, var(--color-pink), var(--color-gold))',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              Story
-            </span>
-          </h1>
-          <div className="gold-divider" />
-          <p className="section-subtitle max-w-2xl mx-auto mt-4 !text-black font-medium">
-            A journey of passion, elegance, and timeless fashion — bringing the art of Indian ethnic wear
-            to every woman who loves to celebrate her culture.
-          </p>
-        </motion.div>
+      {/* Hero with Cinematic Background Video */}
+      <section className="relative min-h-[500px] md:min-h-[560px] flex items-center justify-center overflow-hidden text-center px-4 py-20 bg-slate-950 text-white">
+        {/* Background Video */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover object-center scale-105 transition-all duration-1000 brightness-90"
+          >
+            <source src="/videos/about-video.mp4" type="video/mp4" />
+          </video>
+        </div>
+
+        {/* Multi-layered Cinematic Gradient & Vignette Overlays */}
+        <div className="absolute inset-0 z-[1] bg-slate-950/65 pointer-events-none" />
+        <div className="absolute inset-0 z-[1] bg-gradient-to-t from-slate-950 via-transparent to-slate-950/80 pointer-events-none" />
+        <div className="absolute inset-0 z-[1] bg-gradient-to-r from-slate-950/70 via-transparent to-slate-950/70 pointer-events-none" />
+        <div
+          className="absolute inset-0 z-[1] pointer-events-none opacity-40 mix-blend-screen"
+          style={{
+            background: 'radial-gradient(circle at center, rgba(236, 72, 153, 0.35) 0%, rgba(200, 164, 93, 0.2) 40%, transparent 75%)',
+          }}
+        />
+
+        {/* Hero Content */}
+        <div className="container-brand relative z-10 max-w-4xl mx-auto px-4 py-6">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+          >
+            <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight drop-shadow-xl mt-2">
+              Our{' '}
+              <span
+                className="italic"
+                style={{
+                  background: 'linear-gradient(135deg, #f472b6, #fbbf24)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                Story
+              </span>
+            </h1>
+
+            <div className="gold-divider mx-auto my-4" />
+
+            <p className="max-w-2xl mx-auto text-gray-200 text-base sm:text-lg md:text-xl font-normal leading-relaxed drop-shadow-md">
+              A journey of passion, elegance, and timeless fashion — bringing the art of Indian ethnic wear
+              to every woman who loves to celebrate her culture.
+            </p>
+          </motion.div>
+        </div>
       </section>
 
       {/* Story Section */}
@@ -151,7 +176,7 @@ function AboutPage() {
               </p>
             </motion.div>
 
-            {/* Story Showcase Image with Luxury Designer Shape */}
+            {/* Story Showcase Image/Video with Luxury Designer Shape */}
             <motion.div
               className="relative flex items-center justify-center py-6"
               initial={{ opacity: 0, x: 30 }}
@@ -333,7 +358,7 @@ function AboutPage() {
                   </div>
                   {/* Content Card */}
                   <div className="premium-card p-6 flex-1 rounded-2xl border border-pink-100/80 shadow-sm bg-white hover:shadow-md transition-shadow">
-                    <div className="font-heading font-bold text-xl mb-2 tracking-wide" style={{ color: '#b83280' }}>
+                    <div className="font-sans font-bold text-xl mb-2 tracking-tight" style={{ color: '#b83280' }}>
                       {item.year}
                     </div>
                     <div className="text-black text-sm sm:text-[15px] leading-relaxed font-normal">
