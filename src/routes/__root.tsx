@@ -9,6 +9,8 @@ import Footer from '../components/layout/Footer'
 import { WhatsAppFab, BackToTop } from '../components/layout/FloatingWidgets'
 import { CartProvider } from '../context/CartContext'
 import CartDrawer from '../components/cart/CartDrawer'
+import { WishlistProvider } from '../context/WishlistContext'
+import WishlistDrawer from '../components/wishlist/WishlistDrawer'
 
 import appCss from '../styles.css?url'
 
@@ -57,12 +59,15 @@ function RootContent({ children }: { children: React.ReactNode }) {
 
   return (
     <CartProvider>
-      <Header />
-      <main>{children}</main>
-      <Footer />
-      <WhatsAppFab />
-      <BackToTop />
-      <CartDrawer />
+      <WishlistProvider>
+        <Header />
+        <main>{children}</main>
+        <Footer />
+        <WhatsAppFab />
+        <BackToTop />
+        <CartDrawer />
+        <WishlistDrawer />
+      </WishlistProvider>
     </CartProvider>
   )
 }

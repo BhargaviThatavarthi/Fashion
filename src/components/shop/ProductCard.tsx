@@ -5,6 +5,7 @@ import { Heart, Star, Eye, ShoppingBag } from 'lucide-react'
 import type { Product } from '../../types'
 import { formatPrice, formatDiscount, getImageUrl } from '../../utils/format'
 import { useCart } from '../../context/CartContext'
+import { useWishlist } from '../../context/WishlistContext'
 
 interface ProductCardProps {
   product: Product
@@ -12,7 +13,8 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
-  const [isWishlisted, setIsWishlisted] = useState(false)
+  const { isInWishlist, toggleWishlist } = useWishlist()
+  const isWishlisted = isInWishlist(product.id)
   const [imgIndex, setImgIndex] = useState(0)
   const { addToCart } = useCart()
 
@@ -96,25 +98,32 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
           )}
         </div>
 
-        {/* Wishlist */}
-        <button
-          onClick={() => setIsWishlisted(!isWishlisted)}
-          className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 z-10"
-          aria-label="Add to wishlist"
+        {/* Wishlist / Like Button */}
+        <motion.button
+          type="button"
+          whileTap={{ scale: 0.8 }}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            toggleWishlist(product)
+          }}
+          className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-xs rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 hover:bg-white z-20 cursor-pointer pointer-events-auto"
+          aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
         >
           <Heart
-            size={15}
-            className={isWishlisted ? 'fill-pink-500 text-pink-500' : 'text-gray-400'}
-            style={isWishlisted ? { color: 'var(--color-pink)', fill: 'var(--color-pink)' } : {}}
+            size={16}
+            fill={isWishlisted ? 'var(--color-pink)' : 'none'}
+            color={isWishlisted ? 'var(--color-pink)' : '#6B7280'}
+            className={isWishlisted ? 'text-pink-500' : 'text-gray-400 hover:text-pink-500'}
           />
-        </button>
+        </motion.button>
 
         {/* Quick View overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 z-10">
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 z-10 pointer-events-none">
           <Link
             to="/shop/$slug"
             params={{ slug: product.slug }}
-            className="bg-white text-gray-800 text-xs font-nav font-600 px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5 hover:bg-gray-50 transition-colors"
+            className="bg-white text-gray-800 text-xs font-nav font-600 px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5 hover:bg-gray-50 transition-colors pointer-events-auto"
           >
             <Eye size={13} />
             Quick View

@@ -6,6 +6,7 @@ import { Star, Heart, Share2, ZoomIn, ShoppingBag, Plus, Minus } from 'lucide-re
 import { getProductBySlug, getRelatedProducts } from '../services/products'
 import { formatPrice, formatDiscount, getImageUrl } from '../utils/format'
 import { useCart } from '../context/CartContext'
+import { useWishlist } from '../context/WishlistContext'
 import ProductCard from '../components/shop/ProductCard'
 import { Skeleton } from '../components/ui/skeleton'
 
@@ -36,9 +37,9 @@ function ProductDetailPage() {
   const [selectedColor, setSelectedColor] = useState<string | null>(null)
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [quantity, setQuantity] = useState(1)
-  const [wishlisted, setWishlisted] = useState(false)
   const [zoomed, setZoomed] = useState(false)
   const { addToCart } = useCart()
+  const { isInWishlist, toggleWishlist } = useWishlist()
 
   const { data: product, isLoading } = useQuery({
     queryKey: ['product', slug],
@@ -377,20 +378,22 @@ function ProductDetailPage() {
 
                   {/* Wishlist & Share */}
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => setWishlisted(!wishlisted)}
-                      className="w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer"
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => toggleWishlist(product)}
+                      className="w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer hover:scale-105"
                       style={{
-                        borderColor: wishlisted ? 'var(--color-pink)' : 'var(--color-pink-light)',
-                        background: wishlisted ? 'var(--color-pink-light)' : 'white',
+                        borderColor: isInWishlist(product.id) ? 'var(--color-pink)' : 'var(--color-pink-light)',
+                        background: isInWishlist(product.id) ? 'var(--color-pink-light)' : 'white',
                       }}
-                      aria-label="Add to wishlist"
+                      aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
                     >
                       <Heart
                         size={18}
-                        style={wishlisted ? { fill: 'var(--color-pink)', color: 'var(--color-pink)' } : { color: 'var(--color-gray)' }}
+                        fill={isInWishlist(product.id) ? 'var(--color-pink)' : 'none'}
+                        color={isInWishlist(product.id) ? 'var(--color-pink)' : '#6B7280'}
                       />
-                    </button>
+                    </motion.button>
                     <button
                       onClick={() => navigator.share?.({ title: product.name, url: shareUrl })}
                       className="w-12 h-12 rounded-full border-2 border-gray-200 flex items-center justify-center hover:border-pink-300 transition-colors"
