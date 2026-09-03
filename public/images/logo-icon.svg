@@ -28,18 +28,6 @@
   <!-- Backlight Glow -->
   <circle cx="100" cy="100" r="65" fill="#d946ef" opacity="0.22" filter="url(#iconMagentaGlow)" />
 
-  <!-- Gold Cursive Initial Accent Behind -->
-  <text
-    x="38"
-    y="85"
-    font-family="'Great Vibes', 'Alex Brush', cursive"
-    font-size="64"
-    fill="none"
-    stroke="url(#iconGoldScript)"
-    stroke-width="1.6"
-    opacity="0.85"
-  >Sri</text>
-
   <!-- Magenta Glow Silhouette for SF -->
   <text
     x="32"
