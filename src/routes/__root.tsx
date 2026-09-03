@@ -36,6 +36,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       { property: 'og:type', content: 'website' },
     ],
     links: [
+      { rel: 'icon', href: '/images/logo-icon.svg', type: 'image/svg+xml' },
+      { rel: 'apple-touch-icon', href: '/images/logo-icon.svg' },
       { rel: 'stylesheet', href: appCss },
       { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
       { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: '' },

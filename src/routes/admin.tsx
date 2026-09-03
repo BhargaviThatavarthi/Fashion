@@ -9,6 +9,7 @@ import {
   ChevronLeft, Sun, Moon, Grid, MessageCircle, Calendar, Activity, DollarSign,
   Tag, Video, Star, Home, Share2
 } from 'lucide-react'
+import Logo from '../components/common/Logo'
 
 export const Route = createFileRoute('/admin')({
   beforeLoad: async ({ location }) => {
@@ -92,19 +93,9 @@ function AdminLayout() {
       {/* Brand Header Tile: Sri Subhakari Fashions */}
       <div className="p-4 flex items-center justify-between border-b border-slate-800/60 shrink-0">
         {!collapsed ? (
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-[#091523] border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-md shrink-0">
-              <Grid size={20} />
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="font-heading text-sm font-800 text-white leading-tight truncate">Sri Subhakari</span>
-              <span className="text-[10px] text-slate-400 font-500 tracking-wider truncate">Fashions</span>
-            </div>
-          </div>
+          <Logo variant="admin" linkTo="/admin" />
         ) : (
-          <div className="w-10 h-10 rounded-xl bg-[#091523] border border-cyan-500/40 flex items-center justify-center text-cyan-400 mx-auto" title="Sri Subhakari Fashions">
-            <Grid size={20} />
-          </div>
+          <Logo variant="icon" linkTo="/admin" />
         )}
 
         <button

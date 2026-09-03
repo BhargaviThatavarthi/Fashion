@@ -317,7 +317,7 @@ export default function HeroBanner() {
                     >
                       <IconComponent className="w-4 h-4 text-amber-400 shrink-0" />
                       <div className="text-left">
-                        <div className="text-sm sm:text-base font-bold font-heading text-pink-300 leading-none">
+                        <div className="text-sm sm:text-base font-bold font-sans tracking-tight text-pink-300 leading-none">
                           {stat.num}
                         </div>
                         <div className="text-[10px] text-gray-300 font-medium mt-0.5">{stat.label}</div>

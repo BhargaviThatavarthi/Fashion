@@ -6,6 +6,7 @@ import { Menu, X, Search, Instagram, Youtube, ShoppingBag } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa'
 import { NAV_LINKS, SOCIAL, CONTACT } from '../../constants'
 import { useCart } from '../../context/CartContext'
+import Logo from '../common/Logo'
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -39,19 +40,7 @@ export default function Header() {
         <div className="container-brand px-4 sm:px-6">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="flex flex-col leading-tight">
-                <span className="font-heading text-white text-base md:text-xl font-bold tracking-wide">
-                  Sri Subhakari
-                </span>
-                <span
-                  className="font-nav text-xs md:text-sm tracking-[0.25em] uppercase"
-                  style={{ color: 'var(--color-gold)' }}
-                >
-                  Fashions
-                </span>
-              </div>
-            </Link>
+            <Logo variant="header" linkTo="/" />
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-8">
@@ -223,14 +212,9 @@ export default function Header() {
               className="fixed top-0 left-0 bottom-0 w-80 bg-[#111111] z-50 md:hidden flex flex-col"
             >
               {/* Mobile Header */}
-              <div className="flex items-center justify-between p-5 border-b border-white/10">
-                <div className="flex flex-col">
-                  <span className="font-heading text-white text-lg font-bold">Sri Subhakari</span>
-                  <span className="font-nav text-xs tracking-[0.2em] uppercase" style={{ color: 'var(--color-gold)' }}>
-                    Fashions
-                  </span>
-                </div>
-                <button onClick={() => setIsMobileOpen(false)} className="text-gray-400 p-1">
+              <div className="flex items-center justify-between p-4 border-b border-white/10">
+                <Logo variant="header" linkTo="/" onClick={() => setIsMobileOpen(false)} />
+                <button onClick={() => setIsMobileOpen(false)} className="text-gray-400 p-1 hover:text-white transition-colors">
                   <X size={22} />
                 </button>
               </div>

@@ -4,6 +4,7 @@ import { FaWhatsapp } from 'react-icons/fa'
 import { SITE_NAME, SITE_TAGLINE, SOCIAL, CONTACT, NAV_LINKS } from '../../constants'
 import { STATIC_CATEGORIES } from '../../constants/categories'
 import { useState } from 'react'
+import Logo from '../common/Logo'
 
 export default function Footer() {
   const [email, setEmail] = useState('')
@@ -26,16 +27,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand Column */}
           <div className="lg:col-span-1">
-            <div className="mb-4">
-              <div className="flex flex-col">
-                <span className="font-heading text-white text-2xl font-bold">{SITE_NAME}</span>
-                <span
-                  className="font-nav text-xs tracking-[0.25em] uppercase mt-0.5"
-                  style={{ color: 'var(--color-gold)' }}
-                >
-                  {SITE_TAGLINE}
-                </span>
-              </div>
+            <div className="mb-5">
+              <Logo variant="footer" linkTo="/" />
             </div>
             <p className="text-gray-400 text-sm leading-relaxed mb-5">
               Discover the finest collection of sarees and ethnic wear — crafted with love,

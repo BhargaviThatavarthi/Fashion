@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { supabase, isSupabaseConfigured } from '../../lib/supabase'
 import { SITE_NAME } from '../../constants'
+import Logo from '../../components/common/Logo'
 
 export const Route = createFileRoute('/admin/login')({
   head: () => ({
@@ -106,13 +107,11 @@ function AdminLoginPage() {
         transition={{ duration: 0.6, ease: 'easeOut' }}
       >
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="flex flex-col items-center">
-            <span className="font-heading text-white text-2xl font-700">{SITE_NAME}</span>
-            <span className="font-nav text-xs tracking-[0.25em] uppercase mt-0.5" style={{ color: 'var(--color-gold)' }}>
-              Admin Panel
-            </span>
-          </div>
+        <div className="text-center mb-8 flex flex-col items-center">
+          <Logo variant="full" linkTo="/" className="max-w-[280px]" />
+          <span className="font-nav text-xs tracking-[0.25em] uppercase mt-2 font-semibold text-pink-300">
+            Admin Panel
+          </span>
         </div>
 
         <div

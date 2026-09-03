@@ -224,7 +224,10 @@ function AboutPage() {
       </section>
 
       {/* Mission, Vision */}
-      <section className="py-14 px-4 sm:px-6" style={{ background: '#0d0d0d' }}>
+      <section
+        className="py-14 md:py-18 px-4 sm:px-6 relative border-t border-b border-pink-500/20"
+        style={{ background: 'var(--color-header)' }}
+      >
         <div className="container-brand">
           <motion.div
             className="text-center mb-10"
@@ -258,20 +261,20 @@ function AboutPage() {
             ].map(({ icon: Icon, title, color, text }, i) => (
               <motion.div
                 key={title}
-                className="rounded-2xl p-8"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                className="rounded-2xl p-8 backdrop-blur-sm shadow-lg"
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.15 }}
               >
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
-                  style={{ background: `rgba(${color === 'var(--color-pink)' ? '216,92,138' : '200,164,93'},0.15)` }}
+                  style={{ background: `rgba(${color === 'var(--color-pink)' ? '216,92,138' : '200,164,93'},0.2)` }}
                 >
                   <Icon size={26} style={{ color }} />
                 </div>
-                <h3 className="font-heading text-white text-xl font-600 mb-3">{title}</h3>
-                <p className="text-gray-400 leading-relaxed">{text}</p>
+                <h3 className="font-heading text-white text-xl font-bold mb-3">{title}</h3>
+                <p className="text-gray-200 leading-relaxed font-light">{text}</p>
               </motion.div>
             ))}
           </div>
@@ -373,26 +376,45 @@ function AboutPage() {
       </section>
 
       {/* Quality Promise */}
-      <section className="py-12 px-4 sm:px-6" style={{ background: 'var(--color-header)' }}>
-        <div className="container-brand text-center">
+      <section
+        className="py-14 md:py-16 px-4 sm:px-6 relative border-t border-b border-pink-500/25"
+        style={{ background: 'var(--color-header)' }}
+      >
+        {/* Subtle decorative glow */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-30"
+          style={{
+            background: 'radial-gradient(ellipse at center, rgba(236, 72, 153, 0.25) 0%, transparent 70%)',
+          }}
+        />
+
+        <div className="container-brand text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="max-w-2xl mx-auto"
+            className="max-w-3xl mx-auto"
           >
-            <Award size={48} className="mx-auto mb-4" style={{ color: 'var(--color-gold)' }} />
-            <h2 className="font-heading text-white text-3xl font-700 mb-4">Our Quality Promise</h2>
-            <p className="text-gray-300 leading-relaxed mb-6">
+            <div className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-white/5 border border-pink-400/30 shadow-inner">
+              <Award size={32} style={{ color: 'var(--color-gold)' }} />
+            </div>
+
+            <h2 className="font-heading text-white text-2xl sm:text-3xl md:text-4xl font-bold mb-3 tracking-tight">
+              Our Quality Promise
+            </h2>
+
+            <div className="gold-divider mx-auto my-4" />
+
+            <p className="text-gray-300 text-sm sm:text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-6 font-light">
               Every garment is inspected for quality, authenticity, and craftsmanship before it reaches you.
               We are committed to delivering nothing less than perfection — because you deserve the finest.
             </p>
-            <div className="flex flex-wrap justify-center gap-4">
+
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
               {['✓ Authentic Handcraft', '✓ Quality Certified', '✓ 100% Quality Inspected', '✓ Pan-India Delivery'].map((item) => (
                 <span
                   key={item}
-                  className="px-4 py-2 rounded-full text-sm font-nav font-600"
-                  style={{ background: 'rgba(216,92,138,0.15)', color: 'var(--color-pink)', border: '1px solid rgba(216,92,138,0.3)' }}
+                  className="px-4 py-2 rounded-full text-xs sm:text-sm font-sans font-semibold tracking-wide bg-white/10 text-pink-200 border border-pink-400/30 backdrop-blur-md shadow-sm hover:bg-white/15 transition-colors"
                 >
                   {item}
                 </span>

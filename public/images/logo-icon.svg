@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <filter id="iconMagentaGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <linearGradient id="iconLetterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="60%" stop-color="#ffffff" />
+      <stop offset="90%" stop-color="#fbcfe8" />
+      <stop offset="100%" stop-color="#e879f9" />
+    </linearGradient>
+
+    <linearGradient id="iconGoldScript" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fde68a" />
+      <stop offset="50%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="200" height="200" rx="44" fill="#1f0b24" />
+
+  <!-- Backlight Glow -->
+  <circle cx="100" cy="100" r="65" fill="#d946ef" opacity="0.22" filter="url(#iconMagentaGlow)" />
+
+  <!-- Gold Cursive Initial Accent Behind -->
+  <text
+    x="38"
+    y="85"
+    font-family="'Great Vibes', 'Alex Brush', cursive"
+    font-size="64"
+    fill="none"
+    stroke="url(#iconGoldScript)"
+    stroke-width="1.6"
+    opacity="0.85"
+  >Sri</text>
+
+  <!-- Magenta Glow Silhouette for SF -->
+  <text
+    x="32"
+    y="145"
+    font-family="'Playfair Display', Georgia, serif"
+    font-size="120"
+    font-weight="700"
+    fill="none"
+    stroke="#f43f5e"
+    stroke-width="5"
+    stroke-opacity="0.8"
+    filter="url(#iconMagentaGlow)"
+  >S</text>
+
+  <text
+    x="95"
+    y="145"
+    font-family="'Playfair Display', Georgia, serif"
+    font-size="120"
+    font-weight="700"
+    fill="none"
+    stroke="#d946ef"
+    stroke-width="5"
+    stroke-opacity="0.8"
+    filter="url(#iconMagentaGlow)"
+  >F</text>
+
+  <!-- Foreground Letters -->
+  <text
+    x="32"
+    y="145"
+    font-family="'Playfair Display', Georgia, serif"
+    font-size="120"
+    font-weight="700"
+    fill="url(#iconLetterGrad)"
+  >S</text>
+
+  <text
+    x="95"
+    y="145"
+    font-family="'Playfair Display', Georgia, serif"
+    font-size="120"
+    font-weight="700"
+    fill="url(#iconLetterGrad)"
+  >F</text>
+
+  <!-- Intertwined script ribbon -->
+  <path
+    d="M 25,150 C 42,130 50,85 80,60 C 100,42 122,55 132,85 C 142,115 155,145 178,125"
+    fill="none"
+    stroke="#f472b6"
+    stroke-width="2.6"
+    stroke-linecap="round"
+    opacity="0.9"
+    filter="url(#iconMagentaGlow)"
+  />
+</svg>
