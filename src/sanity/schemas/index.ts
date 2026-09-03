@@ -6,6 +6,7 @@ import { testimonialSchema } from './testimonial'
 import { youtubeVideoSchema } from './youtubeVideo'
 import { siteSettingsSchema } from './siteSettings'
 import { aboutPageSchema } from './aboutPage'
+import { blogPostSchema } from './blogPost'
 
 export const schemaTypes = [
   productSchema,
@@ -16,4 +17,5 @@ export const schemaTypes = [
   youtubeVideoSchema,
   siteSettingsSchema,
   aboutPageSchema,
+  blogPostSchema,
 ]

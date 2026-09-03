@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as BlogRouteImport } from './routes/blog'
 import { Route as CarouselDemoRouteImport } from './routes/carousel-demo'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -32,6 +33,8 @@ import { Route as AdminSocialRouteImport } from './routes/admin/social'
 import { Route as AdminTestimonialsRouteImport } from './routes/admin/testimonials'
 import { Route as AdminYoutubeRouteImport } from './routes/admin/youtube'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ShopIndexRouteImport } from './routes/shop.index'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
 import { Route as StudioSplatRouteImport } from './routes/studio.$'
@@ -53,6 +56,11 @@ const AboutRoute = AboutRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CarouselDemoRoute = CarouselDemoRouteImport.update({
@@ -155,6 +163,16 @@ const ApiUploadRoute = ApiUploadRouteImport.update({
   path: '/api/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BlogRoute,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => BlogRoute,
+} as any)
 const ShopIndexRoute = ShopIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -195,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
+  '/blog': typeof BlogRouteWithChildren
   '/carousel-demo': typeof CarouselDemoRoute
   '/cart': typeof CartRoute
   '/contact': typeof ContactRoute
@@ -214,9 +233,11 @@ export interface FileRoutesByFullPath {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/youtube': typeof AdminYoutubeRoute
   '/api/upload': typeof ApiUploadRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/studio/$': typeof StudioSplatRoute
   '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/shop/': typeof ShopIndexRoute
   '/admin/products/$id': typeof AdminProductsIdRoute
   '/admin/products/new': typeof AdminProductsNewRoute
@@ -243,9 +264,11 @@ export interface FileRoutesByTo {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/youtube': typeof AdminYoutubeRoute
   '/api/upload': typeof ApiUploadRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/studio/$': typeof StudioSplatRoute
   '/admin': typeof AdminIndexRoute
+  '/blog': typeof BlogIndexRoute
   '/shop': typeof ShopIndexRoute
   '/admin/products/$id': typeof AdminProductsIdRoute
   '/admin/products/new': typeof AdminProductsNewRoute
@@ -257,6 +280,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
+  '/blog': typeof BlogRouteWithChildren
   '/carousel-demo': typeof CarouselDemoRoute
   '/cart': typeof CartRoute
   '/contact': typeof ContactRoute
@@ -276,9 +300,11 @@ export interface FileRoutesById {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/youtube': typeof AdminYoutubeRoute
   '/api/upload': typeof ApiUploadRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/studio/$': typeof StudioSplatRoute
   '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/shop/': typeof ShopIndexRoute
   '/admin/products/$id': typeof AdminProductsIdRoute
   '/admin/products/new': typeof AdminProductsNewRoute
@@ -291,6 +317,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/blog'
     | '/carousel-demo'
     | '/cart'
     | '/contact'
@@ -310,9 +337,11 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/admin/youtube'
     | '/api/upload'
+    | '/blog/$slug'
     | '/shop/$slug'
     | '/studio/$'
     | '/admin/'
+    | '/blog/'
     | '/shop/'
     | '/admin/products/$id'
     | '/admin/products/new'
@@ -339,9 +368,11 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/admin/youtube'
     | '/api/upload'
+    | '/blog/$slug'
     | '/shop/$slug'
     | '/studio/$'
     | '/admin'
+    | '/blog'
     | '/shop'
     | '/admin/products/$id'
     | '/admin/products/new'
@@ -352,6 +383,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/blog'
     | '/carousel-demo'
     | '/cart'
     | '/contact'
@@ -371,9 +403,11 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/admin/youtube'
     | '/api/upload'
+    | '/blog/$slug'
     | '/shop/$slug'
     | '/studio/$'
     | '/admin/'
+    | '/blog/'
     | '/shop/'
     | '/admin/products/$id'
     | '/admin/products/new'
@@ -385,6 +419,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
+  BlogRoute: typeof BlogRouteWithChildren
   CarouselDemoRoute: typeof CarouselDemoRoute
   CartRoute: typeof CartRoute
   ContactRoute: typeof ContactRoute
@@ -415,6 +450,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/carousel-demo': {
@@ -557,6 +599,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/': {
+      id: '/blog/'
+      path: '/'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof BlogRoute
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof BlogRoute
+    }
     '/shop/': {
       id: '/shop/'
       path: '/'
@@ -661,6 +717,18 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface BlogRouteChildren {
+  BlogSlugRoute: typeof BlogSlugRoute
+  BlogIndexRoute: typeof BlogIndexRoute
+}
+
+const BlogRouteChildren: BlogRouteChildren = {
+  BlogSlugRoute: BlogSlugRoute,
+  BlogIndexRoute: BlogIndexRoute,
+}
+
+const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
+
 interface ShopRouteChildren {
   ShopSlugRoute: typeof ShopSlugRoute
   ShopIndexRoute: typeof ShopIndexRoute
@@ -688,6 +756,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
+  BlogRoute: BlogRouteWithChildren,
   CarouselDemoRoute: CarouselDemoRoute,
   CartRoute: CartRoute,
   ContactRoute: ContactRoute,
