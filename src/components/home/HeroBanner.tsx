@@ -139,7 +139,7 @@ export default function HeroBanner() {
   } = data
 
   return (
-    <section className="relative min-h-[90vh] md:min-h-[92vh] flex items-center overflow-hidden py-12 bg-slate-950 text-white">
+    <section className="relative min-h-[90vh] md:min-h-[92vh] flex items-center overflow-hidden pt-[68px] sm:pt-[76px] md:pt-[86px] pb-8 sm:pb-10 bg-slate-950 text-white">
       {/* Background Layer: Deep Cosmic Base */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-slate-950" />
@@ -177,7 +177,7 @@ export default function HeroBanner() {
       <GalaxyVideoCanvas />
 
       {/* Hero Content Container (Seamless text over cosmic background with side video) */}
-      <div className="container-brand relative z-20 px-4 sm:px-6 w-full max-w-7xl mx-auto py-6">
+      <div className="container-brand relative z-20 px-4 sm:px-6 w-full max-w-7xl mx-auto py-2 sm:py-3">
         <div className="max-w-2xl">
           <motion.div
             className="relative flex flex-col items-center text-center"
