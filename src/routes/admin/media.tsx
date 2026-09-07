@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Upload, Trash2, Eye, Clipboard, CheckCircle2, AlertCircle, RefreshCw, Image as ImageIcon } from 'lucide-react'
 import { supabase, isSupabaseConfigured, supabaseUrl } from '../../lib/supabase'
 import { getSharedMedia, saveSharedMedia, addSharedMedia } from '../../utils/media'
-import { getImageUrl } from '../../utils/format'
 import type { MediaAsset } from '../../types'
 
 export const Route = createFileRoute('/admin/media')({
@@ -29,27 +28,51 @@ function AdminMedia() {
   const fetchMediaAssets = async () => {
     setLoading(true)
     try {
-      const cleanBase = (supabaseUrl && !supabaseUrl.includes('placeholder'))
-        ? supabaseUrl.replace(/\/+$/, '')
-        : 'https://kmxsgomxxhwpmoayeqmj.supabase.co'
+      const cleanBase = supabaseUrl.replace(/\/+$/, '')
 
+      // 1. Fetch from media_assets table
       const { data, error } = await supabase
         .from('media_assets')
         .select('*')
         .order('created_at', { ascending: false })
 
       if (!error && data && data.length > 0) {
-        const mapped: MediaAsset[] = data.map((item: any) => {
-          let url = item.public_url || ''
-          if (!url && item.file_path) {
-            url = `${cleanBase}/storage/v1/object/public/product-images/${item.file_path.replace(/^\/+/, '')}`
+        const formatted: MediaAsset[] = data.map((m: any) => {
+          let url = m.public_url || ''
+          if (!url && m.file_path) {
+            url = `${cleanBase}/storage/v1/object/public/product-images/${m.file_path.replace(/^\/+/, '')}`
           }
           return {
-            ...item,
-            public_url: getImageUrl(url),
+            id: m.id || m.file_path || m.public_url,
+            file_name: m.file_name || m.file_path || 'asset.jpg',
+            file_path: m.file_path || '',
+            public_url: url,
+            file_type: m.file_type || 'image/jpeg',
+            file_size: m.file_size || 0,
+            created_at: m.created_at || new Date().toISOString(),
           }
-        })
-        setMediaList(mapped)
+        }).filter((m) => m.public_url)
+
+        if (formatted.length > 0) {
+          setMediaList(formatted)
+          setLoading(false)
+          return
+        }
+      }
+
+      // 2. Fallback: inspect product-images storage bucket directly
+      const { data: storageFiles } = await supabase.storage.from('product-images').list('general')
+      if (storageFiles && storageFiles.length > 0) {
+        const storageAssets: MediaAsset[] = storageFiles.map((f, idx) => ({
+          id: `storage-general-${idx}`,
+          file_name: f.name,
+          file_path: `general/${f.name}`,
+          public_url: `${cleanBase}/storage/v1/object/public/product-images/general/${f.name}`,
+          file_type: 'image/jpeg',
+          file_size: f.metadata?.size || 0,
+          created_at: f.created_at || new Date().toISOString(),
+        }))
+        setMediaList(storageAssets)
         setLoading(false)
         return
       }
@@ -62,9 +85,9 @@ function AdminMedia() {
       id: `local-${idx}`,
       file_name: item.name,
       file_path: item.name,
-      public_url: getImageUrl(item.url),
+      public_url: item.url,
       file_size: item.size,
-      file_type: 'image/jpeg',
+      file_type: 'image/png',
       created_at: item.created_at || new Date().toISOString(),
     }))
     setMediaList(local)
@@ -330,12 +353,9 @@ function AdminMedia() {
               {/* Thumbnail Container */}
               <div className="relative aspect-square bg-slate-900/5 overflow-hidden border-b border-slate-100 flex items-center justify-center">
                 <img
-                  src={getImageUrl(media.public_url)}
+                  src={media.public_url}
                   alt={media.file_name}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  onError={(e) => {
-                    ;(e.target as HTMLImageElement).src = '/images/silk-saree.png'
-                  }}
                 />
                 <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-xs">
                   <button

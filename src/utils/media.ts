@@ -1,5 +1,4 @@
 import { supabase, isSupabaseConfigured, supabaseUrl } from '../lib/supabase'
-import { getImageUrl } from './format'
 
 export interface MediaItem {
   name: string
@@ -8,26 +7,28 @@ export interface MediaItem {
   size: number
 }
 
+const DEFAULT_MEDIA: MediaItem[] = [
+  { name: 'placeholder-saree-1.jpg', url: '/placeholder-saree-1.jpg', size: 124500, created_at: '2026-07-24' },
+  { name: 'placeholder-saree-2.jpg', url: '/placeholder-saree-2.jpg', size: 98400, created_at: '2026-07-23' },
+  { name: 'placeholder-lehenga.jpg', url: '/placeholder-lehenga.jpg', size: 245000, created_at: '2026-07-22' },
+]
+
 export function getSharedMedia(): MediaItem[] {
-  if (typeof window === 'undefined') return []
+  if (typeof window === 'undefined') return DEFAULT_MEDIA
   const saved = localStorage.getItem('ssf_media')
   if (saved) {
     try {
-      const parsed = JSON.parse(saved)
-      if (Array.isArray(parsed)) {
-        return parsed.filter((item) => item && item.url && !item.url.includes('placeholder'))
-      }
+      return JSON.parse(saved)
     } catch {
-      return []
+      return DEFAULT_MEDIA
     }
   }
-  return []
+  return DEFAULT_MEDIA
 }
 
 export function saveSharedMedia(list: MediaItem[]) {
   if (typeof window !== 'undefined') {
-    const valid = list.filter((item) => item && item.url && !item.url.includes('placeholder'))
-    localStorage.setItem('ssf_media', JSON.stringify(valid))
+    localStorage.setItem('ssf_media', JSON.stringify(list))
   }
 }
 
@@ -44,10 +45,9 @@ export function addSharedMedia(name: string, url: string, size: number) {
 
 export async function fetchSupabaseMedia(): Promise<MediaItem[]> {
   try {
-    const cleanBase = (supabaseUrl && !supabaseUrl.includes('placeholder'))
-      ? supabaseUrl.replace(/\/+$/, '')
-      : 'https://kmxsgomxxhwpmoayeqmj.supabase.co'
+    const cleanBase = supabaseUrl.replace(/\/+$/, '')
 
+    // 1. Fetch from media_assets table
     const { data: dbMedia, error } = await supabase
       .from('media_assets')
       .select('*')
@@ -62,13 +62,28 @@ export async function fetchSupabaseMedia(): Promise<MediaItem[]> {
           }
           return {
             name: m.file_name || m.file_path || 'asset.jpg',
-            url: getImageUrl(url),
+            url,
             size: m.file_size || 0,
             created_at: m.created_at || new Date().toISOString(),
           }
         })
-        .filter((m) => m.url && !m.url.includes('placeholder'))
+        .filter((m) => m.url)
 
+      if (items.length > 0) {
+        saveSharedMedia(items)
+        return items
+      }
+    }
+
+    // 2. Fallback: inspect product-images storage bucket
+    const { data: storageFiles } = await supabase.storage.from('product-images').list('general')
+    if (storageFiles && storageFiles.length > 0) {
+      const items: MediaItem[] = storageFiles.map((f) => ({
+        name: f.name,
+        url: `${cleanBase}/storage/v1/object/public/product-images/general/${f.name}`,
+        size: f.metadata?.size || 0,
+        created_at: f.created_at || new Date().toISOString(),
+      }))
       saveSharedMedia(items)
       return items
     }

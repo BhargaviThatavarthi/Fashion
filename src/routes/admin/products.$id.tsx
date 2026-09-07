@@ -906,14 +906,7 @@ function AdminProductEditForm() {
                       }`}
                       style={isSelected ? { borderColor: 'var(--color-pink)' } : {}}
                     >
-                      <img
-                        src={getImageUrl(media.url)}
-                        alt=""
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          ;(e.target as HTMLImageElement).src = '/images/silk-saree.png'
-                        }}
-                      />
+                      <img src={media.url} alt="" className="w-full h-full object-cover" />
                       {isSelected && (
                         <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
                           <span className="w-6 h-6 bg-pink-600 text-white text-xs font-700 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--color-pink)' }}>✓</span>
