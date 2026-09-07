@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import fs from 'fs/promises'
 import path from 'path'
+import { supabase, isSupabaseConfigured } from '../../lib/supabase'
 import { YOUTUBE_VIDEOS } from '../../constants'
 import type { YoutubeVideo } from '../../types'
 
@@ -52,6 +53,21 @@ async function clearTokens(): Promise<void> {
 
 async function getSavedVideos(): Promise<YoutubeVideo[]> {
   try {
+    if (isSupabaseConfigured()) {
+      const { data, error } = await supabase
+        .from('youtube_videos')
+        .select('*')
+        .order('sort_order', { ascending: true })
+
+      if (!error && data && data.length > 0) {
+        return data as YoutubeVideo[]
+      }
+    }
+  } catch (err: any) {
+    console.warn('Supabase getSavedVideos notice:', err?.message || err)
+  }
+
+  try {
     const data = await fs.readFile(VIDEOS_FILE, 'utf-8')
     return JSON.parse(data)
   } catch {
@@ -60,8 +76,29 @@ async function getSavedVideos(): Promise<YoutubeVideo[]> {
 }
 
 async function saveVideos(videos: YoutubeVideo[]): Promise<void> {
-  await fs.mkdir(path.dirname(VIDEOS_FILE), { recursive: true })
-  await fs.writeFile(VIDEOS_FILE, JSON.stringify(videos, null, 2), 'utf-8')
+  try {
+    if (isSupabaseConfigured()) {
+      await supabase.from('youtube_videos').delete().neq('id', '___dummy_placeholder___')
+      if (videos.length > 0) {
+        const payload = videos.map((v, idx) => ({
+          id: v.id || `yt-${idx}-${v.video_id}`,
+          title: v.title,
+          video_id: v.video_id,
+          thumbnail: v.thumbnail || `https://img.youtube.com/vi/${v.video_id}/mqdefault.jpg`,
+          sort_order: v.sort_order ?? idx,
+          created_at: v.created_at || new Date().toISOString(),
+        }))
+        await supabase.from('youtube_videos').insert(payload)
+      }
+    }
+  } catch (err: any) {
+    console.warn('Supabase saveVideos notice:', err?.message || err)
+  }
+
+  try {
+    await fs.mkdir(path.dirname(VIDEOS_FILE), { recursive: true })
+    await fs.writeFile(VIDEOS_FILE, JSON.stringify(videos, null, 2), 'utf-8')
+  } catch {}
 }
 
 async function refreshAccessToken(refreshToken: string): Promise<YoutubeTokens> {
