@@ -532,12 +532,21 @@ body {
 .embla__container { display: flex; }
 .embla__slide { min-width: 0; flex: 0 0 auto; }
 
-/* Hide TanStack DevTools UI */
+/* Hide TanStack DevTools UI & Vercel Toolbar */
 [class*="TanStackDevtools"],
 [class*="tanstack-devtools"],
 [data-tanstack-devtools],
 #tanstack-router-devtools,
-div[style*="z-index: 99999"] button[aria-label*="TanStack"] {
+div[style*="z-index: 99999"] button[aria-label*="TanStack"],
+vercel-live-feedback,
+#vercel-live-feedback,
+[id*="vercel-live-feedback"],
+[id*="vercel-toolbar"],
+[data-vercel-toolbar],
+[class*="vercel-toolbar"],
+.__vercel-toolbar,
+iframe[src*="vercel.live"],
+iframe[id*="vercel"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
