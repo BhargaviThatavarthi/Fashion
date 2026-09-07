@@ -250,36 +250,3 @@ DROP POLICY IF EXISTS "Allow delete for product-images" ON storage.objects;
 CREATE POLICY "Allow delete for product-images" 
 ON storage.objects FOR DELETE 
 USING (bucket_id = 'product-images');
-
-
--- =========================================================
--- 6. YOUTUBE VIDEOS TABLE
--- =========================================================
-CREATE TABLE IF NOT EXISTS public.youtube_videos (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    video_id TEXT NOT NULL,
-    thumbnail TEXT,
-    sort_order INTEGER DEFAULT 0,
-    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
-CREATE INDEX IF NOT EXISTS idx_youtube_videos_sort_order ON public.youtube_videos(sort_order ASC);
-
-ALTER TABLE public.youtube_videos ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Allow public read on youtube_videos" 
-ON public.youtube_videos FOR SELECT 
-USING (true);
-
-CREATE POLICY "Allow public insert on youtube_videos" 
-ON public.youtube_videos FOR INSERT 
-WITH CHECK (true);
-
-CREATE POLICY "Allow public update on youtube_videos" 
-ON public.youtube_videos FOR UPDATE 
-USING (true);
-
-CREATE POLICY "Allow public delete on youtube_videos" 
-ON public.youtube_videos FOR DELETE 
-USING (true);
