@@ -68,25 +68,29 @@ function HomePage() {
   const { data: featured, isLoading: loadingFeatured } = useQuery({
     queryKey: ['featured-products'],
     queryFn: getFeaturedProducts,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,
+    refetchOnMount: true,
   })
 
   const { data: bestSellers, isLoading: loadingBest } = useQuery({
     queryKey: ['best-sellers'],
     queryFn: getBestSellers,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,
+    refetchOnMount: true,
   })
 
   const { data: newArrivals, isLoading: loadingNew } = useQuery({
     queryKey: ['new-arrivals'],
     queryFn: getNewArrivals,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,
+    refetchOnMount: true,
   })
 
   const { data: festivalProducts, isLoading: loadingFestival } = useQuery({
     queryKey: ['festival-products'],
     queryFn: getFestivalProducts,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,
+    refetchOnMount: true,
   })
 
   const { data: youtubeVideos } = useQuery({

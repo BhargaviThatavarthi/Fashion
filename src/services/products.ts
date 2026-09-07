@@ -18,9 +18,16 @@ import {
 
 export { formatProductRecord }
 
-// Fetch categories map for joining with products in client
+// Fetch categories map for joining with products
 async function fetchClientCategoriesMap(): Promise<Map<string, Category>> {
   const map = new Map<string, Category>()
+  // Pre-seed with static categories
+  STATIC_CATEGORIES.forEach((c) => {
+    map.set(String(c.id), c)
+    map.set(c.slug.toLowerCase(), c)
+    map.set(c.name.toLowerCase(), c)
+  })
+
   try {
     const { data: dbCats } = await supabase.from('categories').select('*')
     if (dbCats && dbCats.length > 0) {
@@ -39,89 +46,87 @@ async function fetchClientCategoriesMap(): Promise<Map<string, Category>> {
       })
     }
   } catch (err: any) {
-    console.warn('Failed to fetch categories map:', err.message)
+    console.warn('Categories map notice:', err?.message || err)
   }
   return map
 }
 
-// 1. Get Products (Direct Supabase query in browser or Server Function in SSR)
+// 1. Get Products (Universal Direct Supabase query across browser and SSR)
 export async function getProducts(
   filters: ProductFilters = {},
 ): Promise<PaginatedResponse<Product>> {
-  if (isSupabaseConfigured() && typeof window !== 'undefined') {
-    try {
-      const page = filters.page || 1
-      const limit = filters.limit || 12
-      const from = (page - 1) * limit
-      const to = from + limit - 1
+  try {
+    const page = filters.page || 1
+    const limit = filters.limit || 12
+    const from = (page - 1) * limit
+    const to = from + limit - 1
 
-      const categoriesMap = await fetchClientCategoriesMap()
+    const categoriesMap = await fetchClientCategoriesMap()
 
-      let query = supabase.from('products').select('*', { count: 'exact' })
+    let query = supabase.from('products').select('*', { count: 'exact' })
 
-      if (filters.search) {
-        const s = filters.search.trim()
-        query = query.or(`name.ilike.%${s}%,description.ilike.%${s}%,fabric.ilike.%${s}%`)
-      }
-
-      if (filters.category) {
-        const identifiers = getCategoryFilterIdentifiers(filters.category)
-        const matched = categoriesMap.get(filters.category.toLowerCase().trim()) || categoriesMap.get(filters.category)
-        if (matched) {
-          identifiers.push(matched.id, matched.slug, matched.name)
-        }
-        const uniqueIds = Array.from(new Set(identifiers.map((s) => String(s).trim()).filter(Boolean)))
-        const orConditions = uniqueIds.map((id) => `category_id.eq.${id}`).join(',')
-        if (orConditions) {
-          query = query.or(orConditions)
-        }
-      }
-
-      if (filters.fabric) query = query.eq('fabric', filters.fabric)
-      if (filters.minPrice !== undefined) query = query.gte('price', filters.minPrice)
-      if (filters.maxPrice !== undefined) query = query.lte('price', filters.maxPrice)
-      if (filters.newArrival || filters.collection === 'new-arrivals') query = query.eq('new_arrival', true)
-      if (filters.bestSeller || filters.collection === 'best-sellers') query = query.eq('best_seller', true)
-      if (filters.featured || filters.collection === 'featured-sarees') query = query.eq('featured', true)
-
-      switch (filters.sortBy) {
-        case 'price_asc':
-          query = query.order('price', { ascending: true })
-          break
-        case 'price_desc':
-          query = query.order('price', { ascending: false })
-          break
-        case 'popular':
-          query = query.order('review_count', { ascending: false, nullsFirst: false })
-          break
-        default:
-          query = query.order('created_at', { ascending: false })
-      }
-
-      query = query.range(from, to)
-      const { data, error, count } = await query
-
-      if (!error && data !== null) {
-        const formatted = data.map((p) => {
-          const catObj = p.category_id
-            ? categoriesMap.get(String(p.category_id)) ||
-              categoriesMap.get(String(p.category_id).toLowerCase()) ||
-              getStaticCategory(p.category_id)
-            : null
-          return formatProductRecord(p, catObj)
-        })
-        const totalCount = count !== null && count !== undefined ? count : formatted.length
-        return {
-          data: formatted,
-          total: totalCount,
-          page,
-          limit,
-          hasMore: totalCount > to + 1,
-        }
-      }
-    } catch (err: any) {
-      console.warn('Direct client getProducts notice:', err.message)
+    if (filters.search) {
+      const s = filters.search.trim()
+      query = query.or(`name.ilike.%${s}%,description.ilike.%${s}%,fabric.ilike.%${s}%`)
     }
+
+    if (filters.category) {
+      const identifiers = getCategoryFilterIdentifiers(filters.category)
+      const matched = categoriesMap.get(filters.category.toLowerCase().trim()) || categoriesMap.get(filters.category)
+      if (matched) {
+        identifiers.push(matched.id, matched.slug, matched.name)
+      }
+      const uniqueIds = Array.from(new Set(identifiers.map((s) => String(s).trim()).filter(Boolean)))
+      const orConditions = uniqueIds.map((id) => `category_id.eq.${id}`).join(',')
+      if (orConditions) {
+        query = query.or(orConditions)
+      }
+    }
+
+    if (filters.fabric) query = query.eq('fabric', filters.fabric)
+    if (filters.minPrice !== undefined) query = query.gte('price', filters.minPrice)
+    if (filters.maxPrice !== undefined) query = query.lte('price', filters.maxPrice)
+    if (filters.newArrival || filters.collection === 'new-arrivals') query = query.eq('new_arrival', true)
+    if (filters.bestSeller || filters.collection === 'best-sellers') query = query.eq('best_seller', true)
+    if (filters.featured || filters.collection === 'featured-sarees') query = query.eq('featured', true)
+
+    switch (filters.sortBy) {
+      case 'price_asc':
+        query = query.order('price', { ascending: true })
+        break
+      case 'price_desc':
+        query = query.order('price', { ascending: false })
+        break
+      case 'popular':
+        query = query.order('review_count', { ascending: false, nullsFirst: false })
+        break
+      default:
+        query = query.order('created_at', { ascending: false })
+    }
+
+    query = query.range(from, to)
+    const { data, error, count } = await query
+
+    if (!error && data !== null) {
+      const formatted = data.map((p) => {
+        const catObj = p.category_id
+          ? categoriesMap.get(String(p.category_id)) ||
+            categoriesMap.get(String(p.category_id).toLowerCase()) ||
+            getStaticCategory(p.category_id)
+          : null
+        return formatProductRecord(p, catObj)
+      })
+      const totalCount = count !== null && count !== undefined ? count : formatted.length
+      return {
+        data: formatted,
+        total: totalCount,
+        page,
+        limit,
+        hasMore: totalCount > to + 1,
+      }
+    }
+  } catch (err: any) {
+    console.warn('Direct getProducts notice:', err?.message || err)
   }
 
   return await getProductsServerFn({ data: filters })
@@ -129,29 +134,27 @@ export async function getProducts(
 
 // 2. Get Product By Slug
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  if (isSupabaseConfigured() && typeof window !== 'undefined') {
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('slug', slug)
-        .maybeSingle()
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('slug', slug)
+      .maybeSingle()
 
-      if (!error && data) {
-        let categoryObj = null
-        if (data.category_id) {
-          const { data: cat } = await supabase
-            .from('categories')
-            .select('id, name, slug, description, image')
-            .eq('id', data.category_id)
-            .maybeSingle()
-          categoryObj = cat
-        }
-        return formatProductRecord(data, categoryObj)
+    if (!error && data) {
+      let categoryObj = null
+      if (data.category_id) {
+        const { data: cat } = await supabase
+          .from('categories')
+          .select('id, name, slug, description, image')
+          .eq('id', data.category_id)
+          .maybeSingle()
+        categoryObj = cat
       }
-    } catch (err: any) {
-      console.warn('Direct client getProductBySlug notice:', err.message)
+      return formatProductRecord(data, categoryObj)
     }
+  } catch (err: any) {
+    console.warn('Direct getProductBySlug notice:', err?.message || err)
   }
 
   return await getProductBySlugServerFn({ data: slug })
@@ -159,25 +162,37 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 
 // 3. Get Featured Products
 export async function getFeaturedProducts(): Promise<Product[]> {
-  if (isSupabaseConfigured() && typeof window !== 'undefined') {
-    try {
-      const categoriesMap = await fetchClientCategoriesMap()
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('featured', true)
-        .order('created_at', { ascending: false })
-        .limit(8)
+  try {
+    const categoriesMap = await fetchClientCategoriesMap()
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('featured', true)
+      .order('created_at', { ascending: false })
+      .limit(8)
 
-      if (!error && data && data.length > 0) {
-        return data.map((p) => {
-          const catObj = p.category_id ? categoriesMap.get(p.category_id) || categoriesMap.get(p.category_id.toLowerCase()) : null
-          return formatProductRecord(p, catObj)
-        })
-      }
-    } catch (err: any) {
-      console.warn('Direct client getFeaturedProducts notice:', err.message)
+    if (!error && data && data.length > 0) {
+      return data.map((p) => {
+        const catObj = p.category_id ? categoriesMap.get(String(p.category_id)) || categoriesMap.get(String(p.category_id).toLowerCase()) : null
+        return formatProductRecord(p, catObj)
+      })
     }
+
+    // Fallback if none explicitly marked featured: get latest products
+    const { data: fallbackData } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(8)
+
+    if (fallbackData && fallbackData.length > 0) {
+      return fallbackData.map((p) => {
+        const catObj = p.category_id ? categoriesMap.get(String(p.category_id)) || categoriesMap.get(String(p.category_id).toLowerCase()) : null
+        return formatProductRecord(p, catObj)
+      })
+    }
+  } catch (err: any) {
+    console.warn('Direct getFeaturedProducts notice:', err?.message || err)
   }
 
   return await getFeaturedProductsServerFn()
@@ -185,25 +200,36 @@ export async function getFeaturedProducts(): Promise<Product[]> {
 
 // 4. Get Best Sellers
 export async function getBestSellers(): Promise<Product[]> {
-  if (isSupabaseConfigured() && typeof window !== 'undefined') {
-    try {
-      const categoriesMap = await fetchClientCategoriesMap()
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('best_seller', true)
-        .order('created_at', { ascending: false })
-        .limit(8)
+  try {
+    const categoriesMap = await fetchClientCategoriesMap()
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('best_seller', true)
+      .order('created_at', { ascending: false })
+      .limit(8)
 
-      if (!error && data && data.length > 0) {
-        return data.map((p) => {
-          const catObj = p.category_id ? categoriesMap.get(p.category_id) || categoriesMap.get(p.category_id.toLowerCase()) : null
-          return formatProductRecord(p, catObj)
-        })
-      }
-    } catch (err: any) {
-      console.warn('Direct client getBestSellers notice:', err.message)
+    if (!error && data && data.length > 0) {
+      return data.map((p) => {
+        const catObj = p.category_id ? categoriesMap.get(String(p.category_id)) || categoriesMap.get(String(p.category_id).toLowerCase()) : null
+        return formatProductRecord(p, catObj)
+      })
     }
+
+    const { data: fallbackData } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(8)
+
+    if (fallbackData && fallbackData.length > 0) {
+      return fallbackData.map((p) => {
+        const catObj = p.category_id ? categoriesMap.get(String(p.category_id)) || categoriesMap.get(String(p.category_id).toLowerCase()) : null
+        return formatProductRecord(p, catObj)
+      })
+    }
+  } catch (err: any) {
+    console.warn('Direct getBestSellers notice:', err?.message || err)
   }
 
   return await getBestSellersServerFn()
@@ -211,25 +237,36 @@ export async function getBestSellers(): Promise<Product[]> {
 
 // 5. Get New Arrivals
 export async function getNewArrivals(): Promise<Product[]> {
-  if (isSupabaseConfigured() && typeof window !== 'undefined') {
-    try {
-      const categoriesMap = await fetchClientCategoriesMap()
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('new_arrival', true)
-        .order('created_at', { ascending: false })
-        .limit(8)
+  try {
+    const categoriesMap = await fetchClientCategoriesMap()
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('new_arrival', true)
+      .order('created_at', { ascending: false })
+      .limit(8)
 
-      if (!error && data && data.length > 0) {
-        return data.map((p) => {
-          const catObj = p.category_id ? categoriesMap.get(p.category_id) || categoriesMap.get(p.category_id.toLowerCase()) : null
-          return formatProductRecord(p, catObj)
-        })
-      }
-    } catch (err: any) {
-      console.warn('Direct client getNewArrivals notice:', err.message)
+    if (!error && data && data.length > 0) {
+      return data.map((p) => {
+        const catObj = p.category_id ? categoriesMap.get(String(p.category_id)) || categoriesMap.get(String(p.category_id).toLowerCase()) : null
+        return formatProductRecord(p, catObj)
+      })
     }
+
+    const { data: fallbackData } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(8)
+
+    if (fallbackData && fallbackData.length > 0) {
+      return fallbackData.map((p) => {
+        const catObj = p.category_id ? categoriesMap.get(String(p.category_id)) || categoriesMap.get(String(p.category_id).toLowerCase()) : null
+        return formatProductRecord(p, catObj)
+      })
+    }
+  } catch (err: any) {
+    console.warn('Direct getNewArrivals notice:', err?.message || err)
   }
 
   return await getNewArrivalsServerFn()
@@ -237,24 +274,22 @@ export async function getNewArrivals(): Promise<Product[]> {
 
 // 6. Get Festival Products
 export async function getFestivalProducts(): Promise<Product[]> {
-  if (isSupabaseConfigured() && typeof window !== 'undefined') {
-    try {
-      const categoriesMap = await fetchClientCategoriesMap()
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(8)
+  try {
+    const categoriesMap = await fetchClientCategoriesMap()
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(8)
 
-      if (!error && data && data.length > 0) {
-        return data.map((p) => {
-          const catObj = p.category_id ? categoriesMap.get(p.category_id) || categoriesMap.get(p.category_id.toLowerCase()) : null
-          return formatProductRecord(p, catObj)
-        })
-      }
-    } catch (err: any) {
-      console.warn('Direct client getFestivalProducts notice:', err.message)
+    if (!error && data && data.length > 0) {
+      return data.map((p) => {
+        const catObj = p.category_id ? categoriesMap.get(String(p.category_id)) || categoriesMap.get(String(p.category_id).toLowerCase()) : null
+        return formatProductRecord(p, catObj)
+      })
     }
+  } catch (err: any) {
+    console.warn('Direct getFestivalProducts notice:', err?.message || err)
   }
 
   return await getFestivalProductsServerFn()
@@ -265,23 +300,21 @@ export async function getRelatedProducts(
   productId: string,
   categoryId?: string,
 ): Promise<Product[]> {
-  if (isSupabaseConfigured() && typeof window !== 'undefined') {
-    try {
-      const categoriesMap = await fetchClientCategoriesMap()
-      let query = supabase.from('products').select('*').neq('id', productId).limit(4)
-      if (categoryId) {
-        query = query.eq('category_id', categoryId)
-      }
-      const { data, error } = await query
-      if (!error && data && data.length > 0) {
-        return data.map((p) => {
-          const catObj = p.category_id ? categoriesMap.get(p.category_id) || categoriesMap.get(p.category_id.toLowerCase()) : null
-          return formatProductRecord(p, catObj)
-        })
-      }
-    } catch (err: any) {
-      console.warn('Direct client getRelatedProducts notice:', err.message)
+  try {
+    const categoriesMap = await fetchClientCategoriesMap()
+    let query = supabase.from('products').select('*').neq('id', productId).limit(4)
+    if (categoryId) {
+      query = query.eq('category_id', categoryId)
     }
+    const { data, error } = await query
+    if (!error && data && data.length > 0) {
+      return data.map((p) => {
+        const catObj = p.category_id ? categoriesMap.get(String(p.category_id)) || categoriesMap.get(String(p.category_id).toLowerCase()) : null
+        return formatProductRecord(p, catObj)
+      })
+    }
+  } catch (err: any) {
+    console.warn('Direct getRelatedProducts notice:', err?.message || err)
   }
 
   return await getRelatedProductsServerFn({ data: { productId, categoryId } })
