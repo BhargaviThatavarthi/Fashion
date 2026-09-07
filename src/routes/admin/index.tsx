@@ -15,35 +15,10 @@ export const Route = createFileRoute('/admin/')({
   component: AdminDashboard,
 })
 
-interface Order {
-  id: string
-  customer_name: string
-  email: string
-  phone: string
-  product_name: string
-  quantity: number
-  total_price: number
-  status: 'Pending' | 'Shipped' | 'Delivered'
-  date: string
-}
-
-const MOCK_ORDERS: Order[] = [
-  { id: 'ORD-001', customer_name: 'Priya Sharma', email: 'priya@gmail.com', phone: '9876543210', product_name: 'Royal Kanjivaram Silk Saree', quantity: 1, total_price: 10999, status: 'Pending', date: '2026-08-08' },
-  { id: 'ORD-002', customer_name: 'Ananya Rao', email: 'ananya@gmail.com', phone: '9876543211', product_name: 'Crimson Bridal Silk Saree', quantity: 1, total_price: 24999, status: 'Shipped', date: '2026-08-07' },
-  { id: 'ORD-003', customer_name: 'Deepa Patel', email: 'deepa@gmail.com', phone: '9876543212', product_name: 'Handwoven Chanderi Cotton Saree', quantity: 2, total_price: 7998, status: 'Delivered', date: '2026-08-06' },
-  { id: 'ORD-004', customer_name: 'Kavitha Reddy', email: 'kavitha@gmail.com', phone: '9876543213', product_name: 'Emerald Green Banarasi Saree', quantity: 1, total_price: 18999, status: 'Pending', date: '2026-08-05' },
-]
-
-const MOCK_ENQUIRIES = [
-  { id: 'ENQ-001', name: 'Lakshmi Rao', phone: '+91 98765 12345', message: 'Do you have bulk pricing for wedding Kanjivaram orders?', date: '10 mins ago' },
-  { id: 'ENQ-002', name: 'Sunita Verma', phone: '+91 91234 56789', message: 'Interested in customization options for Bridal Lehenga Choli.', date: '1 hour ago' },
-]
-
 function StatCard({
   icon: Icon,
   title,
   value,
-  change,
   gradient,
   index,
   href,
@@ -51,7 +26,6 @@ function StatCard({
   icon: React.ElementType
   title: string
   value: string | number
-  change?: string
   gradient: string
   index: number
   href: string
@@ -68,12 +42,6 @@ function StatCard({
           <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-xs flex items-center justify-center transition-transform group-hover:scale-105">
             <Icon size={22} className="text-white" />
           </div>
-          {change && (
-            <span className="flex items-center gap-1 text-[11px] font-nav font-700 text-white bg-white/20 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-white/20">
-              <TrendingUp size={12} />
-              {change}
-            </span>
-          )}
         </div>
         <div className="font-sans text-2xl sm:text-3xl font-800 tracking-tight mb-1 text-white">{value}</div>
         <div className="font-nav text-[11px] font-700 text-white/80 uppercase tracking-wider flex items-center justify-between">
@@ -103,8 +71,14 @@ function AdminDashboard() {
   })
 
   const allProducts = productsData?.data || []
-  const totalProducts = productsData?.total || allProducts.length
-  const totalRevenue = MOCK_ORDERS.reduce((acc, o) => acc + o.total_price, 0) + 915800
+  const totalProducts = productsData?.total ?? allProducts.length
+  const totalCategories = categories?.length || 0
+  const totalLeads = enquiries?.length || 0
+  const totalOrders = 0
+  const totalRevenue = 0
+  const uniqueCustomers = totalLeads
+
+  const recentLeads = enquiries?.slice(0, 3) || []
 
   return (
     <div className="space-y-6 pb-12 font-sans">
@@ -139,7 +113,6 @@ function AdminDashboard() {
           icon={DollarSign}
           title="Total Sales"
           value={formatPrice(totalRevenue)}
-          change="+14.2%"
           gradient="bg-gradient-to-br from-red-500 to-rose-600"
           index={0}
           href="/admin/reports"
@@ -147,8 +120,7 @@ function AdminDashboard() {
         <StatCard
           icon={ShoppingBag}
           title="Recent Orders"
-          value={MOCK_ORDERS.length + 42}
-          change="+5 today"
+          value={totalOrders}
           gradient="bg-gradient-to-br from-blue-500 to-sky-600"
           index={1}
           href="/admin/orders"
@@ -156,8 +128,7 @@ function AdminDashboard() {
         <StatCard
           icon={Inbox}
           title="Customer Leads"
-          value={enquiries?.length || MOCK_ENQUIRIES.length}
-          change="3 new"
+          value={totalLeads}
           gradient="bg-gradient-to-br from-teal-400 to-emerald-600"
           index={2}
           href="/admin/enquiries"
@@ -166,7 +137,6 @@ function AdminDashboard() {
           icon={Package}
           title="Total Products"
           value={totalProducts}
-          change="+8 new"
           gradient="bg-gradient-to-br from-purple-500 to-indigo-600"
           index={3}
           href="/admin/products"
@@ -174,7 +144,7 @@ function AdminDashboard() {
         <StatCard
           icon={Tag}
           title="Categories"
-          value={categories?.length || 8}
+          value={totalCategories}
           gradient="bg-gradient-to-br from-fuchsia-500 to-pink-600"
           index={4}
           href="/admin/categories"
@@ -182,8 +152,7 @@ function AdminDashboard() {
         <StatCard
           icon={Users}
           title="Customers"
-          value="5,240+"
-          change="+12.5%"
+          value={uniqueCustomers}
           gradient="bg-gradient-to-br from-cyan-500 to-blue-600"
           index={5}
           href="/admin/customers"
@@ -195,37 +164,35 @@ function AdminDashboard() {
         <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
           <div>
             <h2 className="font-heading text-lg font-800 text-slate-900 tracking-tight">Recent Activity Highlights</h2>
-            <p className="text-xs text-slate-400 mt-0.5">Quick view of latest customer dispatches and leads</p>
+            <p className="text-xs text-slate-400 mt-0.5">Quick view of latest customer leads and inquiries</p>
           </div>
           <Link
-            to="/admin/orders"
+            to="/admin/enquiries"
             className="flex items-center gap-1.5 text-xs font-nav font-700 text-cyan-600 hover:text-cyan-700 bg-cyan-50 px-3 py-1.5 rounded-xl border border-cyan-100 transition-all"
           >
-            View All Dispatches <ArrowRight size={13} />
+            View All Leads <ArrowRight size={13} />
           </Link>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/60 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-nav font-700 text-slate-900">4 New Customer Orders</p>
-              <p className="text-[11px] text-slate-500 mt-0.5">Pending dispatch verification &amp; shipping</p>
-            </div>
-            <Link to="/admin/orders" className="text-xs font-700 text-cyan-600 hover:underline">
-              Orders &rarr;
-            </Link>
+        {recentLeads.length > 0 ? (
+          <div className="grid md:grid-cols-2 gap-4">
+            {recentLeads.map((lead: any, idx: number) => (
+              <div key={lead.id || idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200/60 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-nav font-700 text-slate-900">{lead.customer_name || 'Customer Lead'}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">{lead.message || lead.phone || 'New inquiry'}</p>
+                </div>
+                <Link to="/admin/enquiries" className="text-xs font-700 text-cyan-600 hover:underline">
+                  View &rarr;
+                </Link>
+              </div>
+            ))}
           </div>
-
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/60 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-nav font-700 text-slate-900">2 WhatsApp Customer Leads</p>
-              <p className="text-[11px] text-slate-500 mt-0.5">Wedding saree bulk pricing inquiries</p>
-            </div>
-            <Link to="/admin/enquiries" className="text-xs font-700 text-cyan-600 hover:underline">
-              Leads &rarr;
-            </Link>
+        ) : (
+          <div className="text-center py-6 text-slate-400 text-xs font-nav">
+            No customer inquiries yet. Customer leads submitted through the website will appear here in real-time.
           </div>
-        </div>
+        )}
       </div>
     </div>
   )

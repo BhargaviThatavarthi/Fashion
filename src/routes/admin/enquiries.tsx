@@ -12,41 +12,7 @@ export const Route = createFileRoute('/admin/enquiries')({
   component: AdminCustomerLeads,
 })
 
-const INITIAL_MOCK_LEADS: CustomerLead[] = [
-  {
-    id: 'lead-101',
-    customer_name: 'Ananya Sharma',
-    phone: '+91 98765 43210',
-    email: 'ananya.s@gmail.com',
-    source: 'WhatsApp Inquiry',
-    message: 'Interested in Kanchipuram Pure Silk Saree for wedding function. Please send price catalog.',
-    status: 'New',
-    created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'lead-102',
-    customer_name: 'Priya Venkatesh',
-    phone: '+91 94450 12345',
-    email: 'priya.v@yahoo.com',
-    source: 'Website Contact',
-    message: 'Looking for bridal lehenga customization details for next month event.',
-    status: 'Contacted',
-    created_at: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'lead-103',
-    customer_name: 'Lakshmi Narayanan',
-    phone: '+91 98401 88900',
-    email: 'lakshmi.n@outlook.com',
-    source: 'Showroom Visit',
-    message: 'Purchased 3 Designer Silk Sarees during in-store visit. Requested bulk order discount for family.',
-    status: 'Converted',
-    created_at: new Date(Date.now() - 48 * 3600 * 1000).toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-]
+const INITIAL_MOCK_LEADS: CustomerLead[] = []
 
 function AdminCustomerLeads() {
   const [leads, setLeads] = useState<CustomerLead[]>([])

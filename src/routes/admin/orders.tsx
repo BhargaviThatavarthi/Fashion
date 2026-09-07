@@ -20,15 +20,8 @@ interface Order {
   date: string
 }
 
-const MOCK_ORDERS: Order[] = [
-  { id: 'ORD-001', customer_name: 'Priya Sharma', email: 'priya@gmail.com', phone: '9876543210', product_name: 'Royal Kanjivaram Silk Saree', quantity: 1, total_price: 10999, status: 'Pending', date: '2026-07-24' },
-  { id: 'ORD-002', customer_name: 'Ananya Nair', email: 'ananya@gmail.com', phone: '8765432109', product_name: 'Mysore Crepe Chiffon Saree', quantity: 2, total_price: 7598, status: 'Shipped', date: '2026-07-23' },
-  { id: 'ORD-003', customer_name: 'Kavitha Nair', email: 'kavitha@gmail.com', phone: '7654321098', product_name: 'Anarkali Kurti with Dupatta', quantity: 1, total_price: 2899, status: 'Delivered', date: '2026-07-22' },
-  { id: 'ORD-004', customer_name: 'Meera Reddy', email: 'meera@gmail.com', phone: '6543210987', product_name: 'Bridal Red Lehenga Choli', quantity: 1, total_price: 24500, status: 'Delivered', date: '2026-07-20' },
-]
-
 function AdminOrders() {
-  const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS)
+  const [orders, setOrders] = useState<Order[]>([])
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'All' | 'Pending' | 'Shipped' | 'Delivered'>('All')
 

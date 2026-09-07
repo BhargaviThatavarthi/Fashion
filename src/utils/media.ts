@@ -7,11 +7,7 @@ export interface MediaItem {
   size: number
 }
 
-const DEFAULT_MEDIA: MediaItem[] = [
-  { name: 'placeholder-saree-1.jpg', url: '/placeholder-saree-1.jpg', size: 124500, created_at: '2026-07-24' },
-  { name: 'placeholder-saree-2.jpg', url: '/placeholder-saree-2.jpg', size: 98400, created_at: '2026-07-23' },
-  { name: 'placeholder-lehenga.jpg', url: '/placeholder-lehenga.jpg', size: 245000, created_at: '2026-07-22' },
-]
+const DEFAULT_MEDIA: MediaItem[] = []
 
 export function getSharedMedia(): MediaItem[] {
   if (typeof window === 'undefined') return DEFAULT_MEDIA
@@ -76,14 +72,32 @@ export async function fetchSupabaseMedia(): Promise<MediaItem[]> {
     }
 
     // 2. Fallback: inspect product-images storage bucket
-    const { data: storageFiles } = await supabase.storage.from('product-images').list('general')
+    const { data: storageFiles } = await supabase.storage.from('product-images').list('')
+    const { data: generalFiles } = await supabase.storage.from('product-images').list('general')
+    
+    const items: MediaItem[] = []
     if (storageFiles && storageFiles.length > 0) {
-      const items: MediaItem[] = storageFiles.map((f) => ({
-        name: f.name,
-        url: `${cleanBase}/storage/v1/object/public/product-images/general/${f.name}`,
-        size: f.metadata?.size || 0,
-        created_at: f.created_at || new Date().toISOString(),
-      }))
+      storageFiles.filter(f => f.name && f.id).forEach((f) => {
+        items.push({
+          name: f.name,
+          url: `${cleanBase}/storage/v1/object/public/product-images/${f.name}`,
+          size: f.metadata?.size || 0,
+          created_at: f.created_at || new Date().toISOString(),
+        })
+      })
+    }
+    if (generalFiles && generalFiles.length > 0) {
+      generalFiles.filter(f => f.name).forEach((f) => {
+        items.push({
+          name: f.name,
+          url: `${cleanBase}/storage/v1/object/public/product-images/general/${f.name}`,
+          size: f.metadata?.size || 0,
+          created_at: f.created_at || new Date().toISOString(),
+        })
+      })
+    }
+
+    if (items.length > 0) {
       saveSharedMedia(items)
       return items
     }

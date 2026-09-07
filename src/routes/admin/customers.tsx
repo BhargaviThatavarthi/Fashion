@@ -4,6 +4,10 @@ import { motion } from 'framer-motion'
 import { Search, Mail, Phone, Calendar, DollarSign, Award } from 'lucide-react'
 import { formatPrice } from '../../utils/format'
 
+import { useQuery } from '@tanstack/react-query'
+import { getEnquiries } from '../../services/enquiries'
+import { isSupabaseConfigured } from '../../lib/supabase'
+
 export const Route = createFileRoute('/admin/customers')({
   component: AdminCustomers,
 })
@@ -19,26 +23,35 @@ interface Customer {
   status: 'Active' | 'Inactive'
 }
 
-const MOCK_CUSTOMERS: Customer[] = [
-  { id: 'CUST-001', name: 'Priya Sharma', email: 'priya@gmail.com', phone: '9876543210', ordersCount: 5, totalSpent: 35000, joinDate: '2026-01-15', status: 'Active' },
-  { id: 'CUST-002', name: 'Ananya Nair', email: 'ananya@gmail.com', phone: '8765432109', ordersCount: 3, totalSpent: 12500, joinDate: '2026-03-22', status: 'Active' },
-  { id: 'CUST-003', name: 'Kavitha Nair', email: 'kavitha@gmail.com', phone: '7654321098', ordersCount: 12, totalSpent: 85200, joinDate: '2025-08-11', status: 'Active' },
-  { id: 'CUST-004', name: 'Meera Reddy', email: 'meera@gmail.com', phone: '6543210987', ordersCount: 1, totalSpent: 24500, joinDate: '2026-07-20', status: 'Active' },
-  { id: 'CUST-005', name: 'Sreedhar Rao', email: 'sreedhar@gmail.com', phone: '9000112233', ordersCount: 0, totalSpent: 0, joinDate: '2026-07-24', status: 'Inactive' },
-]
-
 function AdminCustomers() {
   const [search, setSearch] = useState('')
 
-  const filteredCustomers = MOCK_CUSTOMERS.filter(c =>
+  const { data: leadsData, isLoading } = useQuery({
+    queryKey: ['enquiries'],
+    queryFn: getEnquiries,
+    enabled: isSupabaseConfigured(),
+  })
+
+  const customers: Customer[] = (leadsData || []).map((lead: any, idx: number) => ({
+    id: lead.id ? String(lead.id).slice(0, 8).toUpperCase() : `CUST-${idx + 1}`,
+    name: lead.customer_name || 'Customer',
+    email: lead.email || 'N/A',
+    phone: lead.phone || 'N/A',
+    ordersCount: 0,
+    totalSpent: 0,
+    joinDate: lead.created_at ? new Date(lead.created_at).toISOString().split('T')[0] : 'Recent',
+    status: lead.status === 'Closed' ? 'Inactive' : 'Active',
+  }))
+
+  const filteredCustomers = customers.filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||
     c.email.toLowerCase().includes(search.toLowerCase()) ||
     c.phone.includes(search)
   )
 
-  const activeCount = MOCK_CUSTOMERS.filter(c => c.status === 'Active').length
-  const vipCount = MOCK_CUSTOMERS.filter(c => c.ordersCount >= 5).length
-  const totalValue = MOCK_CUSTOMERS.reduce((acc, c) => acc + c.totalSpent, 0)
+  const activeCount = customers.filter(c => c.status === 'Active').length
+  const vipCount = customers.filter(c => c.ordersCount >= 5).length
+  const totalValue = customers.reduce((acc, c) => acc + c.totalSpent, 0)
 
   return (
     <div>
@@ -50,7 +63,7 @@ function AdminCustomers() {
       {/* Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { title: 'Total Registered', value: MOCK_CUSTOMERS.length, icon: Calendar, color: 'var(--color-pink)' },
+          { title: 'Total Registered', value: customers.length, icon: Calendar, color: 'var(--color-pink)' },
           { title: 'Active Accounts', value: activeCount, icon: Award, color: '#3b82f6' },
           { title: 'VIP Customers', value: vipCount, icon: Award, color: 'var(--color-gold)' },
           { title: 'Total Customer Value', value: formatPrice(totalValue), icon: DollarSign, color: '#10b981' },

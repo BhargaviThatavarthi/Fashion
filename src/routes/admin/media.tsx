@@ -61,18 +61,39 @@ function AdminMedia() {
       }
 
       // 2. Fallback: inspect product-images storage bucket directly
-      const { data: storageFiles } = await supabase.storage.from('product-images').list('general')
+      const { data: storageFiles } = await supabase.storage.from('product-images').list('')
+      const { data: generalFiles } = await supabase.storage.from('product-images').list('general')
+      
+      const combinedFiles: MediaAsset[] = []
       if (storageFiles && storageFiles.length > 0) {
-        const storageAssets: MediaAsset[] = storageFiles.map((f, idx) => ({
-          id: `storage-general-${idx}`,
-          file_name: f.name,
-          file_path: `general/${f.name}`,
-          public_url: `${cleanBase}/storage/v1/object/public/product-images/general/${f.name}`,
-          file_type: 'image/jpeg',
-          file_size: f.metadata?.size || 0,
-          created_at: f.created_at || new Date().toISOString(),
-        }))
-        setMediaList(storageAssets)
+        storageFiles.filter(f => f.name && f.id).forEach((f, idx) => {
+          combinedFiles.push({
+            id: `storage-root-${idx}-${f.name}`,
+            file_name: f.name,
+            file_path: f.name,
+            public_url: `${cleanBase}/storage/v1/object/public/product-images/${f.name}`,
+            file_type: 'image/jpeg',
+            file_size: f.metadata?.size || 0,
+            created_at: f.created_at || new Date().toISOString(),
+          })
+        })
+      }
+      if (generalFiles && generalFiles.length > 0) {
+        generalFiles.filter(f => f.name).forEach((f, idx) => {
+          combinedFiles.push({
+            id: `storage-gen-${idx}-${f.name}`,
+            file_name: f.name,
+            file_path: `general/${f.name}`,
+            public_url: `${cleanBase}/storage/v1/object/public/product-images/general/${f.name}`,
+            file_type: 'image/jpeg',
+            file_size: f.metadata?.size || 0,
+            created_at: f.created_at || new Date().toISOString(),
+          })
+        })
+      }
+
+      if (combinedFiles.length > 0) {
+        setMediaList(combinedFiles)
         setLoading(false)
         return
       }
