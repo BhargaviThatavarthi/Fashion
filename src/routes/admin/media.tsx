@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Upload, Trash2, Eye, Clipboard, CheckCircle2, AlertCircle, RefreshCw, Image as ImageIcon } from 'lucide-react'
 import { supabase, isSupabaseConfigured, supabaseUrl } from '../../lib/supabase'
 import { getSharedMedia, saveSharedMedia, addSharedMedia } from '../../utils/media'
+import { getImageUrl } from '../../utils/format'
 import type { MediaAsset } from '../../types'
 
 export const Route = createFileRoute('/admin/media')({
@@ -28,22 +29,32 @@ function AdminMedia() {
   const fetchMediaAssets = async () => {
     setLoading(true)
     try {
-      if (isSupabaseConfigured()) {
-        const { data, error } = await supabase
-          .from('media_assets')
-          .select('*')
-          .order('created_at', { ascending: false })
+      const cleanBase = (supabaseUrl && !supabaseUrl.includes('placeholder'))
+        ? supabaseUrl.replace(/\/+$/, '')
+        : 'https://kmxsgomxxhwpmoayeqmj.supabase.co'
 
-        if (error) throw error
+      const { data, error } = await supabase
+        .from('media_assets')
+        .select('*')
+        .order('created_at', { ascending: false })
 
-        if (data && data.length > 0) {
-          setMediaList(data as MediaAsset[])
-          setLoading(false)
-          return
-        }
+      if (!error && data && data.length > 0) {
+        const mapped: MediaAsset[] = data.map((item: any) => {
+          let url = item.public_url || ''
+          if (!url && item.file_path) {
+            url = `${cleanBase}/storage/v1/object/public/product-images/${item.file_path.replace(/^\/+/, '')}`
+          }
+          return {
+            ...item,
+            public_url: getImageUrl(url),
+          }
+        })
+        setMediaList(mapped)
+        setLoading(false)
+        return
       }
     } catch (err: any) {
-      console.warn('Supabase media fetch notice:', err.message)
+      console.warn('Supabase media fetch notice:', err?.message || err)
     }
 
     // Fallback to local storage shared media
@@ -51,9 +62,9 @@ function AdminMedia() {
       id: `local-${idx}`,
       file_name: item.name,
       file_path: item.name,
-      public_url: item.url,
+      public_url: getImageUrl(item.url),
       file_size: item.size,
-      file_type: 'image/png',
+      file_type: 'image/jpeg',
       created_at: item.created_at || new Date().toISOString(),
     }))
     setMediaList(local)
@@ -319,9 +330,12 @@ function AdminMedia() {
               {/* Thumbnail Container */}
               <div className="relative aspect-square bg-slate-900/5 overflow-hidden border-b border-slate-100 flex items-center justify-center">
                 <img
-                  src={media.public_url}
+                  src={getImageUrl(media.public_url)}
                   alt={media.file_name}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    ;(e.target as HTMLImageElement).src = '/images/silk-saree.png'
+                  }}
                 />
                 <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-xs">
                   <button

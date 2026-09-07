@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured, supabaseUrl } from '../lib/supabase'
+import { getImageUrl } from './format'
 
 export interface MediaItem {
   name: string
@@ -7,28 +8,26 @@ export interface MediaItem {
   size: number
 }
 
-const DEFAULT_MEDIA: MediaItem[] = [
-  { name: 'placeholder-saree-1.jpg', url: '/placeholder-saree-1.jpg', size: 124500, created_at: '2026-07-24' },
-  { name: 'placeholder-saree-2.jpg', url: '/placeholder-saree-2.jpg', size: 98400, created_at: '2026-07-23' },
-  { name: 'placeholder-lehenga.jpg', url: '/placeholder-lehenga.jpg', size: 245000, created_at: '2026-07-22' },
-]
-
 export function getSharedMedia(): MediaItem[] {
-  if (typeof window === 'undefined') return DEFAULT_MEDIA
+  if (typeof window === 'undefined') return []
   const saved = localStorage.getItem('ssf_media')
   if (saved) {
     try {
-      return JSON.parse(saved)
+      const parsed = JSON.parse(saved)
+      if (Array.isArray(parsed)) {
+        return parsed.filter((item) => item && item.url && !item.url.includes('placeholder'))
+      }
     } catch {
-      return DEFAULT_MEDIA
+      return []
     }
   }
-  return DEFAULT_MEDIA
+  return []
 }
 
 export function saveSharedMedia(list: MediaItem[]) {
   if (typeof window !== 'undefined') {
-    localStorage.setItem('ssf_media', JSON.stringify(list))
+    const valid = list.filter((item) => item && item.url && !item.url.includes('placeholder'))
+    localStorage.setItem('ssf_media', JSON.stringify(valid))
   }
 }
 
@@ -63,12 +62,12 @@ export async function fetchSupabaseMedia(): Promise<MediaItem[]> {
           }
           return {
             name: m.file_name || m.file_path || 'asset.jpg',
-            url,
+            url: getImageUrl(url),
             size: m.file_size || 0,
             created_at: m.created_at || new Date().toISOString(),
           }
         })
-        .filter((m) => m.url)
+        .filter((m) => m.url && !m.url.includes('placeholder'))
 
       saveSharedMedia(items)
       return items
