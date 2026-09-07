@@ -12,6 +12,17 @@ import {
 } from '../../services/youtube'
 import type { YoutubeVideo } from '../../types'
 
+function extractYouTubeVideoId(input: string): string {
+  const trimmed = input.trim()
+  if (!trimmed) return ''
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed
+  const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/)
+  if (match && match[1]) {
+    return match[1]
+  }
+  return trimmed
+}
+
 export const Route = createFileRoute('/admin/youtube')({
   component: AdminYoutube,
 })
@@ -84,17 +95,18 @@ function AdminYoutube() {
   const add = (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.title || !form.video_id) return
+    const cleanId = extractYouTubeVideoId(form.video_id)
     const newVideo: YoutubeVideo = {
       id: `manual-${Date.now()}`,
-      title: form.title,
-      video_id: form.video_id,
-      thumbnail: `https://img.youtube.com/vi/${form.video_id}/mqdefault.jpg`,
+      title: form.title.trim(),
+      video_id: cleanId,
+      thumbnail: `https://img.youtube.com/vi/${cleanId}/mqdefault.jpg`,
       sort_order: localVideos.length,
       created_at: new Date().toISOString(),
     }
     const updated = [...localVideos, newVideo]
     setLocalVideos(updated)
-    setIsDirty(true)
+    saveMutation.mutate(updated)
     setForm({ title: '', video_id: '' })
     setShowForm(false)
   }
@@ -102,7 +114,7 @@ function AdminYoutube() {
   const remove = (id: string) => {
     const updated = localVideos.filter(vid => vid.id !== id)
     setLocalVideos(updated)
-    setIsDirty(true)
+    saveMutation.mutate(updated)
   }
 
   const handleSaveManualChanges = () => {
