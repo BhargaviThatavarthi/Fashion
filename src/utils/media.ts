@@ -1,4 +1,4 @@
-// Shared Media Library Helpers for local/demo mode
+import { supabase, isSupabaseConfigured, supabaseUrl } from '../lib/supabase'
 
 export interface MediaItem {
   name: string
@@ -23,7 +23,6 @@ export function getSharedMedia(): MediaItem[] {
       return DEFAULT_MEDIA
     }
   }
-  localStorage.setItem('ssf_media', JSON.stringify(DEFAULT_MEDIA))
   return DEFAULT_MEDIA
 }
 
@@ -35,12 +34,48 @@ export function saveSharedMedia(list: MediaItem[]) {
 
 export function addSharedMedia(name: string, url: string, size: number) {
   const list = getSharedMedia()
-  // Check duplicate URL
-  if (!list.some(item => item.url === url)) {
+  if (!list.some((item) => item.url === url)) {
     const updated = [
       { name, url, size, created_at: new Date().toISOString().split('T')[0] },
-      ...list
+      ...list,
     ]
     saveSharedMedia(updated)
   }
+}
+
+export async function fetchSupabaseMedia(): Promise<MediaItem[]> {
+  try {
+    const cleanBase = (supabaseUrl && !supabaseUrl.includes('placeholder'))
+      ? supabaseUrl.replace(/\/+$/, '')
+      : 'https://kmxsgomxxhwpmoayeqmj.supabase.co'
+
+    const { data: dbMedia, error } = await supabase
+      .from('media_assets')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (!error && dbMedia && dbMedia.length > 0) {
+      const items: MediaItem[] = dbMedia
+        .map((m: any) => {
+          let url = m.public_url || ''
+          if (!url && m.file_path) {
+            url = `${cleanBase}/storage/v1/object/public/product-images/${m.file_path.replace(/^\/+/, '')}`
+          }
+          return {
+            name: m.file_name || m.file_path || 'asset.jpg',
+            url,
+            size: m.file_size || 0,
+            created_at: m.created_at || new Date().toISOString(),
+          }
+        })
+        .filter((m) => m.url)
+
+      saveSharedMedia(items)
+      return items
+    }
+  } catch (err: any) {
+    console.warn('fetchSupabaseMedia notice:', err?.message || err)
+  }
+
+  return getSharedMedia()
 }

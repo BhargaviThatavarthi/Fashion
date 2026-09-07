@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from './supabase'
+import { supabase, isSupabaseConfigured, supabaseUrl } from './supabase'
 
 export const STORAGE_BUCKET = 'product-images'
 

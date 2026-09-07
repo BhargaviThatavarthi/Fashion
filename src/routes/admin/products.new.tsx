@@ -9,7 +9,7 @@ import { STATIC_CATEGORIES, getStaticCategory } from '../../constants/categories
 import { slugify, formatPrice, getImageUrl } from '../../utils/format'
 import { FABRIC_OPTIONS, SIZE_OPTIONS } from '../../constants'
 import { validateAndCompressImage, uploadProductImage, dataUrlToBlob } from '../../lib/storage'
-import { getSharedMedia, addSharedMedia, type MediaItem } from '../../utils/media'
+import { getSharedMedia, addSharedMedia, fetchSupabaseMedia, type MediaItem } from '../../utils/media'
 
 export const Route = createFileRoute('/admin/products/new')({
   component: AdminProductForm,
@@ -64,6 +64,9 @@ function AdminProductForm() {
   useEffect(() => {
     if (isMediaModalOpen) {
       setAvailableMedia(getSharedMedia())
+      fetchSupabaseMedia().then((media) => {
+        if (media && media.length > 0) setAvailableMedia(media)
+      })
     }
   }, [isMediaModalOpen])
 
