@@ -531,3 +531,15 @@ body {
 .embla { overflow: hidden; }
 .embla__container { display: flex; }
 .embla__slide { min-width: 0; flex: 0 0 auto; }
+
+/* Hide TanStack DevTools UI */
+[class*="TanStackDevtools"],
+[class*="tanstack-devtools"],
+[data-tanstack-devtools],
+#tanstack-router-devtools,
+div[style*="z-index: 99999"] button[aria-label*="TanStack"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
