@@ -149,8 +149,8 @@ export default function ShopPage() {
   const { data: productsData, isLoading } = useQuery({
     queryKey: ['products', filters],
     queryFn: () => getProducts(filters),
-    staleTime: 30 * 1000,
-    refetchOnMount: true,
+    staleTime: 0,
+    refetchOnMount: 'always',
   })
 
   const { data: categories = [] } = useQuery<Category[]>({
