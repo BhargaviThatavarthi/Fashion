@@ -95,9 +95,48 @@ export const SORT_OPTIONS = [
 ]
 
 export const YOUTUBE_VIDEOS = [
-  { id: 'y1', video_id: 'dQw4w9WgXcQ', title: 'New Collection Sarees 2024' },
-  { id: 'y2', video_id: 'dQw4w9WgXcQ', title: 'Festival Special Lehengas' },
-  { id: 'y3', video_id: 'dQw4w9WgXcQ', title: 'How to Drape a Saree' },
+  {
+    id: 'yt-1',
+    video_id: 'K5qB8hrlB_E',
+    title: 'Elegant Embroidered Anarkali-Style Kurta Set',
+    thumbnail: 'https://i.ytimg.com/vi/K5qB8hrlB_E/mqdefault.jpg',
+    sort_order: 0,
+  },
+  {
+    id: 'yt-2',
+    video_id: 'GgxEPjYNan0',
+    title: 'Space Silk Sarees — Double Shaded New Collection',
+    thumbnail: 'https://i.ytimg.com/vi/GgxEPjYNan0/mqdefault.jpg',
+    sort_order: 1,
+  },
+  {
+    id: 'yt-3',
+    video_id: 'Jt3t4B6qaFY',
+    title: 'Elegant Semi-Stitched Lehenga Collection',
+    thumbnail: 'https://i.ytimg.com/vi/Jt3t4B6qaFY/mqdefault.jpg',
+    sort_order: 2,
+  },
+  {
+    id: 'yt-4',
+    video_id: '5FMEHeXsk_o',
+    title: 'Banaras Sarees Best Price Collection',
+    thumbnail: 'https://i.ytimg.com/vi/5FMEHeXsk_o/mqdefault.jpg',
+    sort_order: 3,
+  },
+  {
+    id: 'yt-5',
+    video_id: 'QhLb7HRUA-Y',
+    title: 'Fancy Saree with Heavy Embroidery',
+    thumbnail: 'https://i.ytimg.com/vi/QhLb7HRUA-Y/mqdefault.jpg',
+    sort_order: 4,
+  },
+  {
+    id: 'yt-6',
+    video_id: 'k-yMr11D7tU',
+    title: 'Beautiful Half Sarees Collection',
+    thumbnail: 'https://i.ytimg.com/vi/k-yMr11D7tU/mqdefault.jpg',
+    sort_order: 5,
+  },
 ]
 
 export const WHY_CHOOSE_US = [
