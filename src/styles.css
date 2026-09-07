@@ -398,14 +398,14 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: var(--color-pink-dark); }
 
 /* =============================================
-   WHATSAPP FAB
+   WHATSAPP FAB (Bottom Left)
    ============================================= */
 .whatsapp-fab {
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  width: 60px;
-  height: 60px;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: linear-gradient(135deg, #25D366, #1aab52);
   color: white;
@@ -413,10 +413,19 @@ body {
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 24px rgba(37, 211, 102, 0.45);
-  z-index: 100;
+  z-index: 40;
   cursor: pointer;
   transition: all 0.3s ease;
   animation: pulse-pink 2.5s ease-in-out infinite;
+}
+
+@media (min-width: 640px) {
+  .whatsapp-fab {
+    bottom: 2rem;
+    left: 2rem;
+    width: 60px;
+    height: 60px;
+  }
 }
 
 .whatsapp-fab:hover {
@@ -425,14 +434,14 @@ body {
 }
 
 /* =============================================
-   BACK TO TOP
+   BACK TO TOP (Above Chatbot Launcher)
    ============================================= */
 .back-to-top {
   position: fixed;
-  bottom: 6rem;
-  right: 2rem;
-  width: 44px;
-  height: 44px;
+  bottom: 5.5rem;
+  right: 1.5rem;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--color-pink);
   color: white;
@@ -440,9 +449,18 @@ body {
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 16px rgba(216, 92, 138, 0.4);
-  z-index: 99;
+  z-index: 39;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+@media (min-width: 640px) {
+  .back-to-top {
+    bottom: 5.75rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+  }
 }
 
 .back-to-top:hover {

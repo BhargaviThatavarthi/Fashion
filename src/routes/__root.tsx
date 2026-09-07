@@ -6,7 +6,8 @@ import {
 } from '@tanstack/react-router'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
-import { WhatsAppFab, BackToTop } from '../components/layout/FloatingWidgets'
+import { BackToTop } from '../components/layout/FloatingWidgets'
+import { ChatbotWidget } from '../components/chatbot/ChatbotWidget'
 import { CartProvider } from '../context/CartContext'
 import CartDrawer from '../components/cart/CartDrawer'
 import { WishlistProvider } from '../context/WishlistContext'
@@ -63,8 +64,8 @@ function RootContent({ children }: { children: React.ReactNode }) {
         <Header />
         <main>{children}</main>
         <Footer />
-        <WhatsAppFab />
         <BackToTop />
+        <ChatbotWidget />
         <CartDrawer />
         <WishlistDrawer />
       </WishlistProvider>
